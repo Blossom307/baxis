@@ -518,6 +518,38 @@ a:focus-visible, button:focus-visible, input:focus-visible {
   background: var(--state-success);
 }
 
+
+/* ============================================================================
+   PROFILE BIO & SUMMARY STYLES
+   ============================================================================ */
+.profile-bio-text {
+  font-size: var(--fs-sm, 0.875rem);
+  color: var(--text-secondary, #A0A0A0);
+  margin-top: 6px;
+  line-height: 1.5;
+  max-width: 520px;
+  word-break: break-word;
+}
+
+#edit-bio {
+  background-color: var(--bg-surface-0, #111111);
+  border: 1px solid var(--border-default, #2A2A2A);
+  border-radius: var(--radius-sm, 6px);
+  color: var(--text-primary, #FFFFFF);
+  font-family: var(--font-sans, sans-serif);
+  font-size: var(--fs-sm, 0.875rem);
+  padding: 10px 12px;
+  width: 100%;
+  min-height: 80px;
+  resize: vertical;
+  transition: border-color var(--transition-fast, 150ms ease);
+}
+
+#edit-bio:focus {
+  outline: none;
+  border-color: var(--text-primary, #FFFFFF);
+  box-shadow: 0 0 0 1px var(--text-primary, #FFFFFF);
+}
 /* ==========================================================================
    6. REPUTATION METRICS GRID
    ========================================================================== */

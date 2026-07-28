@@ -211,8 +211,13 @@
                                     <span class="trust-score-badge" id="profile-trust-badge">99.4 Trust Score</span>
                                 </div>
                                 <p class="profile-job-title" id="profile-job-title">Digital Contract Member</p>
-                                <span class="profile-address-code" id="profile-address-code">0x... • Wallet Not
-                                    Connected</span>
+
+                                <!-- PROFILE BIO / SUMMARY DISPLAY PARAGRAPH -->
+                                <p class="profile-bio-text" id="profile-bio-display" style="font-size: 0.875rem; color: rgba(255,255,255,0.7); margin-top: 6px; line-height: 1.5; max-width: 520px;">
+                                    Digital Contract Member on Baxis Protocol.
+                                </p>
+
+                                <span class="profile-address-code" id="profile-address-code">0x... • Wallet Not Connected</span>
                             </div>
 
                             <div class="profile-status-pill">
@@ -307,8 +312,7 @@
                             <form id="form-edit-profile" novalidate style="margin-top: 1rem;">
                                 <div class="form-row-2col">
                                     <div class="form-group">
-                                        <label for="edit-display-name" class="form-label">Display Name or Business
-                                            Name</label>
+                                        <label for="edit-display-name" class="form-label">Display Name or Business Name</label>
                                         <input type="text" id="edit-display-name" class="form-input-sm"
                                             placeholder="e.g. Alex Turner / Acme Design Studio">
                                     </div>
@@ -318,6 +322,12 @@
                                         <input type="text" id="edit-job-title" class="form-input-sm"
                                             placeholder="e.g. Fullstack Engineer / UI Designer">
                                     </div>
+                                </div>
+
+                                <!-- PROFILE BIO TEXTAREA FIELD -->
+                                <div class="form-group">
+                                    <label for="edit-bio" class="form-label">Profile Bio / Summary</label>
+                                    <textarea id="edit-bio" class="form-input-sm" rows="3" placeholder="Explain your services, background, or work focus..." style="height: auto; padding: 10px; resize: vertical; width: 100%;"></textarea>
                                 </div>
 
                                 <div class="form-row-2col">
@@ -346,18 +356,16 @@
                             </form>
                         </div>
 
-                        <!-- SPECTACULAR MOBILE TRUST CARD PREVIEW -->
+                        <!-- SHAREABLE MOBILE TRUST CARD PREVIEW -->
                         <div class="profile-card trust-card-preview-box">
                             <div class="card-box-header">
                                 <div>
                                     <span class="card-eyebrow">SHAREABLE TRUST CARD</span>
                                     <h2 class="card-title-sm">Your Digital Reputation Badge</h2>
                                 </div>
-                                <button type="button" class="btn btn-ghost btn-sm" id="btn-copy-card-code">Copy DM
-                                    Embed</button>
+                                <button type="button" class="btn btn-ghost btn-sm" id="btn-copy-card-code">Copy DM Embed</button>
                             </div>
 
-                            <!-- The Mobile Digital Trust Card Component -->
                             <div class="mobile-trust-card-frame" id="mobile-trust-card">
                                 <div class="trust-card-header">
                                     <div class="brand-mini-row">
@@ -371,8 +379,7 @@
                                     <div class="trust-card-avatar" id="card-avatar-box">--</div>
                                     <div>
                                         <h3 class="trust-card-name" id="card-display-name">User Account</h3>
-                                        <span class="trust-card-handle" id="card-handles-sub">@user • Baxis
-                                            Member</span>
+                                        <span class="trust-card-handle" id="card-handles-sub">@user • Baxis Member</span>
                                     </div>
                                 </div>
 
@@ -394,8 +401,7 @@
                                 </div>
 
                                 <div class="trust-card-action">
-                                    <a href="create.html" class="btn btn-primary btn-sm full-width">Hire via Baxis
-                                        Escrow ➔</a>
+                                    <a href="create.html" class="btn btn-primary btn-sm full-width">Hire via Baxis Escrow ➔</a>
                                 </div>
                             </div>
                         </div>
@@ -423,10 +429,10 @@
 
                     </div>
 
-                    <!-- RIGHT COLUMN: VERIFIED CREDENTIALS & WALLETS (SVG ICONS) -->
+                    <!-- RIGHT COLUMN: VERIFIED CREDENTIALS & WALLETS -->
                     <div class="profile-sidebar-column">
 
-                        <!-- Verified Accounts with SVGs -->
+                        <!-- Verified Accounts -->
                         <div class="profile-card">
                             <h2 class="card-section-heading">Verified Credentials</h2>
 
@@ -511,8 +517,7 @@
 
     </div>
 
-
-    <!-- UNIVERSAL NATIVE MOBILE BOTTOM HUD (Sitting directly above </body>) -->
+    <!-- NATIVE MOBILE BOTTOM HUD -->
     <nav class="mobile-bottom-hud" aria-label="Mobile Bottom App Navigation">
         <a href="dashboard.html" class="hud-nav-item">
             <svg class="hud-nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -552,7 +557,7 @@
             <span class="hud-nav-label">Ledger</span>
         </a>
 
-        <a href="profile.html" class="hud-nav-item">
+        <a href="profile.html" class="hud-nav-item active" aria-current="page">
             <svg class="hud-nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                 stroke-width="2">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
@@ -562,8 +567,6 @@
         </a>
     </nav>
 
-
-
     <!-- External JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabase.js"></script>
@@ -571,7 +574,5 @@
     <script src="js/notifications.service.js"></script>
     <script src="js/profile.js" defer></script>
 
-    
 </body>
-
 </html>

@@ -1,6 +1,6 @@
 /**
  * BAXIS PROTOCOL — PROFILE & REPUTATION ENGINE (`profile.js`)
- * Real Profile Edits, Avatar Uploads (Supabase Storage) & Database Sync
+ * Handles Bio Summaries, Profile Edits, Avatar Uploads & Realtime Updates
  */
 
 document.documentElement.classList.add('js-enabled');
@@ -76,11 +76,10 @@ document.documentElement.classList.add('js-enabled');
         transition: opacity 250ms ease, transform 250ms ease;
       `;
 
-      const icons = { success: '✓', info: 'ℹ', rust: '⚠' };
       const colors = { success: '#10B981', info: '#3B82F6', rust: '#EF4444' };
 
       toast.innerHTML = `
-        <span style="color: ${colors[type] || colors.info}; font-weight: 700; font-size: 16px;">${icons[type] || 'ℹ'}</span>
+        <span style="color: ${colors[type] || colors.info}; font-weight: 700; font-size: 16px;">•</span>
         <div style="flex: 1;">
           <div style="font-weight: 600; margin-bottom: 2px;">${title}</div>
           <div style="font-size: 12px; color: #9CA3AF;">${message}</div>
@@ -143,7 +142,7 @@ document.documentElement.classList.add('js-enabled');
   }
 
   /* ==========================================================================
-     3. PROFILE & AVATAR UPLOAD ENGINE
+     3. PROFILE & REPUTATION APP
      ========================================================================== */
   class ProfileApp {
     constructor() {
@@ -202,7 +201,7 @@ document.documentElement.classList.add('js-enabled');
             }
           }
         } catch (err) {
-          console.warn('Silent wallet address check:', err);
+          console.warn('Wallet address check:', err);
         }
       }
     }
@@ -221,7 +220,6 @@ document.documentElement.classList.add('js-enabled');
         this.currentUserId = session.user.id;
         this.userEmail = session.user.email || '';
 
-        // Fetch User Profile using maybeSingle() to handle missing rows gracefully
         const { data: profile } = await supabase
           .from('profiles')
           .select('*')
@@ -231,13 +229,13 @@ document.documentElement.classList.add('js-enabled');
         const activeProfile = profile || {
           id: this.currentUserId,
           email: this.userEmail,
-          display_name: this.userEmail ? this.userEmail.split('@')[0] : 'User Account'
+          display_name: this.userEmail ? this.userEmail.split('@')[0] : 'User Account',
+          bio: 'Digital Contract Member on Baxis Protocol.'
         };
 
         this.renderProfileUI(activeProfile);
         this.populateEditForm(activeProfile);
 
-        // Fetch user escrows for stats and history
         const { data: escrows } = await supabase
           .from('escrows')
           .select('*')
@@ -266,14 +264,18 @@ document.documentElement.classList.add('js-enabled');
       const jobEl = document.getElementById('profile-job-title');
       if (jobEl) jobEl.textContent = profile.job_title || 'Digital Contract Member';
 
-      // Sidebar & Topbar Initials
+      // Render Bio Summary
+      const bioEl = document.getElementById('profile-bio-display');
+      if (bioEl) bioEl.textContent = profile.bio || 'Digital Contract Member on Baxis Protocol.';
+
+      // Sidebar Initials
       const sbNameEl = document.getElementById('sidebar-user-name');
       if (sbNameEl) sbNameEl.textContent = displayName;
 
       const sbAvatarEl = document.getElementById('sidebar-user-avatar');
       if (sbAvatarEl) sbAvatarEl.textContent = initials;
 
-      // Avatar Boxes (Main Hero & Mobile Trust Card)
+      // Avatars
       const avatarBox = document.getElementById('profile-avatar-box');
       const cardAvatarBox = document.getElementById('card-avatar-box');
 
@@ -295,7 +297,7 @@ document.documentElement.classList.add('js-enabled');
         if (cardAvatarBox) cardAvatarBox.textContent = initials;
       }
 
-      // ENS Badge
+      // ENS Handle
       const ensBadge = document.getElementById('profile-ens-badge');
       const displayEns = document.getElementById('display-ens');
       const statusEns = document.getElementById('status-ens');
@@ -307,7 +309,7 @@ document.documentElement.classList.add('js-enabled');
         }
         if (displayEns) displayEns.textContent = profile.ens_name;
         if (statusEns) {
-          statusEns.textContent = '✓ Linked';
+          statusEns.textContent = 'Linked';
           statusEns.className = 'cred-status green';
         }
       } else {
@@ -325,7 +327,7 @@ document.documentElement.classList.add('js-enabled');
       if (profile.twitter_handle) {
         if (displayTw) displayTw.textContent = profile.twitter_handle;
         if (statusTw) {
-          statusTw.textContent = '✓ Linked';
+          statusTw.textContent = 'Linked';
           statusTw.className = 'cred-status green';
         }
       } else {
@@ -342,7 +344,7 @@ document.documentElement.classList.add('js-enabled');
       if (profile.discord_handle) {
         if (displayDc) displayDc.textContent = profile.discord_handle;
         if (statusDc) {
-          statusDc.textContent = '✓ Linked';
+          statusDc.textContent = 'Linked';
           statusDc.className = 'cred-status green';
         }
       } else {
@@ -353,7 +355,6 @@ document.documentElement.classList.add('js-enabled');
         }
       }
 
-      // Handles Subtitle on Mobile Card
       const cardSub = document.getElementById('card-handles-sub');
       if (cardSub) {
         cardSub.textContent = `${profile.twitter_handle || profile.ens_name || '@user'} • Baxis Member`;
@@ -363,20 +364,16 @@ document.documentElement.classList.add('js-enabled');
     populateEditForm(profile) {
       if (profile.display_name) document.getElementById('edit-display-name').value = profile.display_name;
       if (profile.job_title) document.getElementById('edit-job-title').value = profile.job_title;
+      if (profile.bio && document.getElementById('edit-bio')) document.getElementById('edit-bio').value = profile.bio;
       if (profile.ens_name) document.getElementById('edit-ens-name').value = profile.ens_name;
       if (profile.twitter_handle) document.getElementById('edit-twitter').value = profile.twitter_handle;
       if (profile.discord_handle) document.getElementById('edit-discord').value = profile.discord_handle;
     }
 
     /* ==========================================================================
-       AVATAR PHOTO UPLOAD (SUPABASE STORAGE)
-       ========================================================================== */
-    /* ==========================================================================
        AVATAR PHOTO UPLOAD (INSTANT OPTIMISTIC PREVIEW + CANVAS COMPRESSION)
        ========================================================================== */
-    
-    // Helper function to crop and compress photos to 400x400 WebP (~40KB)
-    async compressAvatarImage(file, maxDimension = 400, quality = 0.8) {
+    async compressAvatarImage(file, maxDimension = 400, quality = 0.82) {
       return new Promise((resolve) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
@@ -388,7 +385,6 @@ document.documentElement.classList.add('js-enabled');
             let width = img.width;
             let height = img.height;
 
-            // Maintain aspect ratio while capping dimensions at 400px
             if (width > height) {
               if (width > maxDimension) {
                 height = Math.round((height * maxDimension) / width);
@@ -441,7 +437,7 @@ document.documentElement.classList.add('js-enabled');
         const file = e.target.files[0];
         if (!file || !this.currentUserId) return;
 
-        // 1. INSTANT OPTIMISTIC PREVIEW (0ms delay for user!)
+        // Instant optimistic preview
         const localPreviewUrl = URL.createObjectURL(file);
         this.updateAvatarUI(localPreviewUrl);
 
@@ -455,12 +451,9 @@ document.documentElement.classList.add('js-enabled');
           const supabase = this.getSupabase();
           if (!supabase) return;
 
-          // 2. CLIENT-SIDE COMPRESSION (Converts 5MB -> 40KB in 50ms)
           const compressedFile = await this.compressAvatarImage(file, 400, 0.82);
-
           const filePath = `avatars/${this.currentUserId}_${Date.now()}.webp`;
 
-          // 3. ULTRA-FAST STORAGE UPLOAD (40KB uploads instantly!)
           const { error: uploadError } = await supabase.storage
             .from('dispute-evidence')
             .upload(filePath, compressedFile, { cacheControl: '3600', upsert: true });
@@ -473,7 +466,6 @@ document.documentElement.classList.add('js-enabled');
 
           const publicAvatarUrl = urlData.publicUrl;
 
-          // 4. Update profiles table
           await supabase
             .from('profiles')
             .upsert({
@@ -498,10 +490,11 @@ document.documentElement.classList.add('js-enabled');
         }
       });
     }
+
     /* ==========================================================================
-       SAVE PROFILE SETTINGS FORM (USES UPSERT)
+       SAVE PROFILE SETTINGS FORM (INCLUDES BIO SUMMARY)
        ========================================================================== */
-    bindProfileSave() {
+   bindProfileSave() {
       if (!this.editForm) return;
 
       this.editForm.addEventListener('submit', async (e) => {
@@ -511,6 +504,7 @@ document.documentElement.classList.add('js-enabled');
 
         const displayName = document.getElementById('edit-display-name').value.trim();
         const jobTitle = document.getElementById('edit-job-title').value.trim();
+        const bio = document.getElementById('edit-bio') ? document.getElementById('edit-bio').value.trim() : '';
         const ensName = document.getElementById('edit-ens-name').value.trim();
         const twitter = document.getElementById('edit-twitter').value.trim();
         const discord = document.getElementById('edit-discord').value.trim();
@@ -523,13 +517,15 @@ document.documentElement.classList.add('js-enabled');
         }
 
         try {
-          // Use upsert to insert row if missing, or update if existing
+          // Pass email along with display_name, job_title, and bio
           const { error } = await supabase
             .from('profiles')
             .upsert({
               id: this.currentUserId,
+              email: this.userEmail, // <--- INCLUDES EMAIL TO SATISFY DATABASE
               display_name: displayName,
               job_title: jobTitle,
+              bio: bio,
               ens_name: ensName,
               twitter_handle: twitter,
               discord_handle: discord,
@@ -540,18 +536,19 @@ document.documentElement.classList.add('js-enabled');
 
           const updatedProfile = {
             id: this.currentUserId,
+            email: this.userEmail,
             display_name: displayName,
             job_title: jobTitle,
+            bio: bio,
             ens_name: ensName,
             twitter_handle: twitter,
             discord_handle: discord
           };
 
-          // Render updated UI immediately
           this.renderProfileUI(updatedProfile);
 
           this.toast.show({
-            title: 'Profile Saved',
+            title: 'Profile Saved!',
             message: 'Your profile details have been updated.',
             type: 'success'
           });
@@ -568,7 +565,7 @@ document.documentElement.classList.add('js-enabled');
         }
       });
     }
-
+    
     renderStatsAndHistory(escrows) {
       let settledVolume = 0;
       let completedCount = 0;
@@ -583,7 +580,6 @@ document.documentElement.classList.add('js-enabled');
         }
       });
 
-      // Update Reputation Cards
       const settledValEl = document.getElementById('profile-settled-val');
       if (settledValEl) {
         settledValEl.innerHTML = `$${settledVolume.toLocaleString('en-US', { minimumFractionDigits: 2 })} <span class="currency">USDC</span>`;
@@ -594,14 +590,12 @@ document.documentElement.classList.add('js-enabled');
         completedCountEl.innerHTML = `${completedCount} <span class="currency">Deals</span>`;
       }
 
-      // Update Mobile Trust Card Stats
       const cardVolEl = document.getElementById('card-stat-vol');
       if (cardVolEl) cardVolEl.textContent = `$${(settledVolume / 1000).toFixed(1)}k`;
 
       const cardDealsEl = document.getElementById('card-stat-deals');
       if (cardDealsEl) cardDealsEl.textContent = completedCount.toString();
 
-      // Render Table History
       const tableBody = document.getElementById('profile-history-table-body');
       if (!tableBody) return;
       tableBody.innerHTML = '';

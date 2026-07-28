@@ -271,6 +271,30 @@ a:focus-visible, button:focus-visible, input:focus-visible {
   top: 1rem !important;
 }
 
+/* ============================================================================
+   RESPONSIVE MOBILE SEARCH INPUT EXPANSION (< 768px)
+   ============================================================================ */
+@media (max-width: 768px) {
+  .topbar-left {
+    flex-wrap: wrap;
+    width: 100%;
+    gap: 8px;
+  }
+
+ 
+  .search-input,
+  .topbar-search,
+  #dashboard-search-input,
+  #transactions-search-input {
+    width: 100% !important;
+    min-width: 100% !important;
+    height: 42px !important;
+    font-size: 16px !important; 
+    margin-top: 4px;
+    order: 10; 
+  }
+}
+
 /* ==========================================================================
    4. WORKSPACE WRAPPER & TOPBAR
    ========================================================================== */
@@ -1056,5 +1080,17 @@ a:focus-visible, button:focus-visible, input:focus-visible {
   /* Prevent page main content from being obscured behind HUD */
   .dashboard-main {
     padding-bottom: 96px !important;
+  }
+}
+
+/* Hide Topbar Search Bar on Mobile Screens (< 768px) */
+@media (max-width: 768px) {
+  .topbar-search,
+  .topbar-search-wrapper,
+  .topbar-search-input,
+  .search-input,
+  #dashboard-search-input,
+  #transactions-search-input {
+    display: none !important;
   }
 }
