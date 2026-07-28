@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  
+  <title>Contact Baxis | Get in Touch</title>
+  <meta name="title" content="Contact Baxis — Get in Touch">
+  <meta name="description" content="Reach the Baxis core team or founder for user support, dispute assistance, technical inquiries, security reports, or partnership opportunities.">
+
+  <meta name="theme-color" content="#090909">
+  <meta name="color-scheme" content="dark">
+  <link rel="icon" type="image/png" href="images/baxis-logo.jpg">
+
+  <!-- Fonts: Inter + JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ============================================================================
+       BAXIS PROTOCOL — CONTACT PAGE EMBEDDED STYLESHEET (VERCEL / LINEAR TIER)
+       Canvas (#090909) | Surface (#111111) | Card (#161616) | Hairline (0.08)
+       ============================================================================ */
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-canvas: #090909;
+      --bg-surface-0: #111111;
+      --bg-surface-1: #161616;
+      --bg-surface-hover: #1F1F1F;
+
+      --text-primary: #FFFFFF;
+      --text-secondary: rgba(255, 255, 255, 0.65);
+      --text-muted: rgba(255, 255, 255, 0.42);
+
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-default: rgba(255, 255, 255, 0.12);
+      --border-hover: rgba(255, 255, 255, 0.22);
+
+      --accent-cyan: #38BDF8;
+      --state-success: #10B981;
+      --state-warning: #F59E0B;
+      --state-error: #EF4444;
+
+      --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: "JetBrains Mono", monospace;
+
+      --radius-sm: 6px;
+      --radius-md: 12px;
+      --radius-lg: 18px;
+      --radius-xl: 24px;
+      --radius-full: 9999px;
+
+      --transition-fast: 150ms cubic-bezier(0.16, 1, 0.3, 1);
+      --transition-normal: 250ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    html, body {
+      min-height: 100vh;
+      background-color: var(--bg-canvas);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button {
+      background: none;
+      border: none;
+      font-family: inherit;
+      cursor: pointer;
+    }
+
+    .container {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    /* NAVIGATION HEADER */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background-color: rgba(9, 9, 9, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-subtle);
+      height: 68px;
+      display: flex;
+      align-items: center;
+    }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+    }
+
+    .header-logo-img {
+      height: 26px;
+      width: auto;
+      display: block;
+    }
+
+    .header-nav {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-link {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+      transition: color var(--transition-fast);
+    }
+
+    .nav-link:hover, .nav-link.active {
+      color: var(--text-primary);
+    }
+
+    /* HERO SECTION */
+    .hero-section {
+      padding: 6rem 0 4.5rem 0;
+      text-align: center;
+      position: relative;
+      border-bottom: 1px solid var(--border-subtle);
+      background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(255, 255, 255, 0.05) 0%, transparent 80%);
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 14px;
+      border-radius: var(--radius-full);
+      background: var(--bg-surface-0);
+      border: 1px solid var(--border-default);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 1.75rem;
+    }
+
+    .hero-title {
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1.08;
+      margin-bottom: 1.25rem;
+      background: linear-gradient(180deg, #FFFFFF 0%, rgba(255, 255, 255, 0.65) 100%);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .hero-subtitle {
+      font-size: clamp(1rem, 1.4vw, 1.1875rem);
+      color: var(--text-secondary);
+      max-width: 620px;
+      margin: 0 auto;
+      line-height: 1.65;
+    }
+
+    /* SECTION SPACING & HEADINGS */
+    .section-block {
+      padding: 5.5rem 0;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .section-header {
+      margin-bottom: 3rem;
+      max-width: 640px;
+    }
+
+    .section-header.center {
+      margin-left: auto;
+      margin-right: auto;
+      text-align: center;
+    }
+
+    .section-tag {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      display: block;
+      margin-bottom: 0.625rem;
+    }
+
+    .section-title {
+      font-size: clamp(1.75rem, 3vw, 2.375rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--text-primary);
+      line-height: 1.15;
+    }
+
+    .section-desc {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      margin-top: 0.75rem;
+      line-height: 1.6;
+    }
+
+    /* GRIDS */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 1.25rem;
+    }
+
+    /* CARDS */
+    .surface-card {
+      background-color: var(--bg-surface-0);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      transition: all var(--transition-normal);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      position: relative;
+    }
+
+    .surface-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-3px);
+      background-color: var(--bg-surface-1);
+    }
+
+    .card-heading {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.015em;
+      margin-bottom: 0.5rem;
+    }
+
+    .card-body {
+      font-size: 0.9375rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .card-code-handle {
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+      color: var(--accent-cyan);
+      margin-top: 1.25rem;
+      display: block;
+    }
+
+    /* DIRECTORY CARD BADGES & SOCIAL LINKS */
+    .directory-badge {
+      font-family: var(--font-mono);
+      font-size: 0.6875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 3px 8px;
+      border-radius: var(--radius-sm);
+      width: fit-content;
+      margin-bottom: 1rem;
+    }
+
+    .badge-founder {
+      background: rgba(56, 189, 248, 0.1);
+      color: var(--accent-cyan);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+    }
+
+    .badge-official {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--state-success);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+
+    .social-link-list {
+      list-style: none;
+      margin-top: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.625rem;
+    }
+
+    .social-link-item a {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      transition: color var(--transition-fast);
+    }
+
+    .social-link-item a:hover {
+      color: var(--text-primary);
+    }
+
+    .badge-soon {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-muted);
+      background: var(--bg-surface-hover);
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* CONTACT FORM */
+    .form-card {
+      background-color: var(--bg-surface-0);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-xl);
+      padding: 2.75rem;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .form-label {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .form-input {
+      width: 100%;
+      background-color: var(--bg-canvas);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      padding: 0.875rem 1rem;
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      font-size: 0.9375rem;
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--text-primary);
+      box-shadow: 0 0 0 1px var(--text-primary);
+    }
+
+    .btn-submit {
+      background-color: var(--text-primary);
+      color: var(--bg-canvas);
+      border: none;
+      border-radius: var(--radius-full);
+      padding: 0.875rem 2.25rem;
+      font-weight: 700;
+      font-size: 0.9375rem;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-submit:hover {
+      background-color: #E5E5E5;
+      transform: translateY(-2px);
+    }
+
+    .form-alert {
+      padding: 1rem 1.25rem;
+      border-radius: var(--radius-md);
+      font-size: 0.875rem;
+      margin-bottom: 1.5rem;
+      display: none;
+    }
+
+    .form-alert.success {
+      background-color: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: var(--state-success);
+    }
+
+    .form-alert.error {
+      background-color: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: var(--state-error);
+    }
+
+    /* SLA TIME BADGE */
+    .sla-badge {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--state-success);
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      padding: 4px 10px;
+      border-radius: 4px;
+      display: inline-block;
+      margin-top: 1rem;
+      width: fit-content;
+    }
+
+    /* CLOSING CTA */
+    .closing-card {
+      background: radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.08) 0%, transparent 70%), var(--bg-surface-0);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-xl);
+      padding: 4.5rem 2rem;
+      text-align: center;
+      margin: 4rem 0;
+    }
+
+    .closing-title {
+      font-size: clamp(2rem, 3.5vw, 2.75rem);
+      font-weight: 800;
+      letter-spacing: -0.035em;
+      color: var(--text-primary);
+      margin-bottom: 1rem;
+    }
+
+    .closing-subtitle {
+      font-size: 1.0625rem;
+      color: var(--text-secondary);
+      max-width: 520px;
+      margin: 0 auto 2.25rem auto;
+      line-height: 1.6;
+    }
+
+    /* FOOTER */
+    .site-footer {
+      border-top: 1px solid var(--border-subtle);
+      padding: 4.5rem 0 3rem 0;
+      background-color: var(--bg-canvas);
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr repeat(3, 1fr);
+      gap: 3rem;
+      margin-bottom: 3rem;
+    }
+
+    .footer-brand p {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      max-width: 320px;
+      margin-top: 1rem;
+      line-height: 1.6;
+    }
+
+    .footer-col-title {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-primary);
+      margin-bottom: 1.25rem;
+      display: block;
+    }
+
+    .footer-links {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .footer-links a {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      transition: color var(--transition-fast);
+    }
+
+    .footer-links a:hover {
+      color: var(--text-primary);
+    }
+
+    .footer-bottom {
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      .hero-section { padding: 4.5rem 0 3rem 0; }
+      .section-block { padding: 3.5rem 0; }
+      .form-grid-2 { grid-template-columns: 1fr; }
+      .form-card { padding: 1.5rem; }
+      .footer-grid { grid-template-columns: 1fr; }
+      .header-nav { display: none; }
+    }
+  </style>
+</head>
+<body class="contact-page">
+
+  <!-- NAVIGATION HEADER -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <div class="header-brand">
+        <a href="index.html" aria-label="Baxis Homepage">
+          <img src="images/baxis-logo.jpg" alt="Baxis Protocol Logo" class="header-logo-img" width="100" height="26">
+        </a>
+      </div>
+
+      <nav aria-label="Primary Navigation">
+        <ul class="header-nav">
+          <li><a href="index.html#how-it-works" class="nav-link">How It Works</a></li>
+          <li><a href="docs.html" class="nav-link">Documentation</a></li>
+          <li><a href="about.html" class="nav-link">About</a></li>
+          <li><a href="contact.html" class="nav-link active">Contact</a></li>
+        </ul>
+      </nav>
+
+      <div>
+        <a href="dashboard.html" class="btn btn-primary" style="padding: 0.625rem 1.25rem; font-size: 0.875rem;">
+          <span>Launch App</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- 1. HERO SECTION -->
+  <header class="hero-section">
+    <div class="container">
+      <div class="hero-badge">
+        <span>Communication & Direct Support</span>
+      </div>
+      
+      <h1 class="hero-title">Get in Touch.</h1>
+      
+      <p class="hero-subtitle">
+        Have questions about an active escrow vault, security reporting, technical integration, or partnership proposals? Connect directly with the Baxis team.
+      </p>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- 2. FOUNDER & PROTOCOL CHANNELS DIRECTORY -->
+    <section class="section-block">
+      <div class="section-header center">
+        <span class="section-tag">Directory</span>
+        <h2 class="section-title">Direct Channels</h2>
+        <p class="section-desc">Reach the founder or official protocol department handles.</p>
+      </div>
+
+      <div class="grid-2">
+        <!-- FOUNDER CARD -->
+        <div class="surface-card">
+          <span class="directory-badge badge-founder">Founder & Lead Builder</span>
+          <h3 class="card-heading">Blossom Olusegun</h3>
+          <p class="card-body">
+            Direct channel for protocol architecture, core philosophy, and strategic feedback.
+          </p>
+          
+          <ul class="social-link-list">
+            <li class="social-link-item">
+              <a href="mailto:blossom@baxis.io">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                <span>blossom@baxis.io</span>
+              </a>
+            </li>
+            <li class="social-link-item">
+              <a href="https://x.com/blossom_olusegun" target="_blank" rel="noopener">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                <span>X (Personal)</span>
+              </a>
+            </li>
+            <li class="social-link-item">
+              <a href="https://github.com/blossom-olusegun" target="_blank" rel="noopener">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+                <span>GitHub Profile</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- PROTOCOL CARD -->
+        <div class="surface-card">
+          <span class="directory-badge badge-official">Official Protocol Handles</span>
+          <h3 class="card-heading">Baxis Protocol</h3>
+          <p class="card-body">
+            Official department contacts for support, security disclosures, and public repositories.
+          </p>
+
+          <ul class="social-link-list">
+            <li class="social-link-item">
+              <a href="mailto:support@baxis.io">
+                <span>support@baxis.io</span>
+              </a>
+            </li>
+            <li class="social-link-item">
+              <a href="https://x.com/baxisprotocol" target="_blank" rel="noopener">
+                <span>@baxisprotocol (X)</span>
+              </a>
+            </li>
+            <li class="social-link-item">
+              <a href="https://github.com/baxisprotocol" target="_blank" rel="noopener">
+                <span>baxisprotocol (GitHub)</span>
+              </a>
+            </li>
+            <li class="social-link-item">
+              <span style="font-size:0.875rem; color:var(--text-muted); display:inline-flex; align-items:center; gap:8px;">
+                <span>Discord Community</span>
+                <span class="badge-soon">Coming Soon</span>
+              </span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. DEPARTMENT USE-CASE CARDS -->
+    <section class="section-block">
+      <div class="section-header center">
+        <span class="section-tag">Departments</span>
+        <h2 class="section-title">When to Reach Out</h2>
+      </div>
+
+      <div class="grid-4">
+        <div class="surface-card">
+          <h3 class="card-heading">General Support</h3>
+          <p class="card-body">Assistance with escrow creation, deposit checks, or navigation inquiries.</p>
+          <span class="card-code-handle">support@baxis.io</span>
+        </div>
+
+        <div class="surface-card">
+          <h3 class="card-heading">Security Reports</h3>
+          <p class="card-body">Encrypted smart contract vulnerability disclosures directly to security team.</p>
+          <span class="card-code-handle">security@baxis.io</span>
+        </div>
+
+        <div class="surface-card">
+          <h3 class="card-heading">Partnerships</h3>
+          <p class="card-body">Integration proposals for DAOs, platforms, and Web3 developer tools.</p>
+          <span class="card-code-handle">partnerships@baxis.io</span>
+        </div>
+
+        <div class="surface-card">
+          <h3 class="card-heading">General Questions</h3>
+          <p class="card-body">Media inquiries, press coverage, or general brand questions.</p>
+          <span class="card-code-handle">hello@baxis.io</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. CONTACT FORM -->
+    <section class="section-block">
+      <div class="section-header center">
+        <span class="section-tag">Direct Message</span>
+        <h2 class="section-title">Send Us a Message</h2>
+        <p class="section-desc">Submit your message below for direct routing to the appropriate department.</p>
+      </div>
+
+      <div class="form-card">
+        <div id="form-alert-banner" class="form-alert"></div>
+
+        <form id="contact-message-form" novalidate>
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="field-name" class="form-label">Your Name</label>
+              <input type="text" id="field-name" class="form-input" placeholder="e.g. Alex" required>
+            </div>
+
+            <div class="form-group">
+              <label for="field-email" class="form-label">Email Address</label>
+              <input type="email" id="field-email" class="form-input" placeholder="name@domain.com" required>
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="field-subject" class="form-label">Subject</label>
+              <input type="text" id="field-subject" class="form-input" placeholder="Brief summary..." required>
+            </div>
+
+            <div class="form-group">
+              <label for="field-category" class="form-label">Inquiry Type</label>
+              <select id="field-category" class="form-input" style="height: 48px;">
+                <option value="support">General Support</option>
+                <option value="technical">Technical Support / Wallet</option>
+                <option value="dispute">Dispute Status Inquiry</option>
+                <option value="partnership">Partnership Proposal</option>
+                <option value="security">Security Vulnerability</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="field-message" class="form-label">Message Details</label>
+            <textarea id="field-message" class="form-input" rows="5" placeholder="Include specific details or Escrow Contract ID..." required></textarea>
+          </div>
+
+          <button type="submit" class="btn-submit">
+            <span>Send Message</span>
+            <span>➔</span>
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- 5. FAQS & RESPONSE SLA -->
+    <section class="section-block">
+      <div class="section-header center">
+        <span class="section-tag">Response SLA</span>
+        <h2 class="section-title">Support FAQs & SLA</h2>
+      </div>
+
+      <div class="grid-2" style="margin-bottom: 3rem;">
+        <div class="surface-card">
+          <h3 class="card-heading">Where can I report a bug?</h3>
+          <p class="card-body">
+            Technical software bugs can be submitted via the contact form above under "Technical Support" or opened as an issue on our GitHub repository.
+          </p>
+        </div>
+
+        <div class="surface-card">
+          <h3 class="card-heading">How do security disclosures work?</h3>
+          <p class="card-body">
+            Security researchers should email security@baxis.io directly with reproduction steps. Reports are acknowledged within 12 hours.
+          </p>
+        </div>
+
+        <div class="surface-card">
+          <h3 class="card-heading">How do partnership inquiries work?</h3>
+          <p class="card-body">
+            We collaborate with DAOs, freelancing networks, and Web3 tool builders seeking non-custodial escrow integrations.
+          </p>
+        </div>
+
+        <div class="surface-card">
+          <h3 class="card-heading">What is the response time for support?</h3>
+          <p class="card-body">
+            General support tickets are addressed within 24 hours. Critical security vulnerability disclosures receive priority response within 12 hours.
+          </p>
+        </div>
+      </div>
+
+      <!-- SLA BADGES GRID -->
+      <div class="grid-3">
+        <div class="surface-card">
+          <h3 class="card-heading">General Support</h3>
+          <p class="card-body">Standard inquiries & escrow vault help</p>
+          <span class="sla-badge">Within 24 Hours</span>
+        </div>
+
+        <div class="surface-card">
+          <h3 class="card-heading">Security Reports</h3>
+          <p class="card-body">Vulnerability reports & disclosures</p>
+          <span class="sla-badge">Within 12 Hours</span>
+        </div>
+
+        <div class="surface-card">
+          <h3 class="card-heading">Partnerships</h3>
+          <p class="card-body">Integrations & DAO collaborations</p>
+          <span class="sla-badge">1 – 2 Business Days</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. CLOSING CTA -->
+    <section class="closing-card">
+      <h2 class="closing-title">Build Safely with Baxis.</h2>
+      <p class="closing-subtitle">
+        Start creating secure, non-custodial escrow agreements today.
+      </p>
+      <a href="create.html" class="btn btn-primary" style="padding: 0.875rem 2rem;">
+        <span>Create an Escrow Vault</span>
+      </a>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" aria-label="Baxis Homepage">
+            <img src="images/baxis-logo.jpg" alt="Baxis Protocol Logo" width="100" height="26">
+          </a>
+          <p>
+            Building the trust layer for internet commerce. Non-custodial, programmable escrow security for global digital agreements.
+          </p>
+        </div>
+
+        <div>
+          <span class="footer-col-title">Product</span>
+          <ul class="footer-links">
+            <li><a href="dashboard.html">Launch App</a></li>
+            <li><a href="create.html">Create Escrow</a></li>
+            <li><a href="docs.html">Documentation</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <span class="footer-col-title">Company</span>
+          <ul class="footer-links">
+            <li><a href="about.html">About Baxis</a></li>
+            <li><a href="contact.html">Contact Us</a></li>
+            <li><a href="brand.html">Brand Assets</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <span class="footer-col-title">Legal & Trust</span>
+          <ul class="footer-links">
+            <li><a href="privacy.html">Privacy Policy</a></li>
+            <li><a href="terms.html">Terms of Service</a></li>
+            <li><a href="security.html">Security Architecture</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span>&copy; 2026 Baxis Protocol. All rights reserved.</span>
+        <span>Built for the future of internet commerce.</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- FORM VALIDATION SCRIPT -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('contact-message-form');
+      const alertBanner = document.getElementById('form-alert-banner');
+
+      if (form) {
+        form.addEventListener('submit', (e) => {
+          e.preventDefault();
+
+          const name = document.getElementById('field-name').value.trim();
+          const email = document.getElementById('field-email').value.trim();
+          const subject = document.getElementById('field-subject').value.trim();
+          const message = document.getElementById('field-message').value.trim();
+
+          if (!name || !email || !subject || !message) {
+            showAlert('Please complete all required fields.', 'error');
+            return;
+          }
+
+          if (!email.includes('@') || !email.includes('.')) {
+            showAlert('Please enter a valid email address.', 'error');
+            return;
+          }
+
+          showAlert('Message received! The Baxis team will respond via email shortly.', 'success');
+          form.reset();
+        });
+      }
+
+      function showAlert(msg, type) {
+        if (!alertBanner) return;
+        alertBanner.textContent = msg;
+        alertBanner.className = `form-alert ${type}`;
+        alertBanner.style.display = 'block';
+      }
+    });
+  </script>
+
+</body>
+</html>

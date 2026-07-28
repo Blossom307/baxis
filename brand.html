@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  
+  <title>Brand Assets & Media Kit | Baxis Protocol</title>
+  <meta name="title" content="Brand Assets & Media Kit — Baxis Protocol">
+  <meta name="description" content="Download official Baxis logos, logomarks, brand color swatches, typography specs, screenshot assets, and press media kit guidelines.">
+
+  <meta name="theme-color" content="#090909">
+  <meta name="color-scheme" content="dark">
+  <link rel="icon" type="image/png" href="images/baxis-logo.jpg">
+
+  <!-- Typography: Inter + JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ============================================================================
+       BAXIS PROTOCOL — BRAND ASSETS STYLESHEET (STRIPE/FRAMER BRAND TIER)
+       Canvas (#090909) | Surface (#111111) | Card (#161616) | Hairline (0.08)
+       ============================================================================ */
+
+    /* 1. RESET & DESIGN TOKENS */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-app: #090909;
+      --bg-surface-0: #111111;
+      --bg-surface-1: #161616;
+      --bg-surface-hover: #1F1F1F;
+
+      --text-primary: #FFFFFF;
+      --text-secondary: rgba(255, 255, 255, 0.68);
+      --text-muted: rgba(255, 255, 255, 0.42);
+
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-default: rgba(255, 255, 255, 0.12);
+      --border-hover: rgba(255, 255, 255, 0.22);
+
+      --accent-cyan: #38BDF8;
+      --state-success: #10B981;
+      --state-error: #EF4444;
+
+      --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: "JetBrains Mono", monospace;
+
+      --radius-sm: 6px;
+      --radius-md: 12px;
+      --radius-lg: 18px;
+      --radius-xl: 24px;
+      --radius-full: 9999px;
+
+      --transition-fast: 150ms cubic-bezier(0.16, 1, 0.3, 1);
+      --transition-normal: 250ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body.brand-page {
+      min-height: 100vh;
+      background-color: var(--bg-app);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button {
+      background: none;
+      border: none;
+      font-family: inherit;
+      cursor: pointer;
+    }
+
+    .container {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    /* 2. NAVIGATION HEADER */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background-color: rgba(9, 9, 9, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-subtle);
+      height: 68px;
+      display: flex;
+      align-items: center;
+    }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+    }
+
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-logo-img {
+      height: 26px;
+      width: auto;
+      display: block;
+    }
+
+    .header-nav {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-link {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+      transition: color var(--transition-fast);
+    }
+
+    .nav-link:hover, .nav-link.active {
+      color: var(--text-primary);
+    }
+
+    .btn-header-app {
+      background-color: var(--text-primary);
+      color: var(--bg-app);
+      padding: 0.625rem 1.25rem;
+      border-radius: var(--radius-full);
+      font-size: 0.875rem;
+      font-weight: 600;
+      transition: all var(--transition-fast);
+    }
+
+    .btn-header-app:hover {
+      background-color: #E5E5E5;
+      transform: translateY(-1px);
+    }
+
+    /* 3. HERO SECTION */
+    .brand-hero {
+      padding: 6.5rem 0 4.5rem 0;
+      text-align: center;
+      position: relative;
+      border-bottom: 1px solid var(--border-subtle);
+      background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(255, 255, 255, 0.05) 0%, transparent 80%);
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 14px;
+      border-radius: var(--radius-full);
+      background: var(--bg-surface-0);
+      border: 1px solid var(--border-default);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--accent-cyan);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-title {
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1.08;
+      margin-bottom: 1.25rem;
+      background: linear-gradient(180deg, #FFFFFF 0%, rgba(255, 255, 255, 0.65) 100%);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .hero-subtitle {
+      font-size: clamp(1rem, 1.4vw, 1.1875rem);
+      color: var(--text-secondary);
+      max-width: 620px;
+      margin: 0 auto 2.25rem auto;
+      line-height: 1.65;
+    }
+
+    .hero-cta-group {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0.875rem 1.75rem;
+      border-radius: var(--radius-full);
+      font-weight: 600;
+      font-size: 0.9375rem;
+      transition: all var(--transition-fast);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background-color: var(--text-primary);
+      color: var(--bg-app);
+      box-shadow: 0 4px 20px rgba(255, 255, 255, 0.15);
+    }
+
+    .btn-primary:hover {
+      background-color: #E5E5E5;
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background-color: var(--bg-surface-0);
+      color: var(--text-primary);
+      border: 1px solid var(--border-default);
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--bg-surface-hover);
+      border-color: var(--border-hover);
+      transform: translateY(-2px);
+    }
+
+    /* 4. SECTIONS & GRIDS */
+    .section-block {
+      padding: 5.5rem 0;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .section-header {
+      margin-bottom: 3rem;
+      max-width: 640px;
+    }
+
+    .section-header.center {
+      margin-left: auto;
+      margin-right: auto;
+      text-align: center;
+    }
+
+    .section-tag {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      display: block;
+      margin-bottom: 0.625rem;
+    }
+
+    .section-title {
+      font-size: clamp(1.75rem, 3vw, 2.375rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--text-primary);
+      line-height: 1.18;
+    }
+
+    .section-desc {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      margin-top: 0.75rem;
+      line-height: 1.6;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+
+    /* LOGO CARDS */
+    .asset-card {
+      background-color: var(--bg-surface-0);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      transition: all var(--transition-normal);
+      text-align: center;
+    }
+
+    .asset-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-3px);
+      background-color: var(--bg-surface-1);
+    }
+
+    .logo-preview-box {
+      width: 100%;
+      height: 140px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+      padding: 1.5rem;
+    }
+
+    .logo-preview-box.dark-canvas {
+      background-color: #090909;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .logo-preview-box.light-canvas {
+      background-color: #FFFFFF;
+    }
+
+    .logo-preview-img {
+      max-height: 36px;
+      width: auto;
+      display: block;
+    }
+
+    .logo-preview-img.inverted {
+      filter: invert(1);
+    }
+
+    .asset-info {
+      margin-bottom: 1.25rem;
+    }
+
+    .asset-title {
+      font-size: 1.0625rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .asset-sub {
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+    }
+
+    .asset-actions {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .btn-download-sm {
+      flex: 1;
+      padding: 0.625rem;
+      border-radius: var(--radius-md);
+      background-color: var(--bg-surface-1);
+      border: 1px solid var(--border-default);
+      color: var(--text-primary);
+      font-size: 0.8125rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all var(--transition-fast);
+    }
+
+    .btn-download-sm:hover {
+      background-color: var(--bg-surface-hover);
+      border-color: var(--border-hover);
+    }
+
+    /* COLOR SWATCH GRID */
+    .color-swatch-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .swatch-card {
+      background-color: var(--bg-surface-0);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .swatch-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-2px);
+    }
+
+    .swatch-color-box {
+      height: 80px;
+      width: 100%;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .swatch-meta {
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .swatch-name {
+      font-size: 0.8125rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .swatch-hex {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+
+    /* TYPOGRAPHY CARD */
+    .typography-card {
+      background-color: var(--bg-surface-0);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+    }
+
+    .type-sample-primary {
+      font-family: var(--font-sans);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .type-sample-mono {
+      font-family: var(--font-mono);
+      font-size: 1rem;
+      color: var(--accent-cyan);
+      margin-bottom: 0.5rem;
+    }
+
+    /* DO'S & DON'TS GUIDELINES */
+    .guideline-card {
+      background-color: var(--bg-surface-0);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+    }
+
+    .guideline-card.do {
+      border-top: 4px solid var(--state-success);
+    }
+
+    .guideline-card.dont {
+      border-top: 4px solid var(--state-error);
+    }
+
+    .guideline-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .guideline-title.do-title { color: var(--state-success); }
+    .guideline-title.dont-title { color: var(--state-error); }
+
+    .guideline-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .guideline-list li {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* SCREENSHOT CARDS */
+    .screenshot-card {
+      background-color: var(--bg-surface-0);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .screenshot-preview-placeholder {
+      width: 100%;
+      height: 220px;
+      background-color: var(--bg-surface-1);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+    }
+
+    .screenshot-info {
+      padding: 1.5rem;
+    }
+
+    /* BADGE */
+    .badge-tag {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+
+    .badge-tag.soon {
+      background-color: rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* FOOTER */
+    .site-footer {
+      border-top: 1px solid var(--border-subtle);
+      padding: 4.5rem 0 3rem 0;
+      background-color: var(--bg-app);
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr repeat(3, 1fr);
+      gap: 3rem;
+      margin-bottom: 3rem;
+    }
+
+    .footer-brand p {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      max-width: 320px;
+      margin-top: 1rem;
+      line-height: 1.6;
+    }
+
+    .footer-col-title {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-primary);
+      margin-bottom: 1.25rem;
+      display: block;
+    }
+
+    .footer-links {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .footer-links a {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      transition: color var(--transition-fast);
+    }
+
+    .footer-links a:hover {
+      color: var(--text-primary);
+    }
+
+    .footer-bottom {
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    @media (max-width: 900px) {
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+      .header-nav { display: none; }
+    }
+
+    @media (max-width: 640px) {
+      .brand-hero { padding: 4.5rem 0 3rem 0; }
+      .section-block { padding: 3.5rem 0; }
+      .footer-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body class="brand-page">
+
+  <!-- NAVIGATION HEADER -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <div class="header-brand">
+        <a href="index.html" aria-label="Baxis Homepage">
+          <img src="images/baxis-logo.jpg" alt="Baxis Protocol Logo" class="header-logo-img" width="100" height="26">
+        </a>
+      </div>
+
+      <nav aria-label="Primary Navigation">
+        <ul class="header-nav">
+          <li><a href="index.html#how-it-works" class="nav-link">How It Works</a></li>
+          <li><a href="documentation.html" class="nav-link">Documentation</a></li>
+          <li><a href="about.html" class="nav-link">About</a></li>
+          <li><a href="brand-assets.html" class="nav-link active">Brand</a></li>
+        </ul>
+      </nav>
+
+      <div>
+        <a href="dashboard.html" class="btn-header-app">
+          <span>Launch App</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- 1. HERO SECTION -->
+  <header class="brand-hero">
+    <div class="container">
+      <div class="hero-badge">
+        <span>MEDIA KIT & BRAND SYSTEM</span>
+      </div>
+      
+      <h1 class="hero-title">Brand Assets & Guidelines</h1>
+      
+      <p class="hero-subtitle">
+        Official logotypes, brand color swatches, typography rules, and screenshot media assets for Baxis Protocol.
+      </p>
+
+      <div class="hero-cta-group">
+        <button class="btn btn-primary" id="btn-download-bundle" onclick="alert('Downloading Baxis Official Media Kit (.ZIP bundle including SVG, PNG, and brand specs)...');">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span>Download All Assets (.ZIP)</span>
+        </button>
+        <a href="#logo-downloads" class="btn btn-secondary">
+          <span>Browse Logotypes</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- 2. LOGO DOWNLOADS -->
+    <section id="logo-downloads" class="section-block">
+      <div class="section-header center">
+        <span class="section-tag">Logotypes</span>
+        <h2 class="section-title">Official Logos & Marks</h2>
+        <p class="section-desc">Vector SVG and high-resolution PNG logotypes in dark and light canvas variants.</p>
+      </div>
+
+      <div class="grid-2">
+        <!-- DARK CANVAS LOGO -->
+        <div class="asset-card">
+          <div class="logo-preview-box dark-canvas">
+            <img src="images/baxis-logo.jpg" alt="Baxis Primary Dark Logo" class="logo-preview-img">
+          </div>
+          <div class="asset-info">
+            <h3 class="asset-title">Primary Dark Logotype</h3>
+            <span class="asset-sub">For dark obsidian backgrounds (#090909, #111111)</span>
+          </div>
+          <div class="asset-actions">
+            <button class="btn-download-sm" onclick="alert('Downloading Primary Dark Vector SVG...');">Download SVG</button>
+            <button class="btn-download-sm" onclick="alert('Downloading Primary Dark High-Res PNG...');">Download PNG</button>
+          </div>
+        </div>
+
+        <!-- LIGHT CANVAS LOGO (INVERTED) -->
+        <div class="asset-card">
+          <div class="logo-preview-box light-canvas">
+            <img src="images/baxis-logo.jpg" alt="Baxis Light Logotype" class="logo-preview-img inverted">
+          </div>
+          <div class="asset-info">
+            <h3 class="asset-title">Primary Light Logotype</h3>
+            <span class="asset-sub">For white or light neutral background contexts</span>
+          </div>
+          <div class="asset-actions">
+            <button class="btn-download-sm" onclick="alert('Downloading Primary Light Vector SVG...');">Download SVG</button>
+            <button class="btn-download-sm" onclick="alert('Downloading Primary Light High-Res PNG...');">Download PNG</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. BRAND COLORS -->
+    <section class="section-block">
+      <div class="section-header center">
+        <span class="section-tag">Palette</span>
+        <h2 class="section-title">Brand Color System</h2>
+        <p class="section-desc">Click any color swatch below to copy its HEX code directly to your clipboard.</p>
+      </div>
+
+      <div class="color-swatch-grid">
+        <!-- SWATCH 1 -->
+        <div class="swatch-card" onclick="navigator.clipboard.writeText('#090909'); alert('Copied #090909 (Obsidian Canvas) to clipboard!');">
+          <div class="swatch-color-box" style="background-color: #090909;"></div>
+          <div class="swatch-meta">
+            <span class="swatch-name">Obsidian Canvas</span>
+            <span class="swatch-hex">#090909</span>
+          </div>
+        </div>
+
+        <!-- SWATCH 2 -->
+        <div class="swatch-card" onclick="navigator.clipboard.writeText('#111111'); alert('Copied #111111 (Surface Level 0) to clipboard!');">
+          <div class="swatch-color-box" style="background-color: #111111;"></div>
+          <div class="swatch-meta">
+            <span class="swatch-name">Surface Level 0</span>
+            <span class="swatch-hex">#111111</span>
+          </div>
+        </div>
+
+        <!-- SWATCH 3 -->
+        <div class="swatch-card" onclick="navigator.clipboard.writeText('#161616'); alert('Copied #161616 (Surface Level 1) to clipboard!');">
+          <div class="swatch-color-box" style="background-color: #161616;"></div>
+          <div class="swatch-meta">
+            <span class="swatch-name">Surface Level 1</span>
+            <span class="swatch-hex">#161616</span>
+          </div>
+        </div>
+
+        <!-- SWATCH 4 -->
+        <div class="swatch-card" onclick="navigator.clipboard.writeText('#FFFFFF'); alert('Copied #FFFFFF (Text Primary) to clipboard!');">
+          <div class="swatch-color-box" style="background-color: #FFFFFF;"></div>
+          <div class="swatch-meta">
+            <span class="swatch-name">Crisp White</span>
+            <span class="swatch-hex">#FFFFFF</span>
+          </div>
+        </div>
+
+        <!-- SWATCH 5 -->
+        <div class="swatch-card" onclick="navigator.clipboard.writeText('#10B981'); alert('Copied #10B981 (State Success) to clipboard!');">
+          <div class="swatch-color-box" style="background-color: #10B981;"></div>
+          <div class="swatch-meta">
+            <span class="swatch-name">State Success</span>
+            <span class="swatch-hex">#10B981</span>
+          </div>
+        </div>
+
+        <!-- SWATCH 6 -->
+        <div class="swatch-card" onclick="navigator.clipboard.writeText('#EF4444'); alert('Copied #EF4444 (State Dispute) to clipboard!');">
+          <div class="swatch-color-box" style="background-color: #EF4444;"></div>
+          <div class="swatch-meta">
+            <span class="swatch-name">State Dispute</span>
+            <span class="swatch-hex">#EF4444</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. TYPOGRAPHY -->
+    <section class="section-block">
+      <div class="section-header center">
+        <span class="section-tag">Typography</span>
+        <h2 class="section-title">Font Hierarchy & Typefaces</h2>
+      </div>
+
+      <div class="grid-2">
+        <div class="typography-card">
+          <div class="type-sample-primary">Inter Typefamily</div>
+          <p class="section-desc" style="margin-top: 0; margin-bottom: 1rem;">
+            Primary sans-serif typeface used across interface headings, UI controls, navigation, and body copy.
+          </p>
+          <code style="font-family: var(--font-mono); font-size: 0.8125rem; color: var(--accent-cyan);">font-family: "Inter", sans-serif;</code>
+        </div>
+
+        <div class="typography-card">
+          <div class="type-sample-mono">JetBrains Mono</div>
+          <p class="section-desc" style="margin-top: 0; margin-bottom: 1rem;">
+            Monospace font used for smart contract vault addresses, transaction hashes, amounts, and code blocks.
+          </p>
+          <code style="font-family: var(--font-mono); font-size: 0.8125rem; color: var(--accent-cyan);">font-family: "JetBrains Mono", monospace;</code>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. LOGO USAGE GUIDELINES -->
+    <section class="section-block">
+      <div class="section-header center">
+        <span class="section-tag">Guidelines</span>
+        <h2 class="section-title">Logo Usage Rules</h2>
+      </div>
+
+      <div class="grid-2">
+        <!-- DO'S -->
+        <div class="guideline-card do">
+          <div class="guideline-title do-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>Correct Usage (Do)</span>
+          </div>
+          <ul class="guideline-list">
+            <li>Maintain minimum padding around the logotype equal to half the height of the wordmark.</li>
+            <li>Use the primary dark logo on black/dark canvas surfaces (#090909, #111111).</li>
+            <li>Use the inverted white logo on light background surfaces.</li>
+            <li>Ensure the wordmark remains crisp and legible at small display sizes.</li>
+          </ul>
+        </div>
+
+        <!-- DON'TS -->
+        <div class="guideline-card dont">
+          <div class="guideline-title dont-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            <span>Incorrect Usage (Don't)</span>
+          </div>
+          <ul class="guideline-list">
+            <li>Do not stretch, distort, rotate, or skew the logotype proportions.</li>
+            <li>Do not recolor the logotype with non-brand primary colors or drop shadows.</li>
+            <li>Do not place the logotype over busy, low-contrast background photography.</li>
+            <li>Do not refer to Baxis as a "freelance agency" or "marketplace". Baxis is non-custodial trust infrastructure.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. ICONOGRAPHY SYSTEM -->
+    <section class="section-block">
+      <div class="section-header center">
+        <span class="section-tag">Iconography</span>
+        <h2 class="section-title">Minimal Vector Stroke Icons</h2>
+        <p class="section-desc">Baxis utilizes clean, 2px stroke-width SVG icons exclusively. No emojis or solid colored clip-art are used.</p>
+      </div>
+
+      <div class="grid-3">
+        <div class="asset-card" style="padding: 1.5rem; text-align: left; align-items: flex-start;">
+          <div style="width: 36px; height: 36px; border-radius: 8px; background: var(--bg-surface-1); border: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: center; margin-bottom: 1rem;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <h3 class="asset-title">Security & Protection</h3>
+          <p class="asset-sub">2px geometric stroke vectors used across trust and audit cards.</p>
+        </div>
+
+        <div class="asset-card" style="padding: 1.5rem; text-align: left; align-items: flex-start;">
+          <div style="width: 36px; height: 36px; border-radius: 8px; background: var(--bg-surface-1); border: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: center; margin-bottom: 1rem;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <h3 class="asset-title">Smart Vaults & Escrow</h3>
+          <p class="asset-sub">Standardized status icons for vault states and milestone deposits.</p>
+        </div>
+
+        <div class="asset-card" style="padding: 1.5rem; text-align: left; align-items: flex-start;">
+          <div style="width: 36px; height: 36px; border-radius: 8px; background: var(--bg-surface-1); border: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: center; margin-bottom: 1rem;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+          <h3 class="asset-title">Disputes & Risk Alerts</h3>
+          <p class="asset-sub">High-contrast alert and warning icons used strictly for transactions in review.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. SCREENSHOTS & PRESS KIT -->
+    <section class="section-block">
+      <div class="section-header center">
+        <span class="section-tag">Press & UI Assets</span>
+        <h2 class="section-title">Application Screenshots & Press Kit</h2>
+      </div>
+
+      <div class="grid-2">
+        <div class="screenshot-card">
+          <div class="screenshot-preview-placeholder">
+            <span>[ Workspace Dashboard UI Preview ]</span>
+          </div>
+          <div class="screenshot-info">
+            <h3 class="asset-title">Workspace Dashboard</h3>
+            <p class="asset-sub" style="margin-bottom: 1rem;">High-res 4K screenshot of active escrow vault balances and metrics.</p>
+            <button class="btn-download-sm" onclick="alert('Downloading Workspace Dashboard PNG...');">Download UI Screenshot</button>
+          </div>
+        </div>
+
+        <div class="screenshot-card">
+          <div class="screenshot-preview-placeholder">
+            <span>[ Escrow Vault & Timelock UI Preview ]</span>
+          </div>
+          <div class="screenshot-info">
+            <h3 class="asset-title">Escrow Contract Hub</h3>
+            <p class="asset-sub" style="margin-bottom: 1rem;">High-res screenshot of smart contract deliverable submissions and inspection timelocks.</p>
+            <button class="btn-download-sm" onclick="alert('Downloading Escrow Contract Hub PNG...');">Download UI Screenshot</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8. PRESS KIT & INQUIRIES -->
+    <section class="section-block" style="border-bottom: none;">
+      <div class="section-header center">
+        <span class="section-tag">Media Contacts</span>
+        <h2 class="section-title">Press Inquiries & Media Kit</h2>
+        <p class="section-desc">For press inquiries, founder interviews, or co-marketing partnerships, reach our team directly.</p>
+      </div>
+
+      <div class="asset-card" style="max-width: 680px; margin: 0 auto; text-align: center;">
+        <div style="display: flex; align-items: center; gap: 8px; justify-content: center; margin-bottom: 1rem;">
+          <span class="badge-tag soon">Official Press Bundle</span>
+        </div>
+        <h3 class="asset-title" style="font-size: 1.25rem; margin-bottom: 0.5rem;">Baxis Protocol Press Kit</h3>
+        <p class="asset-sub" style="margin-bottom: 1.5rem;">Includes executive founder bio, protocol fact sheet, SVG logotypes, and product screenshots.</p>
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+          <a href="mailto:press@baxis.io" class="btn btn-primary" style="padding: 0.75rem 1.5rem;">
+            <span>Contact Press Team</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- SITE FOOTER -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" aria-label="Baxis Homepage">
+            <img src="images/baxis-logo.jpg" alt="Baxis Protocol Logo" width="100" height="26">
+          </a>
+          <p>
+            Building the trust layer for internet commerce. Non-custodial, programmable escrow security for global digital agreements.
+          </p>
+        </div>
+
+        <div>
+          <span class="footer-col-title">Product</span>
+          <ul class="footer-links">
+            <li><a href="dashboard.html">Launch App</a></li>
+            <li><a href="create.html">Create Escrow</a></li>
+            <li><a href="documentation.html">Documentation</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <span class="footer-col-title">Company</span>
+          <ul class="footer-links">
+            <li><a href="about.html">About Baxis</a></li>
+            <li><a href="contact.html">Contact Us</a></li>
+            <li><a href="brand-assets.html">Brand Assets</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <span class="footer-col-title">Legal & Trust</span>
+          <ul class="footer-links">
+            <li><a href="privacy.html">Privacy Policy</a></li>
+            <li><a href="terms.html">Terms of Service</a></li>
+            <li><a href="security.html">Security Architecture</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span>&copy; 2026 Baxis Protocol. All rights reserved.</span>
+        <span>Built for the future of internet commerce.</span>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

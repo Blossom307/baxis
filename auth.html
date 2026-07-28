@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <!-- Basic Meta Tags -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  
+  <!-- Primary SEO Meta Tags -->
+  <title>Authenticate | Baxis Escrow Protocol</title>
+  <meta name="title" content="Authenticate — Baxis Escrow Protocol">
+  <meta name="description" content="Sign in or create your Baxis account. Access your non-custodial smart contract escrow vaults and manage active project contracts securely.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://baxis.io/auth">
+
+  <!-- Theme Color & Favicon -->
+  <meta name="theme-color" content="#0B0D11">
+  <meta name="color-scheme" content="dark">
+  <link rel="icon" type="image/png" href="images/baxis-logo.jpg">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://baxis.io/auth">
+  <meta property="og:title" content="Authenticate — Baxis Escrow Protocol">
+  <meta property="og:description" content="Programmable trust for digital contracts. Sign in to access your secure payment vaults.">
+  <meta property="og:image" content="https://baxis.io/og-auth.png">
+
+  <!-- Twitter Cards -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Sign In — Baxis Protocol">
+  <meta name="twitter:description" content="Access your non-custodial smart contract vaults. High-security escrow workspace.">
+
+  <!-- Typography: Inter + JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- External Stylesheet -->
+  <link rel="stylesheet" href="css/auth.css">
+
+  <!-- JSON-LD Structured Data Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Baxis Authentication Workspace",
+    "description": "Secure sign-in and account registration for Baxis Escrow Protocol.",
+    "url": "https://baxis.io/auth",
+    "isPartOf": {
+      "@type": "WebSite",
+      "name": "Baxis Protocol",
+      "url": "https://baxis.io"
+    }
+  }
+  </script>
+</head>
+<body class="auth-page baxis-theme">
+
+  <!-- ACCESSIBLE SKIP LINK -->
+  <a href="#auth-forms-wrapper" class="skip-link">Skip to authentication form</a>
+
+  <div class="auth-layout" id="auth-layout" data-view="signin">
+    
+    <!-- LEFT PANEL: EDITORIAL BRAND PANEL (DESKTOP 45%) -->
+    <aside class="auth-hero-panel" aria-label="Brand & Trust Highlights">
+      <!-- Back to Website Link -->
+      <a href="index.html" class="back-home-link" aria-label="Return to Baxis Homepage">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        <span>Back to Website</span>
+      </a>
+
+      <div class="hero-panel-content">
+        <!-- Logo Image -->
+        <div class="auth-brand">
+          <img src="images/baxis-logo.jpg" alt="Baxis Logo" class="auth-logo-img" width="120" height="30">
+        </div>
+
+        <div class="vault-trust-badge">TRUSTED ESCROW INFRASTRUCTURE</div>
+
+        <h1 class="auth-hero-title">
+          Secure every <br>
+          agreement.
+        </h1>
+
+        <p class="auth-hero-subtitle">
+          Baxis protects payments between clients and freelancers using programmable escrow built on transparent smart contracts.
+        </p>
+
+        <!-- Trust Indicators List -->
+        <ul class="trust-indicators-list" aria-label="Security Commitments">
+          <li class="trust-item">
+            <span class="check-icon">✓</span>
+            <span>Smart Contract Protected</span>
+          </li>
+          <li class="trust-item">
+            <span class="check-icon">✓</span>
+            <span>Secure Wallet Authentication</span>
+          </li>
+          <li class="trust-item">
+            <span class="check-icon">✓</span>
+            <span>Built for Trust</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="left-panel-footer">
+        <span>Baxis Infrastructure Protocol • v1.0.0</span>
+      </div>
+    </aside>
+
+    <!-- RIGHT PANEL: AUTHENTICATION FORM HUB (55%) -->
+    <main class="auth-form-panel">
+      
+      <!-- Mobile Top Navigation Header -->
+      <div class="mobile-auth-header">
+        <a href="index.html" class="mobile-brand" aria-label="Baxis Homepage">
+          <img src="/src/images/baxisbannerlogowhite2.jpg" alt="Baxis Logo" class="mobile-logo-img" width="110" height="28">
+        </a>
+        <h1 class="mobile-hero-title">Secure every agreement.</h1>
+        <p class="mobile-hero-sub">Baxis protects payments using programmable escrow.</p>
+        
+        <ul class="mobile-trust-list">
+          <li>✓ Smart Contract Protected</li>
+          <li>✓ Secure Wallet Authentication</li>
+          <li>✓ Built for Trust</li>
+        </ul>
+      </div>
+
+      <!-- THE AUTH CARD -->
+      <div class="auth-card-container">
+        
+        <!-- View Switcher Segmented Control -->
+        <div class="auth-tab-switcher" role="tablist" aria-label="Authentication Mode">
+          <button type="button" class="tab-btn active" id="tab-signin" role="tab" aria-selected="true" aria-controls="view-signin">
+            Sign In
+          </button>
+          <button type="button" class="tab-btn" id="tab-signup" role="tab" aria-selected="false" aria-controls="view-signup">
+            Create Account
+          </button>
+          <div class="tab-indicator" id="tab-indicator"></div>
+        </div>
+
+        <!-- FORM VIEWS WRAPPER -->
+        <div class="auth-forms-wrapper" id="auth-forms-wrapper">
+
+          <!-- 1. SIGN IN FORM VIEW -->
+          <div class="auth-form-view active" id="view-signin" role="tabpanel" aria-labelledby="tab-signin">
+            <div class="form-header">
+              <h2 class="form-title">Welcome back.</h2>
+              <p class="form-subtitle">Access your secure escrow workspace.</p>
+            </div>
+
+            <!-- Global Error Alert Banner (Empty by default, populated dynamically) -->
+            <div class="form-alert rust" id="signin-alert" role="alert" aria-live="assertive" hidden>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <span id="signin-alert-msg"></span>
+            </div>
+
+            <form id="form-signin" novalidate>
+              <!-- Email Input -->
+              <div class="form-group">
+                <div class="input-wrapper">
+                  <input type="email" id="signin-email" class="form-input" placeholder=" " required autocomplete="email">
+                  <label for="signin-email" class="floating-label">Email Address</label>
+                  <span class="input-icon" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                  </span>
+                </div>
+                <span class="field-error" id="err-signin-email" aria-live="polite"></span>
+              </div>
+
+              <!-- Password Input -->
+              <div class="form-group">
+                <div class="input-wrapper">
+                  <input type="password" id="signin-password" class="form-input" placeholder=" " required autocomplete="current-password">
+                  <label for="signin-password" class="floating-label">Password</label>
+                  <button type="button" class="password-toggle" id="toggle-signin-password" aria-label="Show Password">
+                    <svg class="eye-open" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <svg class="eye-closed" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" hidden><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                  </button>
+                </div>
+                <span class="field-error" id="err-signin-password" aria-live="polite"></span>
+              </div>
+
+              <!-- Options Row -->
+              <div class="form-options-row">
+                <label class="custom-checkbox-label">
+                  <input type="checkbox" id="signin-remember" class="custom-checkbox">
+                  <span class="checkbox-box" aria-hidden="true"></span>
+                  <span class="checkbox-text">Remember me</span>
+                </label>
+                <a href="#forgot" class="forgot-link" id="link-forgot-pass">Forgot password?</a>
+              </div>
+
+              <!-- Submit Button -->
+              <button type="submit" class="btn btn-primary full-width" id="btn-submit-signin">
+                <span class="btn-text">Sign In to Workspace</span>
+                <span class="btn-spinner" hidden></span>
+              </button>
+            </form>
+
+            <!-- Social / Web3 Login Divider -->
+            <div class="auth-divider">
+              <span>Or connect with</span>
+            </div>
+
+            <div class="social-auth-grid">
+              <button type="button" class="btn-social" disabled title="Web3 Wallet Login (Coming Soon)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"/><path d="M4 6v12c0 1.1.9 2 2 2h14v-4"/><path d="M18 12a2 2 0 0 0-2 2c0 1.1.9 2 2 2h4v-4h-4z"/></svg>
+                <span>Web3 Wallet</span>
+              </button>
+              <button type="button" class="btn-social" disabled title="Google Login (Coming Soon)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12.24 10.285V13.4h6.887c-.282 1.83-2.12 5.352-6.887 5.352-4.14 0-7.523-3.38-7.523-7.523s3.383-7.523 7.523-7.523c2.355 0 3.93.998 4.83 1.868l2.455-2.385C17.962 1.628 15.352.5 12.24.5 5.86.5.688 5.672.688 12.05s5.172 11.55 11.55 11.55c6.66 0 11.082-4.688 11.082-11.288 0-.76-.08-1.34-.176-1.912H12.24z"/></svg>
+                <span>Google</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 2. CREATE ACCOUNT FORM VIEW -->
+          <div class="auth-form-view" id="view-signup" role="tabpanel" aria-labelledby="tab-signup" hidden>
+            <div class="form-header">
+              <h2 class="form-title">Create an account.</h2>
+              <p class="form-subtitle">Start securing transactions in under 60 seconds.</p>
+            </div>
+
+            <!-- Global Error Alert Banner (Empty by default, populated dynamically) -->
+            <div class="form-alert rust" id="signup-alert" role="alert" aria-live="assertive" hidden>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <span id="signup-alert-msg"></span>
+            </div>
+
+            <form id="form-signup" novalidate>
+              <!-- Full Name or Handle -->
+              <div class="form-group">
+                <div class="input-wrapper">
+                  <input type="text" id="signup-name" class="form-input" placeholder=" " required autocomplete="name">
+                  <label for="signup-name" class="floating-label">Full Name or Handle</label>
+                  <span class="input-icon" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                  </span>
+                </div>
+                <span class="field-error" id="err-signup-name" aria-live="polite"></span>
+              </div>
+
+              <!-- Email Input -->
+              <div class="form-group">
+                <div class="input-wrapper">
+                  <input type="email" id="signup-email" class="form-input" placeholder=" " required autocomplete="email">
+                  <label for="signup-email" class="floating-label">Email Address</label>
+                  <span class="input-icon" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                  </span>
+                </div>
+                <span class="field-error" id="err-signup-email" aria-live="polite"></span>
+              </div>
+
+              <!-- Password Input -->
+              <div class="form-group">
+                <div class="input-wrapper">
+                  <input type="password" id="signup-password" class="form-input" placeholder=" " required autocomplete="new-password">
+                  <label for="signup-password" class="floating-label">Password</label>
+                  <button type="button" class="password-toggle" id="toggle-signup-password" aria-label="Show Password">
+                    <svg class="eye-open" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <svg class="eye-closed" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" hidden><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                  </button>
+                </div>
+                <span class="field-error" id="err-signup-password" aria-live="polite"></span>
+
+                <!-- Password Strength Bars -->
+                <div class="strength-meter-container" id="strength-container">
+                  <div class="strength-bars">
+                    <div class="bar" id="bar-1"></div>
+                    <div class="bar" id="bar-2"></div>
+                    <div class="bar" id="bar-3"></div>
+                    <div class="bar" id="bar-4"></div>
+                  </div>
+                  <span class="strength-label" id="strength-label">Password strength</span>
+                </div>
+
+                <!-- Password Requirements Checklist -->
+                <ul class="password-req-list" aria-label="Password Safety Checklist">
+                  <li id="req-length" class="req-item"><span class="req-icon">○</span> At least 8 characters</li>
+                  <li id="req-number" class="req-item"><span class="req-icon">○</span> Contains a number or symbol</li>
+                  <li id="req-upper" class="req-item"><span class="req-icon">○</span> Contains an uppercase letter</li>
+                </ul>
+              </div>
+
+              <!-- Terms Checkbox -->
+              <div class="form-group">
+                <label class="custom-checkbox-label align-top">
+                  <input type="checkbox" id="signup-terms" class="custom-checkbox" required>
+                  <span class="checkbox-box" aria-hidden="true"></span>
+                  <span class="checkbox-text">
+                    I agree to the <a href="/terms" target="_blank">Terms of Service</a> and <a href="/privacy" target="_blank">Privacy Policy</a>.
+                  </span>
+                </label>
+                <span class="field-error" id="err-signup-terms" aria-live="polite"></span>
+              </div>
+
+              <!-- Submit Button -->
+              <button type="submit" class="btn btn-primary full-width" id="btn-submit-signup">
+                <span class="btn-text">Create Free Account</span>
+                <span class="btn-spinner" hidden></span>
+              </button>
+            </form>
+          </div>
+
+        </div>
+
+        <!-- Card Footer -->
+        <footer class="auth-card-footer">
+          <p class="footer-help-text">
+            Secured by non-custodial smart contracts • <a href="index.html#security">Security Docs</a>
+          </p>
+        </footer>
+
+      </div>
+    </main>
+
+  </div>
+
+  <!-- External JavaScript -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/security.js"></script>
+  <script src="js/auth.js" defer></script>
+</body>
+</html>

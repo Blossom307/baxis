@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <!-- Basic Meta Tags -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  
+  <!-- Primary SEO Meta Tags -->
+  <title>Baxis | Non-Custodial Smart Contract Escrow Protocol</title>
+  <meta name="title" content="Baxis — Smart Contract Escrow Protocol for Web3 Freelancers & Clients">
+  <meta name="description" content="Programmable trust for digital contracts. Baxis holds project funds in non-custodial smart contract vaults until work is completed and approved. Zero upfront payment scams.">
+  <meta name="keywords" content="escrow platform, smart contract escrow, crypto escrow, freelancer payment security, baxis protocol, non-custodial payment vault">
+  <meta name="author" content="Baxis Protocol">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <link rel="canonical" href="https://baxis.io/">
+
+  <!-- Theme Color (#090909 Matte Obsidian) -->
+  <meta name="theme-color" content="#090909">
+  <meta name="color-scheme" content="dark">
+  <link rel="icon" type="image/png" href="images/baxis-logo.jpg">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://baxis.io/">
+  <meta property="og:title" content="Baxis — Work Trustless. Pay With Certainty.">
+  <meta property="og:description" content="Stop choosing between trusting strangers and losing opportunities. Baxis locks project payments in secure smart contract vaults until deliverables are approved.">
+  <meta property="og:image" content="https://baxis.io/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Baxis Protocol">
+  <meta property="og:locale" content="en_US">
+
+  <!-- Twitter Cards -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@baxisprotocol">
+  <meta name="twitter:creator" content="@baxisprotocol">
+  <meta name="twitter:title" content="Baxis Protocol — Programmable Trust Layer">
+  <meta name="twitter:description" content="Non-custodial smart contract escrow for Web3 freelancers, agencies, and clients. Lock funds securely in under 60 seconds.">
+  <meta name="twitter:image" content="https://baxis.io/twitter-card.png">
+
+  <!-- Typography: Inter + JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- External Stylesheet -->
+  <link rel="stylesheet" href="css/styles.css">
+
+  <!-- JSON-LD Structured Data Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://baxis.io/#organization",
+        "name": "Baxis Protocol",
+        "url": "https://baxis.io",
+        "logo": "https://baxis.io/logo.png",
+        "sameAs": [
+          "https://x.com/baxisprotocol",
+          "https://github.com/baxisprotocol"
+        ]
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://baxis.io/#website",
+        "url": "https://baxis.io",
+        "name": "Baxis",
+        "publisher": {
+          "@id": "https://baxis.io/#organization"
+        }
+      },
+      {
+        "@type": "SoftwareApplication",
+        "@id": "https://baxis.io/#software",
+        "name": "Baxis Escrow Protocol",
+        "operatingSystem": "Web, Ethereum, Base, Arbitrum, Solana, Polygon",
+        "applicationCategory": "FinanceApplication",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "description": "Smart contract escrow protocol providing programmable payment security for Web3 freelancers, agencies, and clients."
+      }
+    ]
+  }
+  </script>
+</head>
+<body class="baxis-theme">
+
+  <!-- ACCESSIBLE SKIP LINK -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- FLOATING HUD NAVIGATION HEADER -->
+  <header class="hud-header" id="hud-header">
+    <div class="hud-container">
+      
+      <!-- LOGO IMAGE TAG -->
+      <a href="#hero" class="hud-brand" aria-label="Baxis Protocol Homepage">
+        <img src="images/baxis-logo.jpg" alt="Baxis Logo" class="logo-img" width="110" height="28">
+      </a>
+
+      <!-- Desktop Navigation Links -->
+      <nav class="hud-nav" aria-label="Main Navigation">
+        <ul class="hud-menu">
+          <li><a href="#problem" class="hud-link">The Problem</a></li>
+          <li><a href="#how-it-works" class="hud-link">How It Works</a></li>
+          <li><a href="#why-baxis" class="hud-link">Why Baxis</a></li>
+          <li><a href="#security" class="hud-link">Security</a></li>
+          <li><a href="#personas" class="hud-link">Who It's For</a></li>
+          <li><a href="#faq" class="hud-link">FAQ</a></li>
+        </ul>
+      </nav>
+
+      <!-- HUD Action Buttons -->
+      <div class="hud-actions">
+        <a href="auth.html" class="btn btn-ghost">Sign In</a>
+        <a href="auth.html" class="btn btn-primary">
+          <span>Get Started</span>
+          <span class="btn-arrow" aria-hidden="true">→</span>
+        </a>
+        <button class="hud-mobile-toggle" id="hud-toggle" aria-label="Toggle Navigation Menu" aria-expanded="false" aria-controls="hud-mobile-panel">
+          <span class="toggle-bar"></span>
+          <span class="toggle-bar"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Slide-Down Expandable Panel -->
+    <div class="hud-mobile-panel" id="hud-mobile-panel" aria-hidden="true">
+      <nav aria-label="Mobile Menu Navigation">
+        <ul class="mobile-menu">
+          <li><a href="#problem" class="mobile-link">The Problem</a></li>
+          <li><a href="#how-it-works" class="mobile-link">How It Works</a></li>
+          <li><a href="#why-baxis" class="mobile-link">Why Baxis</a></li>
+          <li><a href="#security" class="mobile-link">Security</a></li>
+          <li><a href="#personas" class="mobile-link">Who It's For</a></li>
+          <li><a href="#faq" class="mobile-link">FAQ</a></li>
+        </ul>
+      </nav>
+      <div class="mobile-actions">
+        <a href="auth.html" class="btn btn-ghost full-width">Sign In</a>
+        <a href="auth.html" class="btn btn-primary full-width">Get Started Free</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT CONTAINER -->
+  <main id="main-content">
+
+    <!-- SECTION 1: HERO  -->
+    <section class="hero-section" id="hero" aria-label="Hero Section">
+      <div class="container hero-grid">
+        
+        <!-- LEFT COLUMN: PROMISE & CTAs -->
+        <div class="hero-left">
+          <div class="badge-pill" data-reveal>
+            <span class="badge-dot"></span>
+            <span class="badge-text">Non-Custodial Escrow Protocol</span>
+          </div>
+
+          <h1 class="hero-headline" data-reveal>
+            Programmable trust for <br>
+            digital work and contracts.
+          </h1>
+
+          <p class="hero-subhead" data-reveal>
+            Sending money upfront is risky. Delivering work without a deposit is terrifying. 
+            Baxis holds project funds in audited smart contract vaults until both parties approve completion.
+          </p>
+
+          <div class="hero-actions" data-reveal>
+            <a href="auth.html" class="btn btn-primary btn-lg">
+              <span>Create Escrow Agreement</span>
+              <span class="btn-arrow" aria-hidden="true">→</span>
+            </a>
+            <a href="#how-it-works" class="btn btn-secondary btn-lg">View How It Works</a>
+          </div>
+
+          <!-- Credibility Metrics -->
+          <div class="hero-metrics-strip" aria-label="Platform Security Metrics" data-reveal>
+            <div class="metric-item">
+              <span class="metric-num">$0.00</span>
+              <span class="metric-desc">Deposit Risk</span>
+            </div>
+            <div class="metric-sep" aria-hidden="true"></div>
+            <div class="metric-item">
+              <span class="metric-num">100%</span>
+              <span class="metric-desc">On-Chain Safety</span>
+            </div>
+            <div class="metric-sep" aria-hidden="true"></div>
+            <div class="metric-item">
+              <span class="metric-num">&lt; 60s</span>
+              <span class="metric-desc">Setup Time</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN: VISUAL ESCROW WORKFLOW CARD (100% EMOJI FREE) -->
+        <div class="hero-right" data-reveal>
+          <article class="hero-workflow-card" aria-label="Live Escrow Workflow Interactive Preview">
+            
+            <div class="card-header-bar">
+              <div class="vault-id-group">
+                <span class="pulse-dot status-indicator-success" aria-hidden="true"></span>
+                <span class="vault-code">VAULT #BX-8942 • ACTIVE</span>
+              </div>
+              <span class="status-pill status-success">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right: 2px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                FUNDS LOCKED
+              </span>
+            </div>
+
+            <div class="card-amount-box">
+              <span class="amount-label">LOCKED ESCROW BALANCE</span>
+              <div class="amount-display">
+                <span class="amount-val">$4,500.00</span>
+                <span class="amount-symbol">USDC</span>
+              </div>
+            </div>
+
+            <!-- Party Breakdown -->
+            <div class="parties-row">
+              <div class="party-card">
+                <span class="party-role">CLIENT (DEPOSITOR)</span>
+                <div class="party-info">
+                  <span class="party-avatar">AC</span>
+                  <div>
+                    <span class="party-name">Acme Corp</span>
+                    <span class="party-status status-text-success">Deposit Locked</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="party-arrow" aria-hidden="true">➔</div>
+
+              <div class="party-card">
+                <span class="party-role">TALENT (BENEFICIARY)</span>
+                <div class="party-info">
+                  <span class="party-avatar accent">AT</span>
+                  <div>
+                    <span class="party-name">alex.eth</span>
+                    <span class="party-status status-text-warning">Work Submitted</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Interactive Stepper -->
+            <div class="workflow-stepper">
+              <div class="step-item completed">
+                <span class="step-icon">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                </span>
+                <span class="step-label">Created</span>
+              </div>
+              <div class="step-line completed"></div>
+              <div class="step-item completed">
+                <span class="step-icon">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                </span>
+                <span class="step-label">Funded</span>
+              </div>
+              <div class="step-line active"></div>
+              <div class="step-item active">
+                <span class="step-icon">3</span>
+                <span class="step-label">In Review</span>
+              </div>
+              <div class="step-line"></div>
+              <div class="step-item">
+                <span class="step-icon">4</span>
+                <span class="step-label">Released</span>
+              </div>
+            </div>
+
+            <div class="card-action-bar">
+              <span class="action-note">Funds protected in Vault <code>0x892...B1</code> • Auto-release in 48h</span>
+            </div>
+
+          </article>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SECTION 2: TRUST STRIP -->
+    <section class="trust-strip-section" aria-label="Supported Networks and Roles">
+      <div class="container">
+        <div class="trust-strip-box" data-reveal>
+          <span class="strip-title">PROTECTING DEALS ACROSS MULTI-CHAIN NETWORKS</span>
+          <div class="network-badges">
+            <span class="chain-badge">Ethereum</span>
+            <span class="chain-badge">Base</span>
+            <span class="chain-badge">Arbitrum</span>
+            <span class="chain-badge">Solana</span>
+            <span class="chain-badge">Polygon</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: THE PROBLEM -->
+    <section class="problem-section" id="problem" aria-label="The DM Hiring Problem">
+      <div class="container">
+        <div class="section-header text-center" data-reveal>
+          <span class="section-eyebrow status-text-danger">The Online Hiring Crisis</span>
+          <h2 class="section-title">Hiring in DMs shouldn't feel like a gamble.</h2>
+          <p class="section-subtitle">
+            Every day, millions of dollars in freelance work are coordinated across Twitter, Telegram, Discord, and private networks. Without escrow, both sides take unnecessary financial risk.
+          </p>
+        </div>
+
+        <div class="problem-narrative-grid">
+          <article class="narrative-card border-danger" data-reveal>
+            <div class="narrative-header">
+              <span class="narrative-tag status-text-danger">Scenario 01 • Client Risk</span>
+              <h3 class="narrative-title">Wiring 50% upfront to someone who vanishes.</h3>
+            </div>
+            <p class="narrative-text">
+              You send $2,500 USDC upfront to reserve a talented developer. Three days later, their account goes dark, your deposit is gone, and your project deadline is ruined.
+            </p>
+            <div class="narrative-footer status-text-danger">Capital lost with zero legal recourse</div>
+          </article>
+
+          <article class="narrative-card border-danger" data-reveal>
+            <div class="narrative-header">
+              <span class="narrative-tag status-text-danger">Scenario 02 • Freelancer Risk</span>
+              <h3 class="narrative-title">Delivering 40 hours of work and getting ghosted.</h3>
+            </div>
+            <p class="narrative-text">
+              You complete a custom smart contract audit or brand design. Once you deliver the final files, the client stops replying or makes endless unpaid revision demands.
+            </p>
+            <div class="narrative-footer status-text-danger">40 hours wasted without compensation</div>
+          </article>
+
+          <article class="narrative-card border-success solution-card" data-reveal>
+            <div class="narrative-header">
+              <span class="narrative-tag status-text-success">Scenario 03 • The Baxis Solution</span>
+              <h3 class="narrative-title">Programmable certainty for both parties.</h3>
+            </div>
+            <p class="narrative-text">
+              Client locks funds in escrow so the freelancer knows the money exists. Freelancer delivers knowing payment is released instantly the moment deliverables are approved.
+            </p>
+            <div class="narrative-footer status-text-success">100% Guaranteed Payout Protection</div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4: HOW BAXIS WORKS -->
+    <section class="how-section" id="how-it-works" aria-label="How Baxis Works">
+      <div class="container">
+        <div class="section-header text-center" data-reveal>
+          <span class="section-eyebrow status-text-success">Four Simple Steps</span>
+          <h2 class="section-title">How Baxis secures your agreement.</h2>
+          <p class="section-subtitle">No complex onboarding. Create a protected agreement link in under 60 seconds.</p>
+        </div>
+
+        <div class="timeline-grid">
+          <div class="timeline-card" data-reveal>
+            <span class="step-number">01</span>
+            <h3 class="step-title">Create Agreement</h3>
+            <p class="step-desc">Define project scope, price in USDC/ETH, delivery deadline, and counterparty address.</p>
+          </div>
+
+          <div class="timeline-card" data-reveal>
+            <span class="step-number">02</span>
+            <h3 class="step-title">Lock Funds</h3>
+            <p class="step-desc">Client opens the link and deposits funds directly into the neutral smart contract vault.</p>
+          </div>
+
+          <div class="timeline-card" data-reveal>
+            <span class="step-number">03</span>
+            <h3 class="step-title">Complete Work</h3>
+            <p class="step-desc">Freelancer works with 100% confidence and submits proof of delivery (GitHub PR, Figma link).</p>
+          </div>
+
+          <div class="timeline-card" data-reveal>
+            <span class="step-number">04</span>
+            <h3 class="step-title">Release Payment</h3>
+            <p class="step-desc">Client reviews deliverables and clicks approve. Funds transfer instantly to freelancer wallet.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 5: WHY BAXIS IS DIFFERENT -->
+    <section class="comparison-section" id="why-baxis" aria-label="Why Baxis Comparison">
+      <div class="container">
+        <div class="section-header text-center" data-reveal>
+          <span class="section-eyebrow">The Difference</span>
+          <h2 class="section-title">Why work through Baxis?</h2>
+        </div>
+
+        <div class="comparison-grid">
+          <div class="comparison-card bad" data-reveal>
+            <h3 class="comp-title status-text-danger">Traditional DM Deals</h3>
+            <ul class="comp-list">
+              <li><span class="comp-icon status-text-danger">•</span> Manual trust based on Twitter reputation</li>
+              <li><span class="comp-icon status-text-danger">•</span> Hope and pray payments arrive after delivery</li>
+              <li><span class="comp-icon status-text-danger">•</span> Screenshots of DM chats used as proof</li>
+              <li><span class="comp-icon status-text-danger">•</span> 14-day hold periods on traditional platforms</li>
+            </ul>
+          </div>
+
+          <div class="comparison-card good" data-reveal>
+            <h3 class="comp-title status-text-success">The Baxis Protocol</h3>
+            <ul class="comp-list">
+              <li><span class="comp-icon status-text-success">•</span> Cryptographic smart contract vault security</li>
+              <li><span class="comp-icon status-text-success">•</span> Funds verified and locked before work begins</li>
+              <li><span class="comp-icon status-text-success">•</span> Immutable on-chain agreement terms</li>
+              <li><span class="comp-icon status-text-success">•</span> Instant payout settlement upon approval</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 6: SECURITY & TRUST -->
+    <section class="security-section" id="security" aria-label="Security and Trust">
+      <div class="container">
+        <div class="security-card" data-reveal>
+          <div class="section-header text-center">
+            <span class="section-eyebrow status-text-success">Uncompromising Safety</span>
+            <h2 class="section-title">Engineered for financial certainty.</h2>
+            <p class="section-subtitle">
+              Baxis never holds your money on a centralized balance sheet. Funds sit inside non-custodial smart contracts that only respond to agreed conditions.
+            </p>
+          </div>
+
+          <div class="security-pillars-grid">
+            <div class="pillar-box">
+              <h3 class="pillar-title">Non-Custodial Vaults</h3>
+              <p class="pillar-desc">Neither Baxis nor counterparty can unilaterally withdraw funds during active contracts.</p>
+            </div>
+            <div class="pillar-box">
+              <h3 class="pillar-title">Dispute Shield</h3>
+              <p class="pillar-desc">If a project stalls, neutral multi-sig arbitration evaluates deliverables fairly.</p>
+            </div>
+            <div class="pillar-box">
+              <h3 class="pillar-title">Safety Timelocks</h3>
+              <p class="pillar-desc">Configurable auto-release windows prevent clients from holding funds hostage.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 7: BUILT FOR EVERY WORKER -->
+    <section class="personas-section" id="personas" aria-label="Target Worker Personas">
+      <div class="container">
+        <div class="section-header text-center" data-reveal>
+          <span class="section-eyebrow">Target Workflows</span>
+          <h2 class="section-title">Built for digital specialists.</h2>
+        </div>
+
+        <div class="personas-grid">
+          <article class="persona-card" data-reveal>
+            <h3 class="persona-role">Developers & Engineers</h3>
+            <p class="persona-desc">Lock payment before starting smart contract audits, frontend dApp builds, or backend integrations.</p>
+          </article>
+
+          <article class="persona-card" data-reveal>
+            <h3 class="persona-role">UI/UX & Brand Designers</h3>
+            <p class="persona-desc">Protect your design assets. Submit Figma previews and release full files upon contract settlement.</p>
+          </article>
+
+          <article class="persona-card" data-reveal>
+            <h3 class="persona-role">Community Moderators</h3>
+            <p class="persona-desc">Set up monthly recurring milestone escrows for Telegram and Discord moderation roles.</p>
+          </article>
+
+          <article class="persona-card" data-reveal>
+            <h3 class="persona-role">Marketers & Growth KOLs</h3>
+            <p class="persona-desc">Secure campaign budgets and thread sponsorships before publishing promotional content.</p>
+          </article>
+
+          <article class="persona-card" data-reveal>
+            <h3 class="persona-role">Smart Contract Auditors</h3>
+            <p class="persona-desc">Hold high-value $20k+ audit fees in milestone vaults released as vulnerabilities are remediated.</p>
+          </article>
+
+          <article class="persona-card" data-reveal>
+            <h3 class="persona-role">Video Editors & Motion Artists</h3>
+            <p class="persona-desc">Watermark draft renders and release final 4K video renders once payment is confirmed in escrow.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 8: FREQUENTLY ASKED QUESTIONS -->
+    <section class="faq-section" id="faq" aria-label="Frequently Asked Questions">
+      <div class="container">
+        <div class="section-header text-center" data-reveal>
+          <span class="section-eyebrow">Friction Removal</span>
+          <h2 class="section-title">Frequently Asked Questions</h2>
+        </div>
+
+        <div class="faq-accordion" id="faq-accordion">
+          <div class="faq-item" data-reveal>
+            <button class="faq-trigger" aria-expanded="false" aria-controls="faq-ans-1" id="faq-btn-1">
+              <span>Does Baxis hold or custody my money?</span>
+              <svg class="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="faq-content" id="faq-ans-1" aria-labelledby="faq-btn-1" hidden>
+              <p>No. Baxis is non-custodial. Funds are held directly inside audited smart contract vaults on the blockchain. Neither Baxis nor any third party can transfer funds without following the agreement release rules.</p>
+            </div>
+          </div>
+
+          <div class="faq-item" data-reveal>
+            <button class="faq-trigger" aria-expanded="false" aria-controls="faq-ans-2" id="faq-btn-2">
+              <span>What happens if the client disappears after I submit work?</span>
+              <svg class="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="faq-content" id="faq-ans-2" aria-labelledby="faq-btn-2" hidden>
+              <p>Every Baxis escrow includes an automated timelock (e.g., 48 hours). If deliverables are submitted and the client fails to review or respond before the timer expires, the contract auto-releases payment to your wallet.</p>
+            </div>
+          </div>
+
+          <div class="faq-item" data-reveal>
+            <button class="faq-trigger" aria-expanded="false" aria-controls="faq-ans-3" id="faq-btn-3">
+              <span>Which blockchain networks and tokens are supported?</span>
+              <svg class="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="faq-content" id="faq-ans-3" aria-labelledby="faq-btn-3" hidden>
+              <p>Baxis natively supports Base, Arbitrum, Ethereum, Solana, and Polygon. You can transact in stablecoins like USDC and USDT, as well as native ETH and SOL.</p>
+            </div>
+          </div>
+
+          <div class="faq-item" data-reveal>
+            <button class="faq-trigger" aria-expanded="false" aria-controls="faq-ans-4" id="faq-btn-4">
+              <span>How are disputes handled if there is a disagreement?</span>
+              <svg class="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="faq-content" id="faq-ans-4" aria-labelledby="faq-btn-4" hidden>
+              <p>If either party clicks "Raise Dispute", the contract triggers Dispute Mode. Neutral arbiters review the submitted deliverables, project spec, and communications before executing a fair split or payout.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 9: FINAL EMOTIONAL CTA -->
+    <section class="final-cta-section" aria-label="Final Action Call">
+      <div class="container">
+        <div class="cta-inner-content" data-reveal>
+          <h2 class="cta-headline">The internet learned how to move money. <br><span>Now it's time to trust strangers.</span></h2>
+          <p class="cta-subtext">Create your first protected escrow agreement in under 60 seconds. Free to set up.</p>
+          <div class="cta-actions-row">
+            <a href="auth.html" class="btn btn-primary btn-lg">Create Escrow Now</a>
+            <a href="dashboard.html" class="btn btn-secondary btn-lg">Launch Dashboard</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+<!-- ============================================================================
+     BAXIS PROTOCOL — PRODUCTION FOOTER 
+     ============================================================================ -->
+<footer class="site-footer" role="contentinfo" aria-label="Page Footer">
+  <div class="footer-container">
+    
+    <div class="footer-main-grid">
+      
+      <div class="footer-brand-col">
+        <a href="index.html" class="footer-logo-link" aria-label="Baxis Homepage">
+          <img src="images/baxis-logo.jpg" alt="Baxis Protocol Logo" class="footer-logo-img" width="112" height="28" loading="lazy">
+        </a>
+
+        <p class="footer-brand-desc">
+          Building the trust layer for internet commerce. Non-custodial, programmable escrow security for global digital agreements.
+        </p>
+
+        <div class="footer-status-pill">
+          <span class="status-pulse-dot" aria-hidden="true"></span>
+          <span class="status-text">All Systems Operational</span>
+        </div>
+
+        <!-- Social Channels -->
+        <div class="footer-social-row">
+          <a href="https://x.com/baxisprotocol" target="_blank" rel="noopener noreferrer" class="footer-social-btn" aria-label="Baxis on Twitter / X">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          </a>
+          <a href="https://discord.gg/baxis" target="_blank" rel="noopener noreferrer" class="footer-social-btn" aria-label="Baxis Discord Community">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.074 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+          </a>
+          <a href="https://t.me/baxisprotocol" target="_blank" rel="noopener noreferrer" class="footer-social-btn" aria-label="Baxis Telegram Channel">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-.13-.32.05-.66 1.06-.47 3.55-1.55 7.48-3.09 1.87-.73 3.5-.72 3.86-.71.39.01.5.15.48.54z"/></svg>
+          </a>
+          <a href="https://github.com/baxisprotocol" target="_blank" rel="noopener noreferrer" class="footer-social-btn" aria-label="Baxis GitHub Repository">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- COLUMN 2: PRODUCT -->
+      <nav class="footer-nav-col" aria-label="Product Links">
+        <span class="footer-col-title">Product</span>
+        <ul class="footer-nav-list">
+          <li><a href="dashboard.html" class="footer-nav-link">Launch App</a></li>
+          <li><a href="create.html" class="footer-nav-link">Create Escrow</a></li>
+          <li><a href="dashboard.html" class="footer-nav-link">Workspace</a></li>
+          <li><a href="docs.html" class="footer-nav-link">Documentation</a></li>
+          <li><a href="docs.html#faq-general" class="footer-nav-link">Help Center</a></li>
+        </ul>
+      </nav>
+
+      <!-- COLUMN 3: COMPANY -->
+      <nav class="footer-nav-col" aria-label="Company Links">
+        <span class="footer-col-title">Company</span>
+        <ul class="footer-nav-list">
+          <li><a href="about.html" class="footer-nav-link">About Baxis</a></li>
+          <li><a href="contact.html" class="footer-nav-link">Contact Us</a></li>
+          <li><a href="brand.html" class="footer-nav-link">Brand Assets</a></li>
+          <li>
+            <a href="contact.html#partnership" class="footer-nav-link">
+              <span>Careers</span>
+              <span class="footer-badge">Hiring</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- COLUMN 4: LEGAL & TRUST -->
+      <nav class="footer-nav-col" aria-label="Legal Links">
+        <span class="footer-col-title">Legal & Trust</span>
+        <ul class="footer-nav-list">
+          <li><a href="privacy.html" class="footer-nav-link">Privacy Policy</a></li>
+          <li><a href="terms.html" class="footer-nav-link">Terms of Service</a></li>
+          <li><a href="security.html" class="footer-nav-link">Security Architecture</a></li>
+          <li><a href="security.html#disclosure" class="footer-nav-link">Responsible Disclosure</a></li>
+        </ul>
+      </nav>
+
+      <!-- COLUMN 5: DEVELOPERS -->
+      <nav class="footer-nav-col" aria-label="Developer Links">
+        <span class="footer-col-title">Developers</span>
+        <ul class="footer-nav-list">
+          <li><a href="security.html#smart-contracts" class="footer-nav-link">Smart Contracts</a></li>
+          <li><a href="https://github.com/baxisprotocol" target="_blank" rel="noopener noreferrer" class="footer-nav-link">GitHub Repository</a></li>
+          <li>
+            <a href="docs.html#api" class="footer-nav-link">
+              <span>Protocol API</span>
+              <span class="footer-badge subtle">Soon</span>
+            </a>
+          </li>
+          <li>
+            <a href="security.html#audit-status" class="footer-nav-link">
+              <span>Security Audits</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+    </div>
+
+    <div class="footer-divider" aria-hidden="true"></div>
+
+    <!-- 2. BOTTOM UTILITY & COPYRIGHT BAR -->
+    <div class="footer-bottom-bar">
+      
+      <div class="footer-bottom-left">
+        <span class="footer-copy-text">&copy; 2026 Baxis Protocol. All rights reserved.</span>
+        <span class="footer-build-tag">v1.0.0-mvp</span>
+      </div>
+
+      <p class="footer-tagline-text">
+        Built for the future of internet commerce. Made with care by the Baxis team.
+      </p>
+
+      <div class="footer-bottom-right">
+        <a href="privacy.html" class="footer-sublink">Privacy</a>
+        <span class="footer-sublink-dot" aria-hidden="true">•</span>
+        <a href="terms.html" class="footer-sublink">Terms</a>
+        <span class="footer-sublink-dot" aria-hidden="true">•</span>
+        <a href="security.html" class="footer-sublink">Security</a>
+      </div>
+
+    </div>
+
+  </div>
+</footer>
+  <!-- External JavaScript -->
+  <script src="js/app.js" defer></script>
+</body>
+</html>

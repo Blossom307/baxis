@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <!-- Basic Meta Tags -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  
+  <!-- Primary SEO Meta Tags -->
+  <title>Escrow Contract Vault | Baxis Protocol</title>
+  <meta name="title" content="Escrow Contract Vault — Baxis Protocol">
+  <meta name="description" content="View live smart contract vault details, deliverables, timelock countdowns, and settlement status for Baxis Escrow agreements.">
+  <meta name="robots" content="noindex, nofollow">
+
+  <!-- Theme Color & Favicon -->
+  <meta name="theme-color" content="#090909">
+  <meta name="color-scheme" content="dark">
+  <link rel="icon" type="image/png" href="images/baxis-logo.jpg">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+  <!-- Typography: Inter + JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- External Stylesheet -->
+  <link rel="stylesheet" href="css/escrow-details.css">
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Baxis Escrow Contract Hub",
+    "applicationCategory": "FinanceApplication"
+  }
+  </script>
+</head>
+<body class="dashboard-page baxis-theme">
+
+  <!-- ACCESSIBLE SKIP LINK -->
+  <a href="#details-main" class="skip-link">Skip to contract details</a>
+
+  <div class="dashboard-layout" id="dashboard-layout">
+    
+    <!-- ==========================================================================
+         1. PERSISTENT SIDEBAR NAVIGATION (DESKTOP)
+         ========================================================================== -->
+    <aside class="sidebar" id="sidebar" aria-label="Workspace Navigation">
+      <div class="sidebar-header">
+        <a href="index.html" class="sidebar-brand" aria-label="Baxis Homepage">
+          <img src="images/baxis-logo.jpg" alt="Baxis Logo" class="sidebar-logo-img" width="100" height="26">
+        </a>
+        <button class="sidebar-collapse-btn" id="sidebar-collapse-toggle" aria-label="Collapse Sidebar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+      </div>
+
+      <!-- Main Navigation Links -->
+      <nav class="sidebar-nav">
+        <span class="sidebar-section-title">Workspace</span>
+        <ul class="nav-list">
+          <li class="nav-item">
+            <a href="dashboard.html" class="nav-link">
+              <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+              <span class="nav-label">Dashboard</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="create.html" class="nav-link">
+              <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <span class="nav-label">Create Escrow</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="escrow-details.html" class="nav-link active" aria-current="page">
+              <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <span class="nav-label">Escrow Vault</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="transactions.html" class="nav-link">
+              <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              <span class="nav-label">Transactions</span>
+            </a>
+          </li>
+        </ul>
+
+        <span class="sidebar-section-title">Settings</span>
+        <ul class="nav-list">
+          <li class="nav-item">
+            <a href="profile.html" class="nav-link">
+              <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <span class="nav-label">Profile & Reputation</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- User Footer -->
+      <div class="sidebar-user-footer">
+        <div class="user-avatar" id="sidebar-user-avatar">--</div>
+        <div class="user-info">
+          <span class="user-name" id="sidebar-user-name">User Account</span>
+          <span class="user-status"><span class="status-dot green"></span> Base Network</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Sidebar Mobile Backdrop Overlay -->
+    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+    <!-- ==========================================================================
+         2. WORKSPACE WRAPPER & TOPBAR
+         ========================================================================== -->
+    <div class="dashboard-wrapper">
+      
+      <!-- TOPBAR WITH MOBILE HAMBURGER -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="topbar-mobile-toggle" id="btn-mobile-sidebar-toggle" aria-label="Open Navigation Drawer">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+
+          <div class="breadcrumb">
+            <a href="dashboard.html" class="breadcrumb-item">Workspace</a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-item active">Escrow Vault</span>
+          </div>
+        </div>
+
+        <div class="topbar-actions">
+          <button class="btn btn-secondary btn-sm" id="btn-share-contract">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+            <span>Share Link</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- MAIN WORKSPACE: ESCROW CONTRACT HUB -->
+      <main class="dashboard-main" id="details-main" style="opacity: 0; transition: opacity 150ms ease;">
+        
+        <!-- ==========================================================================
+             3. CONTRACT HEADER HERO CARD (DYNAMIC PLACEHOLDERS)
+             ========================================================================== -->
+        <section class="contract-hero-card" aria-label="Contract Summary">
+          <div class="contract-title-row">
+            <div>
+              <div class="title-meta-badge">
+                <span class="status-pill green" id="detail-status-pill">
+                  <span class="pulse-dot green" aria-hidden="true"></span>
+                  <span id="detail-status-text">INITIALIZING VAULT...</span>
+                </span>
+                <span class="vault-network-tag" id="detail-network-tag">Base Network</span>
+              </div>
+              <h1 class="contract-title" id="detail-contract-title">Loading Escrow Agreement...</h1>
+              <span class="contract-id-code" id="detail-contract-code">Contract ID: -- • Created --</span>
+            </div>
+
+            <!-- Lock Amount Display -->
+            <div class="contract-amount-display">
+              <span class="amount-title">LOCKED VAULT BALANCE</span>
+              <div class="amount-number-row">
+                <span class="amount-number" id="detail-amount-num">$0.00</span>
+                <span class="amount-token" id="detail-token-symbol">USDC</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==========================================================================
+             4. MAIN CONTRACT GRID (STEPPER, ACTIONS, TABS, PARTIES)
+             ========================================================================== -->
+        <div class="details-main-grid">
+          
+          <!-- LEFT COLUMN: STEPPER, ACTIONS, & DELIVERABLE TABS -->
+          <div class="details-primary-column">
+            
+            <!-- Live Contract Lifecycle Stepper Bar -->
+            <div class="details-card">
+              <h2 class="card-section-heading">Escrow Lifecycle Progress</h2>
+              
+              <div class="details-stepper" id="escrow-stepper-bar">
+                <div class="step-node completed">
+                  <span class="step-circle">1</span>
+                  <span class="step-title">Created</span>
+                </div>
+                <div class="step-line completed"></div>
+
+                <div class="step-node">
+                  <span class="step-circle">2</span>
+                  <span class="step-title">Funded</span>
+                </div>
+                <div class="step-line"></div>
+
+                <div class="step-node">
+                  <span class="step-circle">3</span>
+                  <span class="step-title">Work Submitted</span>
+                </div>
+                <div class="step-line"></div>
+
+                <div class="step-node">
+                  <span class="step-circle">4</span>
+                  <span class="step-title">Released</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Primary Action Hub Card -->
+            <div class="details-card action-hub-card">
+              <div class="action-hub-header">
+                <div class="action-alert-badge">
+                  <span class="pulse-dot rust" aria-hidden="true"></span>
+                  <span id="action-alert-text">Contract Status</span>
+                </div>
+                <div class="timelock-countdown-box" id="timelock-box">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  <span>Auto-release active</span>
+                </div>
+              </div>
+
+              <p class="action-hub-desc" id="action-hub-desc">
+                Review deliverables and authorize settlement payout on-chain.
+              </p>
+
+              <div class="action-buttons-group">
+                <button class="btn btn-primary btn-lg" id="btn-approve-release">
+                  <span>Approve & Release Payment</span>
+                </button>
+                <button class="btn btn-rust-outline btn-lg" id="btn-raise-dispute">
+                  <span>Raise Dispute</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Content Tabs Card (Deliverables / Terms / Audit Trail) -->
+            <div class="details-card content-tabs-card">
+              <div class="tabs-header-bar" role="tablist">
+                <button class="tab-link active" id="tab-btn-deliverables" role="tab" aria-selected="true" aria-controls="tab-panel-deliverables">
+                  Submitted Deliverables
+                </button>
+                <button class="tab-link" id="tab-btn-terms" role="tab" aria-selected="false" aria-controls="tab-panel-terms">
+                  Agreement Terms
+                </button>
+                <button class="tab-link" id="tab-btn-audit" role="tab" aria-selected="false" aria-controls="tab-panel-audit">
+                  On-Chain Audit Trail
+                </button>
+              </div>
+
+              <!-- Tab Panel 1: Deliverables & Custom File Upload -->
+              <div class="tab-panel active" id="tab-panel-deliverables" role="tabpanel" aria-labelledby="tab-btn-deliverables">
+                
+                <!-- Sleek Custom Upload Dropzone Box -->
+                <div class="deliverable-upload-card">
+                  <h3 class="upload-title">Submit Deliverable File or Proof</h3>
+                  <p class="upload-desc">Upload project files (ZIP, PDF, images) or code deliverables to hold in vault storage.</p>
+                  
+                  <div class="upload-form-group">
+                    <input type="text" id="deliverable-title-input" class="form-input-sm" placeholder="Deliverable Title (e.g. Final Asset Package / GitHub PR #41)">
+                    
+                    <!-- Custom Drag & Drop File Label -->
+                    <label for="deliverable-file-input" class="custom-file-dropzone" id="file-dropzone">
+                      <input type="file" id="deliverable-file-input" class="sr-only-input" accept="image/*, application/pdf, .zip, .rar">
+                      <div class="dropzone-content" id="dropzone-content">
+                        <span class="dropzone-icon">
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                        </span>
+                        <div class="dropzone-text-group">
+                          <span class="dropzone-primary-text"><strong class="emerald-text">Click to browse</strong> or drag & drop file</span>
+                          <span class="dropzone-subtext">ZIP, PDF, PNG, JPG up to 50MB</span>
+                        </div>
+                      </div>
+                    </label>
+                    
+                    <button type="button" class="btn btn-primary btn-sm" id="btn-upload-deliverable">
+                      <span>Upload File & Submit Proof</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Submitted Deliverables Dynamic Container -->
+                <div id="submitted-deliverables-container">
+                  <div class="deliverable-item-box">
+                    <span class="deliverable-type-tag">Status</span>
+                    <h3 class="deliverable-heading">Agreement Deliverables</h3>
+                    <p class="deliverable-text">Awaiting freelancer upload or submission link.</p>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Tab Panel 2: Terms (Populated Dynamically) -->
+              <div class="tab-panel" id="tab-panel-terms" role="tabpanel" aria-labelledby="tab-btn-terms" hidden>
+                <ul class="terms-spec-list" id="terms-spec-list">
+                  <li>Loading agreement terms...</li>
+                </ul>
+              </div>
+
+              <!-- Tab Panel 3: Audit Trail (Populated Dynamically) -->
+              <div class="tab-panel" id="tab-panel-audit" role="tabpanel" aria-labelledby="tab-btn-audit" hidden>
+                <div class="audit-timeline" id="audit-timeline-container">
+                  <div class="audit-row">
+                    <span class="audit-time">Just now</span>
+                    <span class="audit-event">Escrow Contract Hub loaded</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+          <!-- RIGHT COLUMN: PARTIES & VAULT SECURITY -->
+          <div class="details-sidebar-column">
+            
+            <!-- Parties Summary Card -->
+            <div class="details-card">
+              <h2 class="card-section-heading">Contract Parties</h2>
+
+              <!-- Party 1: Client -->
+              <div class="party-detail-box">
+                <span class="party-role-tag">CLIENT (DEPOSITOR)</span>
+                <div class="party-profile-row">
+                  <div class="party-avatar-md" id="detail-client-avatar">CL</div>
+                  <div>
+                    <span class="party-profile-name" id="detail-client-name">Client Account</span>
+                    <span class="party-address-code" id="detail-client-addr">0x...</span>
+                  </div>
+                </div>
+                <div class="party-status-indicator green" id="detail-client-status">
+                  <span>Agreement Initialized</span>
+                </div>
+              </div>
+
+              <div class="party-connector-line"></div>
+
+              <!-- Party 2: Freelancer -->
+              <div class="party-detail-box">
+                <span class="party-role-tag">FREELANCER (BENEFICIARY)</span>
+                <div class="party-profile-row">
+                  <div class="party-avatar-md accent" id="detail-freelancer-avatar">FL</div>
+                  <div>
+                    <span class="party-profile-name" id="detail-freelancer-name">Freelancer Account</span>
+                    <span class="party-address-code" id="detail-freelancer-addr">0x...</span>
+                  </div>
+                </div>
+                <div class="party-status-indicator rust" id="detail-freelancer-status">
+                  <span>Awaiting Action</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Vault Security Specs -->
+            <div class="details-card vault-specs-card">
+              <h2 class="card-section-heading">Smart Contract Vault Details</h2>
+              <ul class="spec-value-list">
+                <li>
+                  <span class="spec-label">Vault Address</span>
+                  <code class="spec-val" id="detail-vault-address">0x98a35...81D1</code>
+                </li>
+                <li>
+                  <span class="spec-label">Custody Type</span>
+                  <span class="spec-val green-text">Non-Custodial Smart Contract</span>
+                </li>
+                <li>
+                  <span class="spec-label">Dispute Shield</span>
+                  <span class="spec-val">Active (2-of-3 Multi-Sig)</span>
+                </li>
+              </ul>
+            </div>
+
+          </div>
+
+        </div>
+
+      </main>
+    </div>
+
+  </div>
+
+  <!-- NATIVE THUMB-ACCESSIBLE MOBILE BOTTOM HUD NAVIGATION (MOBILE ONLY <768px) -->
+  <nav class="mobile-bottom-hud" aria-label="Mobile Bottom App Navigation">
+    <a href="dashboard.html" class="hud-nav-item">
+      <svg class="hud-nav-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      <span class="hud-nav-label">Dashboard</span>
+    </a>
+
+    <a href="create.html" class="hud-nav-item">
+      <svg class="hud-nav-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <span class="hud-nav-label">Create</span>
+    </a>
+
+    <a href="escrow-details.html" class="hud-nav-item active" aria-current="page">
+      <svg class="hud-nav-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      <span class="hud-nav-label">Vault</span>
+    </a>
+
+    <a href="transactions.html" class="hud-nav-item">
+      <svg class="hud-nav-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      <span class="hud-nav-label">Ledger</span>
+    </a>
+
+    <a href="profile.html" class="hud-nav-item">
+      <svg class="hud-nav-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span class="hud-nav-label">Profile</span>
+    </a>
+  </nav>
+
+  <!-- ==========================================================================
+       5. DISPUTE MODAL OVERLAY (SELECTED FILES PLACED INSIDE DROPZONE BOX)
+       ========================================================================== -->
+  <div class="dispute-modal-backdrop" id="dispute-modal-backdrop" aria-hidden="true">
+    <div class="dispute-modal-dialog" role="dialog" aria-labelledby="dispute-modal-title" aria-modal="true">
+      
+      <!-- Modal Header -->
+      <div class="dispute-modal-header">
+        <div class="modal-header-title-group">
+          <div class="dispute-modal-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+          <div>
+            <h2 class="dispute-modal-title" id="dispute-modal-title">Raise Escrow Dispute</h2>
+            <span class="dispute-modal-subtitle">Initiate official dispute review with Baxis Arbitrators</span>
+          </div>
+        </div>
+        <button type="button" class="dispute-modal-close" id="btn-close-dispute-modal" aria-label="Close Modal">&times;</button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="dispute-modal-body">
+        
+        <!-- Warning Banner -->
+        <div class="dispute-warning-banner">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span>Opening a dispute freezes locked funds in the smart contract. Arbitrators will review your submitted evidence.</span>
+        </div>
+
+        <!-- Error Alert Box -->
+        <div class="dispute-error-box" id="dispute-modal-error" style="display: none;"></div>
+
+        <!-- Form Inputs -->
+        <form id="dispute-form">
+          
+          <!-- Dispute Reason Input -->
+          <div class="form-group-custom">
+            <label for="dispute-reason-input" class="form-label-custom">
+              Reason for Dispute <span class="required-star">*</span>
+            </label>
+            <textarea 
+              id="dispute-reason-input" 
+              class="form-textarea-custom" 
+              rows="4" 
+              placeholder="Explain why you are opening this dispute. Include details about broken terms, non-delivery, or work quality issues..."
+              required></textarea>
+          </div>
+
+          <!-- Evidence File Upload Zone -->
+          <div class="form-group-custom">
+            <label class="form-label-custom">Supporting Evidence (Screenshots, Receipts, PDF)</label>
+            
+            <label for="dispute-modal-file-input" class="dispute-file-dropzone" id="dispute-dropzone">
+              <input type="file" id="dispute-modal-file-input" class="sr-only-input" multiple accept="image/png, image/jpeg, application/pdf">
+              
+              <div class="dropzone-inner-content">
+                <svg class="dropzone-upload-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <div class="dropzone-text">
+                  <span><strong class="highlight-text">Click to attach files</strong> or drag & drop</span>
+                  <span class="subtext">PNG, JPG, or PDF (Max 10MB per file)</span>
+                </div>
+              </div>
+
+              <!-- SELECTED FILES RENDERED INSIDE THE DROPZONE BOX -->
+              <div class="dispute-selected-files-list" id="dispute-selected-files-container"></div>
+            </label>
+          </div>
+
+        </form>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="dispute-modal-footer">
+        <button type="button" class="btn btn-secondary" id="btn-cancel-dispute">Cancel</button>
+        <button type="button" class="btn btn-rust" id="btn-submit-dispute">
+          <span class="btn-text">Submit Dispute</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- External JavaScript Libraries & Application Services -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/security.js"></script>
+  <script src="js/wallet.js"></script>
+  <script src="js/contract-config.js"></script>
+  <script src="js/dispute.service.js"></script>
+  <script src="js/notifications.service.js"></script>
+  <script src="js/escrow-details.js" defer></script>
+
+</body>
+</html>

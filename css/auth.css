@@ -1,0 +1,665 @@
+/* ==========================================================================
+   BAXIS PROTOCOL — AUTHENTICATION SYSTEM (`auth.css`)
+   Matches the Dark Baxis App Design System:
+   Canvas (#0B0D11) | Surface (#111418) | Card (#171A20) | Hairline (#2A2A2A)
+   ========================================================================== */
+
+/* ==========================================================================
+   1. DESIGN TOKENS & CSS VARIABLES
+   ========================================================================== */
+:root {
+  /* --- Compact Vertical Spacing Scale --- */
+  --space-0-5: 0.25rem;  /* 4px */
+  --space-1:   0.5rem;   /* 8px */
+  --space-1-5: 0.625rem; /* 10px */
+  --space-2:   0.875rem; /* 14px */
+  --space-3:   1.125rem; /* 18px */
+  --space-4:   1.375rem; /* 22px */
+  --space-5:   1.75rem;  /* 28px */
+  --space-6:   2.25rem;  /* 36px */
+  --space-8:   3rem;     /* 48px */
+
+  /* --- Baxis Dark Palette --- */
+  --bg-app:          #0B0D11; /* Deep Canvas */
+  --bg-surface-0:    #111418; /* Surface Panels */
+  --bg-surface-card: #171A20; /* Auth Card Container */
+  --bg-surface-hover:#222632;
+
+  /* Typography Colors */
+  --text-primary:   #FFFFFF; /* Crisp White */
+  --text-secondary: rgba(255, 255, 255, 0.65); /* Slate Gray */
+  --text-muted:     rgba(255, 255, 255, 0.45); /* Muted Gray */
+  --text-inverse:   #0B0D11;
+
+  /* Hairline Borders */
+  --border-subtle:  rgba(255, 255, 255, 0.08);
+  --border-default: rgba(255, 255, 255, 0.12);
+  --border-hover:   rgba(255, 255, 255, 0.22);
+  --border-focus:   #FFFFFF;
+
+  /* Semantic State Colors */
+  --state-error:          #EF4444;
+  --state-error-subtle:   rgba(239, 68, 68, 0.10);
+  --border-danger:        rgba(239, 68, 68, 0.30);
+
+  --state-success:        #10B981;
+  --state-warning:        #F59E0B;
+  --state-info:           #3B82F6;
+
+  /* Elevation Shadows */
+  --shadow-vault: 0 16px 40px rgba(0, 0, 0, 0.75), 0 0 0 1px var(--border-subtle);
+
+  /* Typography Scale */
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  --fs-hero:     clamp(1.75rem, 2.2vw + 0.5rem, 2.5rem);
+  --fs-h2:       1.25rem;
+  --fs-body:     0.875rem;
+  --fs-sm:       0.8125rem;
+  --fs-xs:       0.75rem;
+
+  /* Geometry & Radius */
+  --auth-card-width: 420px;
+  --radius-sm:   6px;
+  --radius-md:   10px;
+  --radius-lg:   16px;
+  --radius-xl:   18px;
+  --radius-full: 9999px;
+
+  /* Motion Curves */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-fast: 150ms var(--ease-out);
+  --transition-normal: 250ms var(--ease-out);
+}
+
+/* ==========================================================================
+   2. GLOBAL BASE STYLES
+   ========================================================================== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  min-height: 100vh;
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body.auth-page {
+  background-color: var(--bg-app);
+  overflow-x: hidden;
+}
+
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 1rem;
+  background: var(--text-primary);
+  color: var(--text-inverse);
+  padding: 0.5rem 1rem;
+  z-index: 9999;
+  border-radius: var(--radius-sm);
+  transition: top var(--transition-fast);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+}
+
+.skip-link:focus { top: 1rem; }
+
+a { color: var(--text-primary); text-decoration: underline; transition: color var(--transition-fast); }
+a:hover { color: var(--text-secondary); }
+
+button { cursor: pointer; font-family: inherit; border: none; background: none; outline: none; }
+
+/* Accessible Focus Ring */
+a:focus-visible, button:focus-visible, input:focus-visible {
+  outline: 2px solid var(--text-primary) !important;
+  outline-offset: 2px !important;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/* ==========================================================================
+   3. DESKTOP SPLIT-SCREEN LAYOUT (40% LEFT / 60% RIGHT)
+   ========================================================================== */
+.auth-layout {
+  display: grid;
+  grid-template-columns: 40fr 60fr;
+  min-height: 100vh;
+  height: 100%;
+  position: relative;
+}
+
+/* --- LEFT PANEL: BRAND & TRUST HIGHLIGHTS (40%) --- */
+.auth-hero-panel {
+  background: var(--bg-surface-0);
+  border-right: 1px solid var(--border-subtle);
+  padding: var(--space-4) var(--space-5);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow-y: auto;
+}
+
+.back-home-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+  font-weight: 500;
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.back-home-link:hover { color: var(--text-primary); }
+
+.hero-panel-content {
+  max-width: 380px;
+  margin: auto 0;
+}
+
+.auth-brand { margin-bottom: var(--space-1-5); }
+.auth-logo-img { display: block; height: 24px; width: auto; }
+
+.vault-trust-badge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+  background: var(--bg-app);
+  border: 1px solid var(--border-subtle);
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  display: inline-block;
+  margin-bottom: var(--space-1-5);
+}
+
+.auth-hero-title {
+  font-size: var(--fs-hero);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  margin-bottom: var(--space-1-5);
+  color: var(--text-primary);
+}
+
+.auth-hero-subtitle {
+  font-size: var(--fs-body);
+  color: var(--text-secondary);
+  line-height: 1.45;
+  margin-bottom: var(--space-3);
+}
+
+/* Trust Indicators List */
+.trust-indicators-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1-5);
+}
+
+.trust-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.check-icon {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--bg-surface-card);
+  border: 1px solid var(--border-default);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-primary);
+  flex-shrink: 0;
+}
+
+.left-panel-footer {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+}
+
+/* ==========================================================================
+   4. RIGHT PANEL: AUTHENTICATION FORM HUB (60%)
+   ========================================================================== */
+.auth-form-panel {
+  background: var(--bg-app);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2);
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  overflow-y: auto;
+}
+
+.mobile-auth-header {
+  display: none;
+  text-align: center;
+  margin-bottom: var(--space-2);
+  max-width: 400px;
+}
+
+.mobile-logo-img { height: 22px; width: auto; margin: 0 auto var(--space-1); display: block; }
+.mobile-hero-title { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.025em; margin-bottom: 2px; color: var(--text-primary); }
+.mobile-hero-sub { font-size: var(--fs-xs); color: var(--text-secondary); margin-bottom: var(--space-1); }
+
+.mobile-trust-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+}
+
+/* --- THE AUTH CARD (Compact 20px padding prevents desktop scroll) --- */
+.auth-card-container {
+  width: 100%;
+  max-width: var(--auth-card-width);
+  background: var(--bg-surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  padding: 1.25rem 1.5rem; /* Perfectly tuned padding */
+  box-shadow: var(--shadow-vault);
+  position: relative;
+}
+
+/* --- SEGMENTED TAB SWITCHER --- */
+.auth-tab-switcher {
+  display: flex;
+  background: var(--bg-surface-0);
+  padding: 3px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-subtle);
+  position: relative;
+  margin-bottom: var(--space-1-5);
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 0.375rem var(--space-1-5);
+  min-height: 34px;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--text-secondary);
+  border-radius: var(--radius-full);
+  z-index: 2;
+  transition: color var(--transition-fast);
+  text-align: center;
+}
+
+.tab-btn.active { color: var(--text-primary); }
+
+.tab-indicator {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 3px;
+  width: calc(50% - 3px);
+  background: var(--bg-surface-card);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-full);
+  transition: transform var(--transition-normal);
+  z-index: 1;
+}
+
+.auth-layout[data-view="signup"] .tab-indicator {
+  transform: translateX(100%);
+}
+
+.auth-forms-wrapper { position: relative; }
+
+.auth-form-view {
+  transition: opacity var(--transition-normal), transform var(--transition-normal);
+}
+
+.auth-form-view[hidden] { display: none !important; }
+
+.form-header { margin-bottom: var(--space-1-5); }
+.form-title { font-size: var(--fs-h2); font-weight: 800; letter-spacing: -0.025em; margin-bottom: 2px; color: var(--text-primary); }
+.form-subtitle { font-size: var(--fs-xs); color: var(--text-secondary); }
+
+/* Alert Banners */
+.form-alert {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0.5rem var(--space-1-5);
+  border-radius: var(--radius-md);
+  font-size: var(--fs-xs);
+  margin-bottom: var(--space-1-5);
+}
+
+.form-alert.rust {
+  background: var(--state-error-subtle);
+  border: 1px solid var(--border-danger);
+  color: var(--state-error);
+}
+
+/* ==========================================================================
+   5. FORM INPUTS & FLOATING LABELS (OPTIMIZED 42px HEIGHT)
+   ========================================================================== */
+.form-group {
+  margin-bottom: 10px; /* Tight gap handles multi-field Sign Up smoothly */
+  position: relative;
+}
+
+.input-wrapper { position: relative; }
+
+.form-input {
+  width: 100%;
+  height: 42px; /* Sleek compact height */
+  padding: 1rem 2.25rem 0.2rem 0.75rem;
+  background: var(--bg-surface-0);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 15px; /* Clean crisp typography */
+  font-weight: 500;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.floating-label {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  pointer-events: none;
+  transition: all var(--transition-fast);
+}
+
+.form-input:focus ~ .floating-label,
+.form-input:not(:placeholder-shown) ~ .floating-label {
+  top: 0.45rem;
+  transform: translateY(0);
+  font-size: 9px;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.form-input:focus {
+  border-color: var(--border-focus);
+}
+
+.form-input.is-invalid {
+  border-color: var(--state-error);
+  background: var(--state-error-subtle);
+}
+
+.input-icon {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+  display: flex;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 0.375rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  min-width: 32px;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--transition-fast);
+}
+
+.password-toggle:hover { color: var(--text-primary); }
+
+.field-error {
+  display: block;
+  font-size: 11px;
+  color: var(--state-error);
+  margin-top: 2px;
+  min-height: 12px;
+}
+
+/* ==========================================================================
+   6. PASSWORD STRENGTH METER & CHECKLIST (INLINE GRID FOR ZERO OVERFLOW)
+   ========================================================================== */
+.strength-meter-container { margin-top: 4px; }
+
+.strength-bars {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 2px;
+}
+
+.bar {
+  flex: 1;
+  height: 3px;
+  background: var(--bg-surface-0);
+  border-radius: var(--radius-full);
+  transition: background var(--transition-normal);
+}
+
+.bar.weak { background: var(--state-error); }
+.bar.fair { background: var(--state-warning); }
+.bar.good { background: var(--state-info); }
+.bar.strong { background: var(--state-success); }
+
+.strength-label {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+/* 2-Column Grid keeps Sign Up checklist compact */
+.password-req-list {
+  margin-top: 4px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px 8px;
+}
+
+.req-item {
+  font-size: 10px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.req-item.met { color: var(--text-primary); font-weight: 600; }
+
+/* ==========================================================================
+   7. CHECKBOXES, BUTTONS & FOOTER
+   ========================================================================== */
+.form-options-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  gap: var(--space-1);
+}
+
+.custom-checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+  min-height: 28px;
+}
+
+.custom-checkbox-label.align-top { align-items: flex-start; }
+
+.custom-checkbox {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.checkbox-box {
+  width: 15px;
+  height: 15px;
+  border-radius: 4px;
+  background: var(--bg-surface-0);
+  border: 1px solid var(--border-default);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.custom-checkbox:checked ~ .checkbox-box {
+  background: var(--text-primary);
+  border-color: var(--text-primary);
+}
+
+.custom-checkbox:checked ~ .checkbox-box::after {
+  content: "✓";
+  font-size: 10px;
+  color: var(--text-inverse);
+  font-weight: 700;
+}
+
+.checkbox-text { font-size: var(--fs-xs); color: var(--text-secondary); }
+.forgot-link { font-size: var(--fs-xs); color: var(--text-secondary); font-weight: 500; text-decoration: none; }
+.forgot-link:hover { color: var(--text-primary); text-decoration: underline; }
+
+/* Primary White Button on Dark Card */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.625rem 1.25rem;
+  min-height: 40px;
+  border-radius: var(--radius-full);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  transition: transform var(--transition-fast), background var(--transition-fast);
+  position: relative;
+}
+
+.btn-primary {
+  background: var(--text-primary);
+  color: var(--text-inverse);
+}
+
+.btn-primary:hover { background: #E5E5E5; transform: translateY(-1px); }
+.btn-primary:active { transform: scale(0.98); }
+
+.btn.is-loading .btn-text { visibility: hidden; }
+
+.btn-spinner {
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  border: 2px solid var(--text-inverse);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.full-width { width: 100%; }
+
+/* Social Dividers */
+.auth-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 10px 0;
+}
+
+.auth-divider::before, .auth-divider::after {
+  content: "";
+  flex: 1;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.auth-divider span { padding: 0 var(--space-1-5); font-size: 11px; color: var(--text-muted); }
+
+.social-auth-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-1-5);
+}
+
+.btn-social {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  padding: 0.375rem;
+  min-height: 36px;
+  background: var(--bg-surface-0);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  font-size: 11px;
+  color: var(--text-muted);
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.auth-card-footer {
+  margin-top: 10px;
+  text-align: center;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 8px;
+}
+
+.footer-help-text { font-size: 11px; color: var(--text-muted); }
+.footer-help-text a { color: var(--text-secondary); }
+
+/* ==========================================================================
+   8. MOBILE RESPONSIVENESS (360px – 1024px)
+   ========================================================================== */
+@media (max-width: 1024px) {
+  .auth-layout { grid-template-columns: 1fr; }
+  .auth-hero-panel { display: none; }
+  .mobile-auth-header { display: block; }
+  .auth-form-panel { padding: var(--space-2) var(--space-1-5); justify-content: center; }
+  .auth-card-container { max-width: 100%; padding: 1.25rem 1rem; }
+}
+
+@media (max-width: 480px) {
+  .auth-card-container {
+    padding: 1.125rem 0.875rem;
+    border-radius: var(--radius-lg);
+  }
+
+  .form-title { font-size: 1.15rem; }
+  .social-auth-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 360px) {
+  .auth-form-panel { padding: var(--space-1); }
+  .auth-card-container { padding: 1rem 0.75rem; }
+  .btn { font-size: 0.75rem; }
+}

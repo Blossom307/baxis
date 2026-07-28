@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <!-- Basic Meta Tags -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <!-- Primary SEO Meta Tags -->
+    <title>User Profile & Trust Score | Baxis Protocol</title>
+    <meta name="title" content="User Profile & Trust Score — Baxis Protocol">
+    <meta name="description"
+        content="View verified on-chain escrow history, completed contract volume, and connected credentials on Baxis Protocol.">
+    <meta name="robots" content="noindex, nofollow">
+
+    <!-- Theme Color & Favicon -->
+    <meta name="theme-color" content="#090909">
+    <meta name="color-scheme" content="dark">
+    <link rel="icon" type="image/png" href="images/baxis-logo.jpg">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="profile">
+    <meta property="og:title" content="User Profile — Baxis Escrow Protocol">
+    <meta property="og:description" content="Verified Payout Completion Rate & Volume Settled on Baxis Protocol.">
+
+    <!-- Typography: Inter + JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
+
+    <!-- External Stylesheet -->
+    <link rel="stylesheet" href="css/profile.css">
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "User Profile",
+    "jobTitle": "Web3 Specialist"
+  }
+  </script>
+</head>
+
+<body class="dashboard-page baxis-theme">
+
+    <!-- ACCESSIBLE SKIP LINK -->
+    <a href="#profile-main" class="skip-link">Skip to profile details</a>
+
+    <div class="dashboard-layout" id="dashboard-layout">
+
+        <!-- ==========================================================================
+         1. PERSISTENT SIDEBAR NAVIGATION (DESKTOP)
+         ========================================================================== -->
+        <aside class="sidebar" id="sidebar" aria-label="Workspace Navigation">
+            <div class="sidebar-header">
+                <a href="index.html" class="sidebar-brand" aria-label="Baxis Homepage">
+                    <img src="images/baxis-logo.jpg" alt="Baxis Logo" class="sidebar-logo-img"
+                        width="100" height="26">
+                </a>
+                <button class="sidebar-collapse-btn" id="sidebar-collapse-toggle" aria-label="Collapse Sidebar">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 18 9 12 15 6" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Main Navigation Links -->
+            <nav class="sidebar-nav">
+                <span class="sidebar-section-title">Workspace</span>
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="dashboard.html" class="nav-link">
+                            <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="7" height="7" />
+                                <rect x="14" y="3" width="7" height="7" />
+                                <rect x="14" y="14" width="7" height="7" />
+                                <rect x="3" y="14" width="7" height="7" />
+                            </svg>
+                            <span class="nav-label">Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="create.html" class="nav-link">
+                            <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2">
+                                <line x1="12" y1="5" x2="12" y2="19" />
+                                <line x1="5" y1="12" x2="19" y2="12" />
+                            </svg>
+                            <span class="nav-label">Create Escrow</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="escrow-details.html" class="nav-link">
+                            <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                            </svg>
+                            <span class="nav-label">Escrow Vault</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <span class="sidebar-section-title">Settings</span>
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="profile.html" class="nav-link active" aria-current="page">
+                            <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                <circle cx="12" cy="7" r="4" />
+                            </svg>
+                            <span class="nav-label">Profile & Reputation</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- User Footer -->
+            <div class="sidebar-user-footer">
+                <div class="user-avatar" id="sidebar-user-avatar">--</div>
+                <div class="user-info">
+                    <span class="user-name" id="sidebar-user-name">User Account</span>
+                    <span class="user-status"><span class="status-dot green"></span> Base Network</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Sidebar Mobile Backdrop Overlay -->
+        <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+        <!-- ==========================================================================
+         2. WORKSPACE WRAPPER & TOPBAR
+         ========================================================================== -->
+        <div class="dashboard-wrapper">
+
+            <!-- TOPBAR WITH MOBILE HAMBURGER -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <!-- MOBILE HAMBURGER TOGGLE -->
+                    <button class="topbar-mobile-toggle" id="btn-mobile-sidebar-toggle"
+                        aria-label="Open Mobile Navigation Drawer">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="3" y1="12" x2="21" y2="12" />
+                            <line x1="3" y1="6" x2="21" y2="6" />
+                            <line x1="3" y1="18" x2="21" y2="18" />
+                        </svg>
+                    </button>
+
+                    <div class="breadcrumb">
+                        <a href="dashboard.html" class="breadcrumb-item">Workspace</a>
+                        <span class="breadcrumb-separator">/</span>
+                        <span class="breadcrumb-item active">Profile & Reputation</span>
+                    </div>
+                </div>
+
+                <div class="topbar-actions">
+                    <button class="btn btn-primary btn-sm" id="btn-share-profile">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+                            <polyline points="16 6 12 2 8 6" />
+                            <line x1="12" y1="2" x2="12" y2="15" />
+                        </svg>
+                        <span>Share Trust Card</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- MAIN WORKSPACE CONTENT -->
+            <main class="dashboard-main" id="profile-main">
+
+                <!-- ==========================================================================
+             3. PROFILE HERO CARD 
+             ========================================================================== -->
+                <section class="profile-hero-card" aria-label="Profile Header">
+                    <div class="profile-cover-banner"></div>
+
+                    <div class="profile-hero-body">
+
+                        <div class="profile-avatar-wrapper">
+                            <div class="profile-avatar-lg" id="profile-avatar-box">--</div>
+
+                            <!-- Camera Upload Trigger -->
+                            <label for="avatar-file-input" class="avatar-upload-trigger" title="Upload Profile Picture"
+                                aria-label="Upload Profile Picture">
+                                <input type="file" id="avatar-file-input" class="sr-only-input"
+                                    accept="image/png, image/jpeg, image/webp">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path
+                                        d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                                    <circle cx="12" cy="13" r="4" />
+                                </svg>
+                            </label>
+                        </div>
+
+                        <div class="profile-meta-row">
+                            <div class="profile-titles-box">
+                                <div class="title-with-pill">
+                                    <h1 class="profile-display-name" id="profile-display-name">User Account</h1>
+                                    <span class="ens-badge" id="profile-ens-badge" hidden>--</span>
+                                    <span class="trust-score-badge" id="profile-trust-badge">99.4 Trust Score</span>
+                                </div>
+                                <p class="profile-job-title" id="profile-job-title">Digital Contract Member</p>
+                                <span class="profile-address-code" id="profile-address-code">0x... • Wallet Not
+                                    Connected</span>
+                            </div>
+
+                            <div class="profile-status-pill">
+                                <span class="pulse-dot green"></span>
+                                <span>Verified Escrow User</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==========================================================================
+             4. REPUTATION METRICS GRID 
+             ========================================================================== -->
+                <section class="metrics-section" aria-label="Reputation Statistics">
+                    <div class="metrics-grid">
+
+                        <!-- Volume Settled -->
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <span class="metric-label">Lifetime Volume Settled</span>
+                                <span class="metric-icon">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                                        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                                    </svg>
+                                </span>
+                            </div>
+                            <div class="metric-body">
+                                <span class="metric-value" id="profile-settled-val">$0.00 <span
+                                        class="currency">USDC</span></span>
+                                <span class="metric-trend positive">100% On-Chain Escrow</span>
+                            </div>
+                        </div>
+
+                        <!-- Completed Deals -->
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <span class="metric-label">Completed Contracts</span>
+                                <span class="metric-icon">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                        <polyline points="22 4 12 14.01 9 11.01" />
+                                    </svg>
+                                </span>
+                            </div>
+                            <div class="metric-body">
+                                <span class="metric-value" id="profile-completed-count">0 <span
+                                        class="currency">Deals</span></span>
+                                <span class="metric-trend positive">0 Disputes Lost</span>
+                            </div>
+                        </div>
+
+                        <!-- Payout Speed -->
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <span class="metric-label">Avg. Payout Speed</span>
+                                <span class="metric-icon">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                                    </svg>
+                                </span>
+                            </div>
+                            <div class="metric-body">
+                                <span class="metric-value" id="profile-payout-speed">Instant</span>
+                                <span class="metric-trend positive">Automated Settlement</span>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+                <!-- ==========================================================================
+             5. MAIN PROFILE GRID
+             ========================================================================== -->
+                <div class="profile-main-grid">
+
+                    <!-- LEFT COLUMN: EDIT PROFILE SETUP & VERIFIED HISTORY -->
+                    <div class="profile-primary-column">
+
+                        <!-- EDIT PROFILE SETTINGS CARD -->
+                        <div class="profile-card">
+                            <div class="card-box-header">
+                                <div>
+                                    <span class="card-eyebrow">PROFILE SETUP</span>
+                                    <h2 class="card-title-sm">Edit Your Profile & Social Handles</h2>
+                                </div>
+                            </div>
+
+                            <form id="form-edit-profile" novalidate style="margin-top: 1rem;">
+                                <div class="form-row-2col">
+                                    <div class="form-group">
+                                        <label for="edit-display-name" class="form-label">Display Name or Business
+                                            Name</label>
+                                        <input type="text" id="edit-display-name" class="form-input-sm"
+                                            placeholder="e.g. Alex Turner / Acme Design Studio">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="edit-job-title" class="form-label">Role or Specialization</label>
+                                        <input type="text" id="edit-job-title" class="form-input-sm"
+                                            placeholder="e.g. Fullstack Engineer / UI Designer">
+                                    </div>
+                                </div>
+
+                                <div class="form-row-2col">
+                                    <div class="form-group">
+                                        <label for="edit-ens-name" class="form-label">ENS Handle (Optional)</label>
+                                        <input type="text" id="edit-ens-name" class="form-input-sm"
+                                            placeholder="e.g. alex.eth">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="edit-twitter" class="form-label">Twitter / X Handle</label>
+                                        <input type="text" id="edit-twitter" class="form-input-sm"
+                                            placeholder="e.g. @alex_turner">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="edit-discord" class="form-label">Discord Username</label>
+                                    <input type="text" id="edit-discord" class="form-input-sm"
+                                        placeholder="e.g. alex#1042">
+                                </div>
+
+                                <button type="submit" class="btn btn-primary btn-sm" id="btn-save-profile">
+                                    <span>Save Profile Changes</span>
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- SPECTACULAR MOBILE TRUST CARD PREVIEW -->
+                        <div class="profile-card trust-card-preview-box">
+                            <div class="card-box-header">
+                                <div>
+                                    <span class="card-eyebrow">SHAREABLE TRUST CARD</span>
+                                    <h2 class="card-title-sm">Your Digital Reputation Badge</h2>
+                                </div>
+                                <button type="button" class="btn btn-ghost btn-sm" id="btn-copy-card-code">Copy DM
+                                    Embed</button>
+                            </div>
+
+                            <!-- The Mobile Digital Trust Card Component -->
+                            <div class="mobile-trust-card-frame" id="mobile-trust-card">
+                                <div class="trust-card-header">
+                                    <div class="brand-mini-row">
+                                        <img src="images/baxis-logo.jpg" alt="Baxis Logo"
+                                            class="card-brand-logo" width="80" height="20">
+                                        <span class="card-network-pill">BASE VERIFIED</span>
+                                    </div>
+                                </div>
+
+                                <div class="trust-card-user-info">
+                                    <div class="trust-card-avatar" id="card-avatar-box">--</div>
+                                    <div>
+                                        <h3 class="trust-card-name" id="card-display-name">User Account</h3>
+                                        <span class="trust-card-handle" id="card-handles-sub">@user • Baxis
+                                            Member</span>
+                                    </div>
+                                </div>
+
+                                <div class="trust-card-stats-row">
+                                    <div class="stat-mini">
+                                        <span class="stat-val" id="card-stat-vol">$0k</span>
+                                        <span class="stat-lbl">VOLUME</span>
+                                    </div>
+                                    <div class="stat-divider"></div>
+                                    <div class="stat-mini">
+                                        <span class="stat-val" id="card-stat-deals">0</span>
+                                        <span class="stat-lbl">ESCROWS</span>
+                                    </div>
+                                    <div class="stat-divider"></div>
+                                    <div class="stat-mini">
+                                        <span class="stat-val">100%</span>
+                                        <span class="stat-lbl">SUCCESS</span>
+                                    </div>
+                                </div>
+
+                                <div class="trust-card-action">
+                                    <a href="create.html" class="btn btn-primary btn-sm full-width">Hire via Baxis
+                                        Escrow ➔</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recent Verified Contracts Table -->
+                        <div class="profile-card">
+                            <h2 class="card-section-heading">Verified Escrow History</h2>
+
+                            <div class="table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Agreement Title</th>
+                                            <th scope="col">Counterparty</th>
+                                            <th scope="col">Amount</th>
+                                            <th scope="col">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="profile-history-table-body">
+                                        <!-- Rendered dynamically from Supabase or Empty State -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- RIGHT COLUMN: VERIFIED CREDENTIALS & WALLETS (SVG ICONS) -->
+                    <div class="profile-sidebar-column">
+
+                        <!-- Verified Accounts with SVGs -->
+                        <div class="profile-card">
+                            <h2 class="card-section-heading">Verified Credentials</h2>
+
+                            <ul class="verified-credentials-list">
+                                <!-- Twitter / X -->
+                                <li class="cred-item">
+                                    <div class="cred-info">
+                                        <span class="cred-icon">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                                <path
+                                                    d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                                            </svg>
+                                        </span>
+                                        <div>
+                                            <span class="cred-name">Twitter / X</span>
+                                            <span class="cred-handle" id="display-twitter">Not linked</span>
+                                        </div>
+                                    </div>
+                                    <span class="cred-status" id="status-twitter">--</span>
+                                </li>
+
+                                <!-- Discord -->
+                                <li class="cred-item">
+                                    <div class="cred-info">
+                                        <span class="cred-icon">
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                                <path
+                                                    d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.074 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.7 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.01-.09-.03-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.031.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z" />
+                                            </svg>
+                                        </span>
+                                        <div>
+                                            <span class="cred-name">Discord</span>
+                                            <span class="cred-handle" id="display-discord">Not linked</span>
+                                        </div>
+                                    </div>
+                                    <span class="cred-status" id="status-discord">--</span>
+                                </li>
+
+                                <!-- ENS Handle -->
+                                <li class="cred-item">
+                                    <div class="cred-info">
+                                        <span class="cred-icon">
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2">
+                                                <circle cx="12" cy="12" r="10" />
+                                                <line x1="2" y1="12" x2="22" y2="12" />
+                                                <path
+                                                    d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                                            </svg>
+                                        </span>
+                                        <div>
+                                            <span class="cred-name">ENS Handle</span>
+                                            <span class="cred-handle" id="display-ens">Not linked</span>
+                                        </div>
+                                    </div>
+                                    <span class="cred-status" id="status-ens">--</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- Connected Wallets -->
+                        <div class="profile-card">
+                            <h2 class="card-section-heading">Connected Vault Wallet</h2>
+
+                            <ul class="wallets-list">
+                                <li class="wallet-item">
+                                    <div>
+                                        <span class="wallet-chain">Base Network (EVM)</span>
+                                        <code class="wallet-addr" id="display-wallet-address">Not Connected</code>
+                                    </div>
+                                    <span class="wallet-tag active" id="wallet-status-tag">Connected</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </main>
+        </div>
+
+    </div>
+
+
+    <!-- UNIVERSAL NATIVE MOBILE BOTTOM HUD (Sitting directly above </body>) -->
+    <nav class="mobile-bottom-hud" aria-label="Mobile Bottom App Navigation">
+        <a href="dashboard.html" class="hud-nav-item">
+            <svg class="hud-nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <rect x="3" y="3" width="7" height="7" />
+                <rect x="14" y="3" width="7" height="7" />
+                <rect x="14" y="14" width="7" height="7" />
+                <rect x="3" y="14" width="7" height="7" />
+            </svg>
+            <span class="hud-nav-label">Home</span>
+        </a>
+
+        <a href="create.html" class="hud-nav-item">
+            <svg class="hud-nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2.5">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            <span class="hud-nav-label">Create</span>
+        </a>
+
+        <a href="escrow-details.html" class="hud-nav-item">
+            <svg class="hud-nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
+            <span class="hud-nav-label">Vault</span>
+        </a>
+
+        <a href="transactions.html" class="hud-nav-item">
+            <svg class="hud-nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <line x1="12" y1="1" x2="12" y2="23" />
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+            </svg>
+            <span class="hud-nav-label">Ledger</span>
+        </a>
+
+        <a href="profile.html" class="hud-nav-item">
+            <svg class="hud-nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+            </svg>
+            <span class="hud-nav-label">Profile</span>
+        </a>
+    </nav>
+
+
+
+    <!-- External JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase.js"></script>
+    <script src="js/security.js"></script>
+    <script src="js/notifications.service.js"></script>
+    <script src="js/profile.js" defer></script>
+
+    
+</body>
+
+</html>

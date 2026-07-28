@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  
+  <title>Privacy Policy | Baxis Protocol Documentation</title>
+  <meta name="title" content="Privacy Policy — Baxis Protocol Documentation">
+  <meta name="description" content="Official Baxis Privacy Policy. Learn how Baxis handles authentication data, wallet interaction, escrow metadata, dispute evidence, and public blockchain transparency.">
+
+  <meta name="theme-color" content="#090909">
+  <meta name="color-scheme" content="dark">
+  <link rel="icon" type="image/png" href="images/baxis-logo.jpg">
+
+  <!-- Typography: Inter + JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ============================================================================
+       BAXIS PROTOCOL — PRIVACY POLICY DOCUMENTATION STYLESHEET (VERCEL/CLERK TIER)
+       Canvas (#090909) | Surface (#111111) | Card (#161616) | Hairline (0.08)
+       ============================================================================ */
+
+    /* 1. RESET & DESIGN TOKENS */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-app: #090909;
+      --bg-surface-0: #111111;
+      --bg-surface-1: #161616;
+      --bg-surface-hover: #1F1F1F;
+
+      --text-primary: #FFFFFF;
+      --text-secondary: rgba(255, 255, 255, 0.68);
+      --text-muted: rgba(255, 255, 255, 0.42);
+
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-default: rgba(255, 255, 255, 0.12);
+      --border-hover: rgba(255, 255, 255, 0.22);
+
+      --accent-cyan: #38BDF8;
+      --state-success: #10B981;
+      --state-warning: #F59E0B;
+      --state-error: #EF4444;
+
+      --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: "JetBrains Mono", monospace;
+
+      --radius-sm: 6px;
+      --radius-md: 12px;
+      --radius-lg: 18px;
+      --radius-xl: 24px;
+      --radius-full: 9999px;
+
+      --transition-fast: 150ms cubic-bezier(0.16, 1, 0.3, 1);
+      --transition-normal: 250ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body.privacy-page {
+      min-height: 100vh;
+      background-color: var(--bg-app);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .container {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    /* 2. NAVIGATION HEADER */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background-color: rgba(9, 9, 9, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-subtle);
+      height: 68px;
+      display: flex;
+      align-items: center;
+    }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+    }
+
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-logo-img {
+      height: 26px;
+      width: auto;
+      display: block;
+    }
+
+    .header-nav {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-link {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+      transition: color var(--transition-fast);
+    }
+
+    .nav-link:hover, .nav-link.active {
+      color: var(--text-primary);
+    }
+
+    .btn-header-app {
+      background-color: var(--text-primary);
+      color: var(--bg-app);
+      padding: 0.625rem 1.25rem;
+      border-radius: var(--radius-full);
+      font-size: 0.875rem;
+      font-weight: 600;
+      transition: all var(--transition-fast);
+    }
+
+    .btn-header-app:hover {
+      background-color: #E5E5E5;
+      transform: translateY(-1px);
+    }
+
+    /* 3. HERO SECTION */
+    .doc-hero {
+      padding: 5.5rem 0 4rem 0;
+      text-align: center;
+      position: relative;
+      border-bottom: 1px solid var(--border-subtle);
+      background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(255, 255, 255, 0.05) 0%, transparent 80%);
+    }
+
+    .doc-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 14px;
+      border-radius: var(--radius-full);
+      background: var(--bg-surface-0);
+      border: 1px solid var(--border-default);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--state-success);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 1.5rem;
+    }
+
+    .doc-hero-title {
+      font-size: clamp(2.5rem, 4.5vw, 3.75rem);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1.1;
+      margin-bottom: 1rem;
+      background: linear-gradient(180deg, #FFFFFF 0%, rgba(255, 255, 255, 0.65) 100%);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+    }
+
+    .doc-hero-subtitle {
+      font-size: clamp(1rem, 1.4vw, 1.125rem);
+      color: var(--text-secondary);
+      max-width: 640px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    .doc-hero-meta {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 1.75rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    /* 4. DOCUMENTATION LAYOUT WITH STICKY TOC */
+    .doc-wrapper {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      gap: 4rem;
+      padding: 4.5rem 0;
+      align-items: start;
+    }
+
+    /* STICKY TOC SIDEBAR */
+    .toc-sidebar {
+      position: sticky;
+      top: 90px;
+      height: fit-content;
+      max-height: calc(100vh - 120px);
+      overflow-y: auto;
+    }
+
+    .toc-heading {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 1rem;
+    }
+
+    .toc-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      border-left: 1px solid var(--border-subtle);
+    }
+
+    .toc-item a {
+      display: block;
+      padding: 6px 16px;
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+      transition: all var(--transition-fast);
+      border-left: 2px solid transparent;
+      margin-left: -1px;
+    }
+
+    .toc-item a:hover {
+      color: var(--text-primary);
+      background-color: rgba(255, 255, 255, 0.02);
+    }
+
+    .toc-item a.active {
+      color: var(--text-primary);
+      border-left-color: var(--text-primary);
+      font-weight: 600;
+      background-color: rgba(255, 255, 255, 0.04);
+    }
+
+    /* DOCUMENT CONTENT */
+    .doc-content {
+      display: flex;
+      flex-direction: column;
+      gap: 3.5rem;
+      min-width: 0;
+    }
+
+    .doc-section {
+      scroll-margin-top: 100px;
+    }
+
+    .doc-section h2 {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      letter-spacing: -0.02em;
+      margin-bottom: 1rem;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .doc-section h3 {
+      font-size: 1.0625rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 1.5rem 0 0.5rem 0;
+    }
+
+    .doc-section p {
+      font-size: 0.9375rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin-bottom: 1rem;
+    }
+
+    /* CUSTOM BULLET LISTS */
+    .doc-section ul {
+      list-style: none;
+      padding-left: 0;
+      margin-bottom: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .doc-section ul li {
+      position: relative;
+      padding-left: 20px;
+      font-size: 0.9375rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .doc-section ul li::before {
+      content: "";
+      position: absolute;
+      left: 4px;
+      top: 10px;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background-color: var(--text-muted);
+    }
+
+    .doc-section ul li strong {
+      color: var(--text-primary);
+    }
+
+    /* INLINE CODE BADGES */
+    .doc-section code,
+    .doc-card code {
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+      background-color: var(--bg-surface-1);
+      border: 1px solid var(--border-default);
+      padding: 2px 7px;
+      border-radius: 4px;
+      color: var(--accent-cyan);
+    }
+
+    /* CARDS & CALLOUTS */
+    .doc-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+      margin: 1.25rem 0;
+    }
+
+    .doc-card {
+      background-color: var(--bg-surface-0);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1.5rem;
+      transition: border-color var(--transition-fast);
+    }
+
+    .doc-card:hover {
+      border-color: var(--border-hover);
+    }
+
+    .doc-card h3 {
+      margin-top: 0;
+      margin-bottom: 6px;
+    }
+
+    .doc-card p {
+      margin-bottom: 0;
+      font-size: 0.875rem;
+    }
+
+    .doc-callout {
+      background-color: var(--bg-surface-1);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      padding: 1.25rem 1.5rem;
+      margin: 1.5rem 0;
+    }
+
+    .doc-callout.green-border {
+      border-left: 4px solid var(--state-success);
+      background-color: rgba(16, 185, 129, 0.04);
+    }
+
+    .doc-callout.warning {
+      border-left: 4px solid var(--state-error);
+      background-color: rgba(239, 68, 68, 0.04);
+    }
+
+    .doc-callout-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 6px;
+      color: var(--text-primary);
+    }
+
+    .doc-callout p {
+      margin-bottom: 0;
+      font-size: 0.875rem;
+    }
+
+    .section-icon {
+      width: 18px;
+      height: 18px;
+      stroke: var(--text-secondary);
+      flex-shrink: 0;
+    }
+
+    /* 5. FOOTER STYLING */
+    .site-footer {
+      border-top: 1px solid var(--border-subtle);
+      padding: 4.5rem 0 3rem 0;
+      background-color: var(--bg-app);
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr repeat(3, 1fr);
+      gap: 3rem;
+      margin-bottom: 3rem;
+    }
+
+    .footer-brand p {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      max-width: 320px;
+      margin-top: 1rem;
+      line-height: 1.6;
+    }
+
+    .footer-col-title {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-primary);
+      margin-bottom: 1.25rem;
+      display: block;
+    }
+
+    .footer-links {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .footer-links a {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      transition: color var(--transition-fast);
+    }
+
+    .footer-links a:hover {
+      color: var(--text-primary);
+    }
+
+    .footer-bottom {
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    @media (max-width: 900px) {
+      .doc-wrapper {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+      .toc-sidebar {
+        display: none;
+      }
+      .footer-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      .header-nav {
+        display: none;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .doc-hero {
+        padding: 4rem 0 3rem 0;
+      }
+      .footer-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body class="privacy-page">
+
+  <!-- NAVIGATION HEADER -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <div class="header-brand">
+        <a href="index.html" aria-label="Baxis Homepage">
+          <img src="images/baxis-logo.jpg" alt="Baxis Protocol Logo" class="header-logo-img" width="100" height="26">
+        </a>
+      </div>
+
+      <nav aria-label="Primary Navigation">
+        <ul class="header-nav">
+          <li><a href="index.html#how-it-works" class="nav-link">How It Works</a></li>
+          <li><a href="docs.html" class="nav-link">Documentation</a></li>
+          <li><a href="about.html" class="nav-link">About</a></li>
+          <li><a href="privacy.html" class="nav-link active">Privacy</a></li>
+        </ul>
+      </nav>
+
+      <div>
+        <a href="dashboard.html" class="btn-header-app">
+          <span>Launch App</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- 1. HERO SECTION -->
+  <header class="doc-hero">
+    <div class="container">
+      <div class="doc-badge">
+        <span>LEGAL & COMPLIANCE</span>
+      </div>
+      
+      <h1 class="doc-hero-title">Privacy Policy</h1>
+      
+      <p class="doc-hero-subtitle">
+        A transparent explanation of how Baxis handles user authentication, profile data, wallet interactions, escrow metadata, and public blockchain visibility.
+      </p>
+
+      <div class="doc-hero-meta">
+        <span>Effective Date: July 28, 2026</span>
+        <span>•</span>
+        <span>Version 1.0</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN DOCUMENTATION CONTAINER -->
+  <div class="container">
+    <div class="doc-wrapper">
+      
+      <!-- STICKY TABLE OF CONTENTS SIDEBAR -->
+      <aside class="toc-sidebar" aria-label="Table of Contents">
+        <div class="toc-heading">Table of Contents</div>
+        <ul class="toc-list">
+          <li class="toc-item"><a href="#introduction" class="active">1. Introduction</a></li>
+          <li class="toc-item"><a href="#information-collect">2. Information We Collect</a></li>
+          <li class="toc-item"><a href="#profile-info">3. Profile Information</a></li>
+          <li class="toc-item"><a href="#wallet-addresses">4. Wallet Addresses</a></li>
+          <li class="toc-item"><a href="#escrow-data">5. Escrow Data</a></li>
+          <li class="toc-item"><a href="#dispute-evidence">6. Dispute Evidence</a></li>
+          <li class="toc-item"><a href="#how-we-use">7. How Information Is Used</a></li>
+          <li class="toc-item"><a href="#blockchain-transparency">8. Blockchain Transparency</a></li>
+          <li class="toc-item"><a href="#data-storage">9. Data Storage</a></li>
+          <li class="toc-item"><a href="#cookies-storage">10. Cookies & Local Storage</a></li>
+          <li class="toc-item"><a href="#third-parties">11. Third-Party Services</a></li>
+          <li class="toc-item"><a href="#data-retention">12. Data Retention</a></li>
+          <li class="toc-item"><a href="#user-rights">13. User Rights</a></li>
+          <li class="toc-item"><a href="#childrens-privacy">14. Children's Privacy</a></li>
+          <li class="toc-item"><a href="#policy-updates">15. Policy Updates</a></li>
+          <li class="toc-item"><a href="#contact-info">16. Contact Information</a></li>
+        </ul>
+      </aside>
+
+      <!-- DOCUMENT CONTENT -->
+      <main class="doc-content">
+
+        <!-- SECTION 1 -->
+        <section id="introduction" class="doc-section">
+          <h2>
+            <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            1. Introduction
+          </h2>
+          <p>
+            Baxis Protocol ("Baxis", "we", "our") is a non-custodial Web3 escrow platform. Baxis provides the decentralized trust infrastructure that allows strangers on the internet to safely negotiate digital agreements, lock milestone deposits, submit deliverables, and resolve disputes on-chain.
+          </p>
+          <p>
+            We are committed to operational transparency and data minimization. This Privacy Policy details what information is processed when you access Baxis applications, connect an EVM wallet, or participate in escrow agreements.
+          </p>
+
+          <div class="doc-callout green-border">
+            <div class="doc-callout-title">Core Non-Custodial Security Principle</div>
+            <p>
+              Baxis will <strong>never</strong> ask for, store, or have access to your wallet's private keys or seed recovery phrases. You retain complete sovereignty over your crypto assets at all times.
+            </p>
+          </div>
+        </section>
+
+        <!-- SECTION 2 -->
+        <section id="information-collect" class="doc-section">
+          <h2>
+            <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+            2. Information We Collect
+          </h2>
+          <p>
+            To deliver non-custodial escrow services, Baxis collects and processes specific data categories required for workspace functionality, database security, and on-chain contract coordination.
+          </p>
+        </section>
+
+        <!-- SECTION 3 -->
+        <section id="profile-info" class="doc-section">
+          <h2>
+            <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            3. Profile Information
+          </h2>
+          <p>
+            When you register or sign in using Supabase Auth, we process your email address, unique user identification numbers (UUID), and optional profile metadata (such as display handles or avatars) stored in our database.
+          </p>
+        </section>
+
+        <!-- SECTION 4 -->
+        <section id="wallet-addresses" class="doc-section">
+          <h2>
+            <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            4. Wallet Addresses
+          </h2>
+          <p>
+            When you connect an Ethereum Virtual Machine (EVM) compatible wallet (such as MetaMask) to Baxis, we log your public wallet address (`0x...`). This address is used to associate active escrows with your workspace and verify your signature during on-chain transactions.
+          </p>
+        </section>
+
+        <!-- SECTION 5 -->
+        <section id="escrow-data" class="doc-section">
+          <h2>
+            <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            5. Escrow Data
+          </h2>
+          <p>
+            When an escrow agreement is generated, Baxis stores the off-chain agreement metadata required to render your workspace.
+          </p>
+          <div class="doc-grid-2">
+            <div class="doc-card">
+              <h3>Agreement Scope</h3>
+              <p>Agreement title, deliverable description, milestone deposit amount, and currency token (e.g., USDC).</p>
+            </div>
+            <div class="doc-card">
+              <h3>Party Identifiers</h3>
+              <p>The depositor (client) and beneficiary (freelancer) wallet addresses or Supabase user IDs.</p>
+            </div>
+            <div class="doc-card">
+              <h3>Inspection Window</h3>
+              <p>Selected auto-release timelock duration (ranging from 24 hours to 90 days).</p>
+            </div>
+            <div class="doc-card">
+              <h3>Contract State</h3>
+              <p>On-chain status tags (`FUNDED`, `SUBMITTED`, `RELEASED`, `DISPUTED`, `RESOLVED`).</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- SECTION 6 -->
+        <section id="dispute-evidence" class="doc-section">
+          <h2>
+            <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            6. Dispute Evidence Submissions
+          </h2>
+          <p>
+            If a party opens an official dispute, both participants submit written justifications and evidence files (PNG, JPG, PDF) through the escrow workspace. Evidence files are uploaded directly to private storage buckets and associated with the unique dispute ID.
+          </p>
+        </section>
+
+        <!-- SECTION 7 -->
+        <section id="how-we-use" class="doc-section">
+          <h2>
+            <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            7. How Information Is Used
+          </h2>
+          <p>Processed data is used strictly for platform operation and security enforcement:</p>
+          <ul>
+            <li><strong>Authentication:</strong> Verifying user access to protected workspace routes and dashboard analytics.</li>
+            <li><strong>Escrow Lifecycle Management:</strong> Constructing smart contract calldata, monitoring inspection timelocks, and rendering live updates.</li>
+            <li><strong>Arbitration & Dispute Review:</strong> Enabling platform arbitrators to review uploaded proof assets and execute binding on-chain settlements.</li>
+            <li><strong>Security Auditing:</strong> Recording administrative actions in immutable audit logs to prevent privilege abuse.</li>
+          </ul>
+        </section>
+
+        <!-- SECTION 8 -->
+        <section id="blockchain-transparency" class="doc-section">
+          <h2>
+            <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>
+            8. Blockchain Transparency & Public Ledger
+          </h2>
+          <div class="doc-callout warning">
+            <div class="doc-callout-title">Public Ledger Notice</div>
+            <p>
+              Transactions submitted to the Base network or connected EVM blockchains are published to a public ledger. On-chain data—including public wallet addresses, vault deposit amounts, transaction hashes, and resolution states—is permanently visible to the open web and cannot be altered or removed.
+            </p>
+          </div>
+        </section>
+
+        <!-- SECTION 9 -->
+        <section id="data-storage" class="doc-section">
+          <h2>
+            <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+            9. Data Storage & Security
+          </h2>
+          <p>
+            Baxis uses Supabase PostgreSQL database infrastructure and Supabase Storage for off-chain metadata.
+          </p>
+          <p>
+            Private evidence storage is protected at the database layer using PostgreSQL **Row Level Security (RLS)** policies. Evidence files are restricted strictly to agreement participants (client and freelancer) and verified platform arbitrators.
+          </p>
+        </section>
+
+        <!-- SECTION 10 -->
+        <section id="cookies-storage" class="doc-section">
+          <h2>
+            <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+            10. Cookies & Local Storage
+          </h2>
+          <p>
+            Baxis does not use third-party advertising tracking cookies or cross-site behavioral analytics. Essential session tokens (Supabase Auth JWTs) and interface preference states (such as sidebar toggle status) are persisted locally in browser `localStorage`.
+          </p>
+        </section>
+
+        <!-- SECTION 11 -->
+        <section id="third-parties" class="doc-section">
+          <h2>
+            <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            11. Third-Party Infrastructure Services
+          </h2>
+          <p>Baxis interfaces with trusted Web3 and cloud infrastructure providers:</p>
+          <ul>
+            <li><strong>Supabase Inc.:</strong> Cloud database, authentication, and encrypted object storage.</li>
+            <li><strong>Base Network (Coinbase L2):</strong> Blockchain smart contract execution and settlement layer.</li>
+            <li><strong>EVM Wallet Extensions:</strong> Wallet software (e.g., MetaMask) used to sign and relay transactions.</li>
+          </ul>
+        </section>
+
+        <!-- SECTION 12 -->
+        <section id="data-retention" class="doc-section">
+          <h2>
+            <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            12. Data Retention
+          </h2>
+          <p>
+            Off-chain account data and escrow metadata are retained while your account is active. Evidence files associated with resolved disputes are archived securely for audit compliance. Public on-chain smart contract logs persist indefinitely on the underlying blockchain network.
+          </p>
+        </section>
+
+        <!-- SECTION 13 -->
+        <section id="user-rights" class="doc-section">
+          <h2>
+            <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            13. User Rights
+          </h2>
+          <p>
+            You may request access, correction, or deletion of your off-chain account data stored in our Supabase database by contacting our legal team. Deletion of off-chain data cannot alter or wipe immutable transactions committed to the blockchain.
+          </p>
+        </section>
+
+        <!-- SECTION 14 -->
+        <section id="childrens-privacy" class="doc-section">
+          <h2>
+            <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            14. Children's Privacy
+          </h2>
+          <p>
+            Baxis services are strictly intended for users who are at least 18 years of age or the age of legal majority in their jurisdiction. We do not knowingly collect personal data from minors.
+          </p>
+        </section>
+
+        <!-- SECTION 15 -->
+        <section id="policy-updates" class="doc-section">
+          <h2>
+            <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6"/><path d="M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+            15. Policy Updates
+          </h2>
+          <p>
+            We may update this Privacy Policy as protocol architecture evolves. Updates will be published on this page with an updated revision date.
+          </p>
+        </section>
+
+        <!-- SECTION 16 -->
+        <section id="contact-info" class="doc-section">
+          <h2>
+            <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            16. Contact Information
+          </h2>
+          <p>For privacy queries or off-chain data requests, contact our team at:</p>
+          <div class="doc-card">
+            <strong>Privacy & Legal Department</strong><br>
+            Email: <code>privacy@baxis.io</code><br>
+            Official Website: <code>https://baxis.io</code>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- SITE FOOTER -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" aria-label="Baxis Homepage">
+            <img src="images/baxis-logo.jpg" alt="Baxis Protocol Logo" width="100" height="26">
+          </a>
+          <p>
+            Building the trust layer for internet commerce. Non-custodial, programmable escrow security for global digital agreements.
+          </p>
+        </div>
+
+        <div>
+          <span class="footer-col-title">Product</span>
+          <ul class="footer-links">
+            <li><a href="dashboard.html">Launch App</a></li>
+            <li><a href="create.html">Create Escrow</a></li>
+            <li><a href="docs.html">Documentation</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <span class="footer-col-title">Company</span>
+          <ul class="footer-links">
+            <li><a href="about.html">About Baxis</a></li>
+            <li><a href="contact.html">Contact Us</a></li>
+            <li><a href="brand.html">Brand Assets</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <span class="footer-col-title">Legal & Trust</span>
+          <ul class="footer-links">
+            <li><a href="privacy.html">Privacy Policy</a></li>
+            <li><a href="terms.html">Terms of Service</a></li>
+            <li><a href="security.html">Security Architecture</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span>&copy; 2026 Baxis Protocol. All rights reserved.</span>
+        <span>Built for the future of internet commerce.</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- TOC SCROLL HIGHLIGHTING SCRIPT -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const id = entry.target.getAttribute('id');
+            document.querySelectorAll('.toc-item a').forEach(link => {
+              link.classList.toggle('active', link.getAttribute('href') === `#${id}`);
+            });
+          }
+        });
+      }, { rootMargin: '-20% 0px -70% 0px' });
+
+      document.querySelectorAll('.doc-section').forEach(section => {
+        observer.observe(section);
+      });
+    });
+  </script>
+
+</body>
+</html>

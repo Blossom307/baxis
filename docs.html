@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  
+  <title>Documentation & Knowledge Hub | Baxis Protocol</title>
+  <meta name="title" content="Documentation & Knowledge Hub — Baxis Protocol">
+  <meta name="description" content="Explore official guides, smart contract architecture, dispute workflows, and API specifications for Baxis Web3 escrow infrastructure.">
+
+  <meta name="theme-color" content="#090909">
+  <meta name="color-scheme" content="dark">
+  <link rel="icon" type="image/png" href="images/baxis-logo.jpg">
+
+  <!-- Typography: Inter + JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ============================================================================
+       BAXIS PROTOCOL — DOCUMENTATION HUB STYLESHEET (VERCEL / STRIPE DOCS TIER)
+       Canvas (#090909) | Surface (#111111) | Card (#161616) | Hairline (0.08)
+       ============================================================================ */
+
+    /* 1. RESET & DESIGN TOKENS */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-app: #090909;
+      --bg-surface-0: #111111;
+      --bg-surface-1: #161616;
+      --bg-surface-hover: #1F1F1F;
+
+      --text-primary: #FFFFFF;
+      --text-secondary: rgba(255, 255, 255, 0.68);
+      --text-muted: rgba(255, 255, 255, 0.42);
+
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-default: rgba(255, 255, 255, 0.12);
+      --border-hover: rgba(255, 255, 255, 0.22);
+
+      --accent-cyan: #38BDF8;
+      --state-success: #10B981;
+      --state-warning: #F59E0B;
+
+      --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: "JetBrains Mono", monospace;
+
+      --radius-sm: 6px;
+      --radius-md: 12px;
+      --radius-lg: 18px;
+      --radius-xl: 24px;
+      --radius-full: 9999px;
+
+      --transition-fast: 150ms cubic-bezier(0.16, 1, 0.3, 1);
+      --transition-normal: 250ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body.docs-hub-page {
+      min-height: 100vh;
+      background-color: var(--bg-app);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button {
+      background: none;
+      border: none;
+      font-family: inherit;
+      cursor: pointer;
+    }
+
+    .container {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    /* 2. NAVIGATION HEADER */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background-color: rgba(9, 9, 9, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-subtle);
+      height: 68px;
+      display: flex;
+      align-items: center;
+    }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+    }
+
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-logo-img {
+      height: 26px;
+      width: auto;
+      display: block;
+    }
+
+    .header-nav {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-link {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+      transition: color var(--transition-fast);
+    }
+
+    .nav-link:hover, .nav-link.active {
+      color: var(--text-primary);
+    }
+
+    .btn-header-app {
+      background-color: var(--text-primary);
+      color: var(--bg-app);
+      padding: 0.625rem 1.25rem;
+      border-radius: var(--radius-full);
+      font-size: 0.875rem;
+      font-weight: 600;
+      transition: all var(--transition-fast);
+    }
+
+    .btn-header-app:hover {
+      background-color: #E5E5E5;
+      transform: translateY(-1px);
+    }
+
+    /* 3. HERO SECTION WITH SEARCH BAR */
+    .doc-hero {
+      padding: 6rem 0 4.5rem 0;
+      text-align: center;
+      position: relative;
+      border-bottom: 1px solid var(--border-subtle);
+      background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(56, 189, 248, 0.05) 0%, transparent 80%);
+    }
+
+    .doc-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 14px;
+      border-radius: var(--radius-full);
+      background: var(--bg-surface-0);
+      border: 1px solid var(--border-default);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--accent-cyan);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 1.5rem;
+    }
+
+    .doc-hero-title {
+      font-size: clamp(2.5rem, 4.5vw, 3.75rem);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1.1;
+      margin-bottom: 1rem;
+      background: linear-gradient(180deg, #FFFFFF 0%, rgba(255, 255, 255, 0.65) 100%);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+    }
+
+    .doc-hero-subtitle {
+      font-size: clamp(1rem, 1.4vw, 1.125rem);
+      color: var(--text-secondary);
+      max-width: 620px;
+      margin: 0 auto 2.5rem auto;
+      line-height: 1.6;
+    }
+
+    /* SEARCH BAR CONTAINER */
+    .search-box-wrapper {
+      max-width: 580px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .search-input-field {
+      width: 100%;
+      height: 52px;
+      background-color: var(--bg-surface-0);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-full);
+      padding: 0 1.25rem 0 3.25rem;
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      font-size: 0.9375rem;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      transition: all var(--transition-fast);
+    }
+
+    .search-input-field:focus {
+      outline: none;
+      border-color: var(--text-primary);
+      box-shadow: 0 0 0 1px var(--text-primary), 0 12px 40px rgba(0, 0, 0, 0.6);
+    }
+
+    .search-icon-svg {
+      position: absolute;
+      left: 1.25rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .search-shortcut-badge {
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      background-color: var(--bg-surface-1);
+      border: 1px solid var(--border-subtle);
+      padding: 3px 8px;
+      border-radius: 4px;
+      pointer-events: none;
+    }
+
+    /* 4. MAIN LAYOUT GRID WITH SIDEBAR */
+    .docs-layout-grid {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      gap: 3.5rem;
+      padding: 4.5rem 0;
+      align-items: start;
+    }
+
+    /* SIDEBAR NAV */
+    .docs-sidebar {
+      position: sticky;
+      top: 90px;
+      height: fit-content;
+      max-height: calc(100vh - 120px);
+      overflow-y: auto;
+    }
+
+    .sidebar-section-heading {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    .sidebar-nav-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      border-left: 1px solid var(--border-subtle);
+    }
+
+    .sidebar-nav-link {
+      display: block;
+      padding: 6px 16px;
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+      transition: all var(--transition-fast);
+      border-left: 2px solid transparent;
+      margin-left: -1px;
+    }
+
+    .sidebar-nav-link:hover {
+      color: var(--text-primary);
+      background-color: rgba(255, 255, 255, 0.02);
+    }
+
+    .sidebar-nav-link.active {
+      color: var(--text-primary);
+      border-left-color: var(--text-primary);
+      font-weight: 600;
+      background-color: rgba(255, 255, 255, 0.04);
+    }
+
+    /* CATEGORY CARD GRID */
+    .doc-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .category-card {
+      background-color: var(--bg-surface-0);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      transition: all var(--transition-normal);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
+      position: relative;
+    }
+
+    .category-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-3px);
+      background-color: var(--bg-surface-1);
+    }
+
+    .card-icon-container {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-md);
+      background-color: var(--bg-surface-1);
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.25rem;
+      color: var(--text-primary);
+    }
+
+    .category-card-title {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.015em;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .category-card-desc {
+      font-size: 0.9375rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 1.25rem;
+    }
+
+    .card-footer-link {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--accent-cyan);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: auto;
+    }
+
+    /* BADGES */
+    .badge-tag {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+
+    .badge-tag.soon {
+      background-color: rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* 5. FOOTER STYLING */
+    .site-footer {
+      border-top: 1px solid var(--border-subtle);
+      padding: 4.5rem 0 3rem 0;
+      background-color: var(--bg-app);
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr repeat(3, 1fr);
+      gap: 3rem;
+      margin-bottom: 3rem;
+    }
+
+    .footer-brand p {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      max-width: 320px;
+      margin-top: 1rem;
+      line-height: 1.6;
+    }
+
+    .footer-col-title {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-primary);
+      margin-bottom: 1.25rem;
+      display: block;
+    }
+
+    .footer-links {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .footer-links a {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      transition: color var(--transition-fast);
+    }
+
+    .footer-links a:hover {
+      color: var(--text-primary);
+    }
+
+    .footer-bottom {
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    @media (max-width: 900px) {
+      .docs-layout-grid {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+      }
+      .docs-sidebar {
+        display: none;
+      }
+      .footer-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      .header-nav {
+        display: none;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .doc-hero {
+        padding: 4.5rem 0 3rem 0;
+      }
+      .footer-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body class="docs-hub-page">
+
+  <!-- NAVIGATION HEADER -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <div class="header-brand">
+        <a href="index.html" aria-label="Baxis Homepage">
+          <img src="images/baxis-logo.jpg" alt="Baxis Protocol Logo" class="header-logo-img" width="100" height="26">
+        </a>
+      </div>
+
+      <nav aria-label="Primary Navigation">
+        <ul class="header-nav">
+          <li><a href="index.html#how-it-works" class="nav-link">How It Works</a></li>
+          <li><a href="documentation.html" class="nav-link active">Documentation</a></li>
+          <li><a href="about.html" class="nav-link">About</a></li>
+          <li><a href="contact.html" class="nav-link">Contact</a></li>
+        </ul>
+      </nav>
+
+      <div>
+        <a href="dashboard.html" class="btn-header-app">
+          <span>Launch App</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- 1. HERO SECTION WITH INTERACTIVE SEARCH -->
+  <header class="doc-hero">
+    <div class="container">
+      <div class="doc-badge">
+        <span>KNOWLEDGE HUB & GUIDES</span>
+      </div>
+      
+      <h1 class="doc-hero-title">Baxis Documentation</h1>
+      
+      <p class="doc-hero-subtitle">
+        Everything you need to build, create, and resolve digital escrow agreements on the Base blockchain using Baxis Protocol.
+      </p>
+
+      <!-- SEARCH INPUT BAR -->
+      <div class="search-box-wrapper">
+        <svg class="search-icon-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input 
+          type="text" 
+          id="docs-search-input" 
+          class="search-input-field" 
+          placeholder="Search guides, escrow workflows, disputes, smart contracts..." 
+          aria-label="Search documentation topics">
+        <span class="search-shortcut-badge">CMD + K</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN DOCUMENTATION GRID -->
+  <div class="container">
+    <div class="docs-layout-grid">
+      
+      <!-- STICKY CATEGORY SIDEBAR -->
+      <aside class="docs-sidebar" aria-label="Category Navigation">
+        <span class="sidebar-section-heading">Core Categories</span>
+        <ul class="sidebar-nav-list">
+          <li><a href="#getting-started" class="sidebar-nav-link active">Getting Started</a></li>
+          <li><a href="#creating-escrow" class="sidebar-nav-link">Creating an Escrow</a></li>
+          <li><a href="#funding-escrow" class="sidebar-nav-link">Funding Escrow</a></li>
+          <li><a href="#milestones" class="sidebar-nav-link">Milestones</a></li>
+          <li><a href="#managing-escrows" class="sidebar-nav-link">Managing Escrows</a></li>
+          <li><a href="#disputes" class="sidebar-nav-link">Disputes & Arbitration</a></li>
+          <li><a href="#user-profiles" class="sidebar-nav-link">User Profiles</a></li>
+          <li><a href="#faqs" class="sidebar-nav-link">Frequently Asked Questions</a></li>
+          <li><a href="#api" class="sidebar-nav-link">Protocol API</a></li>
+          <li><a href="#smart-contracts" class="sidebar-nav-link">Smart Contracts</a></li>
+          <li><a href="#security" class="sidebar-nav-link">Security Architecture</a></li>
+        </ul>
+      </aside>
+
+      <!-- MAIN DOCUMENTATION CARDS GRID -->
+      <main>
+        <div class="doc-cards-grid" id="category-cards-container">
+
+          <!-- 1. GETTING STARTED -->
+          <article class="category-card" data-title="getting started introduction protocol trust layer">
+            <div>
+              <div class="card-icon-container">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+              </div>
+              <h2 class="category-card-title">Getting Started</h2>
+              <p class="category-card-desc">
+                Learn how Baxis serves as a non-custodial trust layer for digital transactions negotiated across X, Discord, and Telegram.
+              </p>
+            </div>
+            <a href="about.html" class="card-footer-link">Read Introduction ➔</a>
+          </article>
+
+          <!-- 2. CREATING AN ESCROW -->
+          <article class="category-card" data-title="creating an escrow agreement gig create deposit terms">
+            <div>
+              <div class="card-icon-container">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              </div>
+              <h2 class="category-card-title">Creating an Escrow</h2>
+              <p class="category-card-desc">
+                Step-by-step guide to defining agreement titles, USDC deposit amounts, counterparty wallet addresses, and inspection timelocks.
+              </p>
+            </div>
+            <a href="create.html" class="card-footer-link">Escrow Setup Guide ➔</a>
+          </article>
+
+          <!-- 3. FUNDING ESCROW -->
+          <article class="category-card" data-title="funding escrow usdc stablecoin allowance token deposit base">
+            <div>
+              <div class="card-icon-container">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              </div>
+              <h2 class="category-card-title">Funding Escrow</h2>
+              <p class="category-card-desc">
+                Understanding ERC-20 token allowance approvals, smart contract vault deposits, and Base network gas confirmations.
+              </p>
+            </div>
+            <a href="security.html#smart-contracts" class="card-footer-link">Funding Mechanics ➔</a>
+          </article>
+
+          <!-- 4. MILESTONES -->
+          <article class="category-card" data-title="milestones deliverables inspection auto release timelock">
+            <div>
+              <div class="card-icon-container">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              </div>
+              <h2 class="category-card-title">Milestones & Timelocks</h2>
+              <p class="category-card-desc">
+                How auto-release inspection timelocks operate to protect freelancers from unresponsive clients.
+              </p>
+            </div>
+            <a href="security.html#escrow-protection" class="card-footer-link">Timelock Details ➔</a>
+          </article>
+
+          <!-- 5. MANAGING ESCROWS -->
+          <article class="category-card" data-title="managing escrows workspace dashboard release payout deliverables">
+            <div>
+              <div class="card-icon-container">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+              </div>
+              <h2 class="category-card-title">Managing Escrows</h2>
+              <p class="category-card-desc">
+                Navigating your active agreements, uploading project proof deliverables, and approving settlement releases.
+              </p>
+            </div>
+            <a href="dashboard.html" class="card-footer-link">Open Workspace ➔</a>
+          </article>
+
+          <!-- 6. DISPUTES -->
+          <article class="category-card" data-title="disputes arbitration evidence private vault storage decision">
+            <div>
+              <div class="card-icon-container">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              </div>
+              <h2 class="category-card-title">Disputes & Arbitration</h2>
+              <p class="category-card-desc">
+                Opening formal disputes, uploading evidence to private storage, and understanding arbitrator split rulings.
+              </p>
+            </div>
+            <a href="security.html#evidence-storage" class="card-footer-link">Dispute Process ➔</a>
+          </article>
+
+          <!-- 7. USER PROFILES -->
+          <article class="category-card" data-title="user profiles reputation identity supabase auth account">
+            <div>
+              <div class="card-icon-container">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              </div>
+              <h2 class="category-card-title">User Profiles</h2>
+              <p class="category-card-desc">
+                Managing Supabase authentication, linking wallet addresses, and building verified transaction history over time.
+              </p>
+            </div>
+            <a href="profile.html" class="card-footer-link">Profile Settings ➔</a>
+          </article>
+
+          <!-- 8. FREQUENTLY ASKED QUESTIONS -->
+          <article class="category-card" data-title="frequently asked questions faq help support fees network">
+            <div>
+              <div class="card-icon-container">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              </div>
+              <h2 class="category-card-title">Frequently Asked Questions</h2>
+              <p class="category-card-desc">
+                Quick answers regarding platform fees, MetaMask transaction errors, Base network switching, and response SLAs.
+              </p>
+            </div>
+            <a href="contact.html#faqs" class="card-footer-link">View FAQs ➔</a>
+          </article>
+
+          <!-- 9. API (COMING SOON) -->
+          <article class="category-card" data-title="api developer webhooks SDK coming soon">
+            <div>
+              <div class="card-icon-container">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+              </div>
+              <h2 class="category-card-title">
+                <span>Protocol API</span>
+                <span class="badge-tag soon">Soon</span>
+              </h2>
+              <p class="category-card-desc">
+                Developer API specifications and webhook triggers for embedding Baxis escrow vaults into DAOs and platforms.
+              </p>
+            </div>
+            <span class="card-footer-link" style="color: var(--text-muted);">In Development</span>
+          </article>
+
+          <!-- 10. SMART CONTRACTS -->
+          <article class="category-card" data-title="smart contracts solidity openzeppelin reentrancy guard base abi">
+            <div>
+              <div class="card-icon-container">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+              </div>
+              <h2 class="category-card-title">Smart Contracts</h2>
+              <p class="category-card-desc">
+                Technical overview of `BaxisEscrow.sol`, OpenZeppelin security inheritance, and verified contract addresses.
+              </p>
+            </div>
+            <a href="security.html#smart-contracts" class="card-footer-link">Contract Specs ➔</a>
+          </article>
+
+          <!-- 11. SECURITY ARCHITECTURE -->
+          <article class="category-card" data-title="security architecture audit rls supabase non-custodial disclosures">
+            <div>
+              <div class="card-icon-container">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              </div>
+              <h2 class="category-card-title">Security Architecture</h2>
+              <p class="category-card-desc">
+                Deep dive into PostgreSQL Row Level Security (RLS), private evidence encryption, and audit disclosures.
+              </p>
+            </div>
+            <a href="security.html" class="card-footer-link">Security Center ➔</a>
+          </article>
+
+        </div>
+      </main>
+
+    </div>
+  </div>
+
+  <!-- SITE FOOTER -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" aria-label="Baxis Homepage">
+            <img src="images/baxis-logo.jpg" alt="Baxis Protocol Logo" width="100" height="26">
+          </a>
+          <p>
+            Building the trust layer for internet commerce. Non-custodial, programmable escrow security for global digital agreements.
+          </p>
+        </div>
+
+        <div>
+          <span class="footer-col-title">Product</span>
+          <ul class="footer-links">
+            <li><a href="dashboard.html">Launch App</a></li>
+            <li><a href="create.html">Create Escrow</a></li>
+            <li><a href="documentation.html">Documentation</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <span class="footer-col-title">Company</span>
+          <ul class="footer-links">
+            <li><a href="about.html">About Baxis</a></li>
+            <li><a href="contact.html">Contact Us</a></li>
+            <li><a href="brand.html">Brand Assets</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <span class="footer-col-title">Legal & Trust</span>
+          <ul class="footer-links">
+            <li><a href="privacy.html">Privacy Policy</a></li>
+            <li><a href="terms.html">Terms of Service</a></li>
+            <li><a href="security.html">Security Architecture</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span>&copy; 2026 Baxis Protocol. All rights reserved.</span>
+        <span>Built for the future of internet commerce.</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- CLIENT-SIDE LIVE SEARCH FILTER SCRIPT -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const searchInput = document.getElementById('docs-search-input');
+      const cards = document.querySelectorAll('.category-card');
+
+      if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+          const query = e.target.value.toLowerCase().trim();
+
+          cards.forEach(card => {
+            const title = card.getAttribute('data-title').toLowerCase();
+            const textContent = card.innerText.toLowerCase();
+
+            if (title.includes(query) || textContent.includes(query)) {
+              card.style.display = 'flex';
+            } else {
+              card.style.display = 'none';
+            }
+          });
+        });
+
+        // CMD+K / CTRL+K Keyboard Shortcut Listener
+        window.addEventListener('keydown', (e) => {
+          if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+            e.preventDefault();
+            searchInput.focus();
+          }
+        });
+      }
+    });
+  </script>
+
+</body>
+</html>
