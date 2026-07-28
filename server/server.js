@@ -24,5 +24,5 @@ app.get("/", (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Baxis running at http://localhost:${PORT}`);
+  console.log(`Baxis running on port ${PORT}`);
 });
