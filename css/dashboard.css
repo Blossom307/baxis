@@ -251,6 +251,26 @@ a:focus-visible, button:focus-visible, input:focus-visible {
   z-index: 99;
 }
 
+/* Visually Hide Accessible Skip Link Off-Screen */
+.skip-link {
+  position: absolute !important;
+  top: -100px !important;
+  left: 1rem !important;
+  z-index: 9999;
+  background: #FFFFFF;
+  color: #090909;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: top 150ms ease;
+}
+
+/* Only show if someone presses Tab on a keyboard */
+.skip-link:focus {
+  top: 1rem !important;
+}
+
 /* ==========================================================================
    4. WORKSPACE WRAPPER & TOPBAR
    ========================================================================== */
