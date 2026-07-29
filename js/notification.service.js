@@ -1,7 +1,7 @@
 /**
  * ============================================================================
  * BAXIS PROTOCOL — REAL-TIME NOTIFICATION SERVICE (`js/notifications.service.js`)
- * Renders Topbar Bell, Unread Badges, Dropdown Menu & Handles Realtime WebSockets
+ * Personalized Notifications & Instant Red-Dot Clearing on View
  * ============================================================================
  */
 
@@ -30,10 +30,10 @@ class NotificationService {
 
       this.currentUserId = session.user.id;
 
-      // Inject Bell Markup & CSS into topbar
+      // Inject Bell UI into topbar
       this.injectBellUI();
       
-      // Load initial notifications & subscribe to Realtime
+      // Load user-specific notifications & subscribe to Realtime
       await this.loadNotifications();
       this.subscribeRealtime();
     });
@@ -88,7 +88,7 @@ class NotificationService {
     `;
     document.head.appendChild(style);
 
-    // Inject HTML
+    // Inject HTML Markup
     const bellWrapper = document.createElement('div');
     bellWrapper.className = 'bell-wrapper';
     bellWrapper.id = 'baxis-bell-wrapper';
@@ -111,15 +111,20 @@ class NotificationService {
 
     topbarActions.prepend(bellWrapper);
 
-    // Event listeners
     const toggleBtn = document.getElementById('btn-bell-toggle');
     const dropdown = document.getElementById('notif-dropdown-menu');
     const markReadBtn = document.getElementById('btn-mark-all-read');
 
+    // OPEN DROPDOWN & INSTANTLY CLEAR RED DOT ON VIEW
     if (toggleBtn && dropdown) {
       toggleBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        dropdown.classList.toggle('active');
+        const isActive = dropdown.classList.toggle('active');
+
+        // IF OPENED AND HAS UNREAD ITEMS -> INSTANTLY CLEAR RED DOT
+        if (isActive && this.unreadCount > 0) {
+          this.markAllAsRead();
+        }
       });
 
       document.addEventListener('click', (e) => {
@@ -138,6 +143,7 @@ class NotificationService {
     const supabase = this.getClient();
     if (!supabase || !this.currentUserId) return;
 
+    // QUERY STRICTLY FILTERED BY CURRENT USER ID
     const { data, error } = await supabase
       .from('notifications')
       .select('*')
@@ -158,7 +164,7 @@ class NotificationService {
 
     this.unreadCount = this.notifications.filter(n => !n.is_read).length;
 
-    // Update Badge
+    // Update Badge Display
     if (badge) {
       if (this.unreadCount > 0) {
         badge.textContent = this.unreadCount > 9 ? '9+' : this.unreadCount;
@@ -168,7 +174,6 @@ class NotificationService {
       }
     }
 
-    // Render List
     if (this.notifications.length === 0) {
       container.innerHTML = '<div class="notif-empty">No notifications yet.</div>';
       return;
@@ -204,18 +209,33 @@ class NotificationService {
   }
 
   async markAllAsRead() {
-    const supabase = this.getClient();
-    if (!supabase || !this.currentUserId) return;
+    // 1. INSTANTLY HIDE RED BADGE ON SCREEN (0ms latency!)
+    const badge = document.getElementById('bell-unread-badge');
+    if (badge) badge.style.display = 'none';
+    this.unreadCount = 0;
 
-    await supabase.from('notifications').update({ is_read: true }).eq('user_id', this.currentUserId);
+    // 2. Remove unread red borders visually
+    document.querySelectorAll('.notif-item.unread').forEach(item => {
+      item.classList.remove('unread');
+    });
+
     this.notifications.forEach(n => n.is_read = true);
-    this.renderNotifications();
+
+    // 3. Update database in background
+    const supabase = this.getClient();
+    if (supabase && this.currentUserId) {
+      await supabase.from('notifications')
+        .update({ is_read: true })
+        .eq('user_id', this.currentUserId)
+        .eq('is_read', false);
+    }
   }
 
   subscribeRealtime() {
     const supabase = this.getClient();
     if (!supabase || !this.currentUserId) return;
 
+    // WebSockets strictly filtered by current user's UUID
     supabase
       .channel(`user-notifications-${this.currentUserId}`)
       .on('postgres_changes', {
@@ -226,19 +246,9 @@ class NotificationService {
       }, (payload) => {
         this.notifications.unshift(payload.new);
         this.renderNotifications();
-
-        // Optional browser audio or alert toast
-        if (window.appInstance && window.appInstance.toast) {
-          window.appInstance.toast.show({
-            title: payload.new.title,
-            message: payload.new.message,
-            type: 'rust'
-          });
-        }
       })
       .subscribe();
   }
 }
 
-// Global Singleton
 window.notificationService = new NotificationService();

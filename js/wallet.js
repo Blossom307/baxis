@@ -48,11 +48,27 @@
     }
 
     async connectWallet() {
+      // 1. If window.ethereum is not present (Mobile Safari/Chrome or Desktop without extension)
       if (!window.ethereum) {
-        alert('Web3 wallet not detected! Please install MetaMask or Coinbase Wallet.');
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        if (isMobile) {
+          // Direct deep-link redirect into MetaMask Mobile dApp Browser
+          const cleanUrl = window.location.href.replace(/^https?:\/\//, '');
+          const metaMaskUrl = `https://metamask.app.link/dapp/${cleanUrl}`;
+          
+          const confirmOpen = confirm('Connecting on mobile? Click OK to open Baxis inside your MetaMask Mobile App Browser.');
+          if (confirmOpen) {
+            window.location.href = metaMaskUrl;
+          }
+          return null;
+        }
+
+        alert('Web3 wallet not detected! Please install MetaMask or Coinbase Wallet extension.');
         return null;
       }
 
+      // 2. Wallet Injected (Desktop Extension or Mobile MetaMask Browser)
       try {
         await this.ensureCorrectNetwork();
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
