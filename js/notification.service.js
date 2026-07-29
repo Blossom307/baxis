@@ -1,7 +1,7 @@
 /**
  * ============================================================================
  * BAXIS PROTOCOL — REAL-TIME NOTIFICATION SERVICE (`js/notifications.service.js`)
- * Personalized Notifications & Instant Red-Dot Clearing on View
+ * Instant Red-Dot Clearing & Permanent DB Sync
  * ============================================================================
  */
 
@@ -88,7 +88,7 @@ class NotificationService {
     `;
     document.head.appendChild(style);
 
-    // Inject HTML Markup
+    // Inject HTML
     const bellWrapper = document.createElement('div');
     bellWrapper.className = 'bell-wrapper';
     bellWrapper.id = 'baxis-bell-wrapper';
@@ -115,14 +115,13 @@ class NotificationService {
     const dropdown = document.getElementById('notif-dropdown-menu');
     const markReadBtn = document.getElementById('btn-mark-all-read');
 
-    // OPEN DROPDOWN & INSTANTLY CLEAR RED DOT ON VIEW
     if (toggleBtn && dropdown) {
       toggleBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         const isActive = dropdown.classList.toggle('active');
 
-        // IF OPENED AND HAS UNREAD ITEMS -> INSTANTLY CLEAR RED DOT
-        if (isActive && this.unreadCount > 0) {
+        // INSTANTLY CLEAR RED DOT WHENEVER DROPDOWN IS OPENED
+        if (isActive) {
           this.markAllAsRead();
         }
       });
@@ -143,7 +142,6 @@ class NotificationService {
     const supabase = this.getClient();
     if (!supabase || !this.currentUserId) return;
 
-    // QUERY STRICTLY FILTERED BY CURRENT USER ID
     const { data, error } = await supabase
       .from('notifications')
       .select('*')
@@ -164,7 +162,6 @@ class NotificationService {
 
     this.unreadCount = this.notifications.filter(n => !n.is_read).length;
 
-    // Update Badge Display
     if (badge) {
       if (this.unreadCount > 0) {
         badge.textContent = this.unreadCount > 9 ? '9+' : this.unreadCount;
@@ -209,25 +206,31 @@ class NotificationService {
   }
 
   async markAllAsRead() {
-    // 1. INSTANTLY HIDE RED BADGE ON SCREEN (0ms latency!)
+    // 1. INSTANTLY HIDE RED DOT IN DOM (0ms delay!)
     const badge = document.getElementById('bell-unread-badge');
-    if (badge) badge.style.display = 'none';
+    if (badge) {
+      badge.style.display = 'none';
+      badge.textContent = '0';
+    }
     this.unreadCount = 0;
 
-    // 2. Remove unread red borders visually
+    // 2. Remove unread visual highlights
     document.querySelectorAll('.notif-item.unread').forEach(item => {
       item.classList.remove('unread');
     });
 
     this.notifications.forEach(n => n.is_read = true);
 
-    // 3. Update database in background
+    // 3. Update Supabase Database in background
     const supabase = this.getClient();
     if (supabase && this.currentUserId) {
-      await supabase.from('notifications')
-        .update({ is_read: true })
-        .eq('user_id', this.currentUserId)
-        .eq('is_read', false);
+      try {
+        await supabase.from('notifications')
+          .update({ is_read: true })
+          .eq('user_id', this.currentUserId);
+      } catch (err) {
+        console.warn('[NotificationService] Mark read error:', err);
+      }
     }
   }
 
@@ -235,7 +238,6 @@ class NotificationService {
     const supabase = this.getClient();
     if (!supabase || !this.currentUserId) return;
 
-    // WebSockets strictly filtered by current user's UUID
     supabase
       .channel(`user-notifications-${this.currentUserId}`)
       .on('postgres_changes', {
