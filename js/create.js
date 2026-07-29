@@ -117,9 +117,13 @@ document.documentElement.classList.add('js-enabled');
     }
 
     static validateCounterparty(id) {
-      return id && id.trim() 
+      if (!id || !id.trim()) {
+        return { isValid: false, error: 'Freelancer 0x EVM wallet address is required.' };
+      }
+      const isEvmAddress = /^0x[a-fA-F0-9]{40}$/.test(id.trim());
+      return isEvmAddress 
         ? { isValid: true, error: '' } 
-        : { isValid: false, error: 'Counterparty email, ENS, or wallet address is required.' };
+        : { isValid: false, error: 'Enter a valid 0x EVM Wallet Address (e.g. 0x71C...3A9).' };
     }
 
     static validateAmount(amount) {
@@ -147,7 +151,9 @@ document.documentElement.classList.add('js-enabled');
 
     getSupabase() {
       if (window.baxisSupabase) return window.baxisSupabase;
-      if (window.supabase) {
+      if (window.supabaseClient) return window.supabaseClient;
+      if (window.supabase && window.supabase.auth) return window.supabase;
+      if (window.supabase && typeof window.supabase.createClient === 'function') {
         window.baxisSupabase = window.supabase.createClient(
           'https://sytnwsuqoeqlwybkkhhj.supabase.co',
           'sb_publishable_Qtiz_CfMKreLNiDHgVjYag_nFulAMjt'
@@ -183,18 +189,23 @@ document.documentElement.classList.add('js-enabled');
           return;
         }
 
-        const titleVal = document.getElementById('deal-title').value;
-        const descVal = document.getElementById('deal-description').value;
-        const counterpartyVal = document.getElementById('counterparty-id').value;
-        const amountVal = document.getElementById('deal-amount').value;
-        const tokenVal = document.getElementById('deal-token').value;
-        const networkVal = document.getElementById('deal-network').value;
-        const timelockVal = document.getElementById('auto-release-timelock').value;
+        const titleVal = document.getElementById('deal-title') ? document.getElementById('deal-title').value : '';
+        const descVal = document.getElementById('deal-description') ? document.getElementById('deal-description').value : '';
+        const counterpartyVal = document.getElementById('counterparty-id') ? document.getElementById('counterparty-id').value : '';
+        const amountVal = document.getElementById('deal-amount') ? document.getElementById('deal-amount').value : '';
+        const tokenVal = document.getElementById('deal-token') ? document.getElementById('deal-token').value : 'USDC';
+        const networkVal = document.getElementById('deal-network') ? document.getElementById('deal-network').value : 'Base';
+        const timelockVal = document.getElementById('auto-release-timelock') ? document.getElementById('auto-release-timelock').value : '48';
         
         let roleVal = 'client';
         document.querySelectorAll('input[name="user-role"]').forEach((r) => { if (r.checked) roleVal = r.value; });
 
-        // Validation
+        // Clear previous errors
+        this.clearFieldError('deal-title');
+        this.clearFieldError('counterparty-id');
+        this.clearFieldError('deal-amount');
+
+        // Form Validation (Including EVM Wallet Address Validation)
         const titleRes = FormValidator.validateTitle(titleVal);
         const cpRes = FormValidator.validateCounterparty(counterpartyVal);
         const amountRes = FormValidator.validateAmount(amountVal);
@@ -240,15 +251,6 @@ document.documentElement.classList.add('js-enabled');
 
           const newEscrowCode = data.id;
 
-          // Validation in escrow creation form submission:
-           const counterpartyInput = document.getElementById('counterparty-input').value.trim();
-           const isEvmAddress = /^0x[a-fA-F0-9]{40}$/.test(counterpartyInput);
-
-          if (!isEvmAddress) {
-           alert('Please enter a valid 0x EVM Wallet Address for the freelancer (e.g. 0x71C...3A9).');
-          return;
-           }
-
           // Log activity event
           await supabase.from('activity_logs').insert([{
             escrow_id: newEscrowCode,
@@ -269,13 +271,13 @@ document.documentElement.classList.add('js-enabled');
 
     setButtonLoading(isLoading) {
       if (!this.submitBtn) return;
-      const text = this.submitBtn.querySelector('span');
+      const text = this.submitBtn.querySelector('span') || this.submitBtn;
       if (isLoading) {
         this.submitBtn.disabled = true;
-        if (text) text.textContent = 'Saving Agreement to Database...';
+        text.textContent = 'Saving Agreement to Database...';
       } else {
         this.submitBtn.disabled = false;
-        if (text) text.textContent = 'Generate Escrow Agreement Link';
+        text.textContent = 'Generate Escrow Agreement Link';
       }
     }
   }

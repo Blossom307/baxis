@@ -591,6 +591,19 @@ document.documentElement.classList.add('js-enabled');
 
         const usdcContract = new ethers.Contract(USDC_TOKEN_ADDRESS, ERC20_ABI, signer);
 
+        // PRE-FLIGHT USDC BALANCE CHECK
+        try {
+          const balance = await usdcContract.balanceOf(userAddr);
+          if (balance < totalCharge) {
+            const userFormatted = ethers.formatUnits(balance, decimals);
+            const requiredFormatted = ethers.formatUnits(totalCharge, decimals);
+            throw new Error(`Insufficient USDC balance. You have $${userFormatted} USDC, but $${requiredFormatted} USDC is required.`);
+          }
+        } catch (balanceErr) {
+          if (balanceErr.message.includes('Insufficient USDC')) throw balanceErr;
+          console.warn('Silent balance check fallback:', balanceErr);
+        }
+
         const currentAllowance = await usdcContract.allowance(userAddr, BAXIS_CONTRACT_ADDRESS);
 
         if (currentAllowance < totalCharge) {
@@ -602,13 +615,13 @@ document.documentElement.classList.add('js-enabled');
 
         this.setApproveBtnText('2/2: Confirm in MetaMask...');
 
-       
-         const freelancerAddr = this.currentEscrow?.counterparty_identifier || '';
-          if (!freelancerAddr || !ethers.isAddress(freelancerAddr)) {
+        // STRICT REAL-MONEY EVM ADDRESS SAFEGUARD
+        const freelancerAddr = this.currentEscrow?.counterparty_identifier || '';
+        if (!freelancerAddr || !ethers.isAddress(freelancerAddr)) {
           throw new Error('Invalid Freelancer Wallet Address. The counterparty must be a valid 0x EVM wallet address before funding.');
         }
-          if (freelancerAddr.toLowerCase() === userAddr.toLowerCase()) {
-           throw new Error('You cannot create an escrow with yourself as the freelancer.');
+        if (freelancerAddr.toLowerCase() === userAddr.toLowerCase()) {
+          throw new Error('You cannot create an escrow with yourself as the freelancer.');
         }
 
         const rawHours = this.currentEscrow?.auto_release_hours || 48;
@@ -631,6 +644,15 @@ document.documentElement.classList.add('js-enabled');
             data: calldata
           }]
         });
+
+        // WAIT FOR REAL ON-CHAIN BLOCKCHAIN CONFIRMATION RECEIPT
+        this.setApproveBtnText('Waiting for Blockchain Confirmation...');
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const txReceipt = await provider.waitForTransaction(txHash);
+
+        if (!txReceipt || txReceipt.status !== 1) {
+          throw new Error('Transaction reverted on-chain. Deposit was not executed.');
+        }
 
         this.setApproveBtnText('Updating Database...');
 
@@ -695,6 +717,15 @@ document.documentElement.classList.add('js-enabled');
             data: calldata
           }]
         });
+
+        // WAIT FOR REAL ON-CHAIN BLOCKCHAIN CONFIRMATION RECEIPT
+        this.setApproveBtnText('Waiting for Blockchain Confirmation...');
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const txReceipt = await provider.waitForTransaction(txHash);
+
+        if (!txReceipt || txReceipt.status !== 1) {
+          throw new Error('Release transaction reverted on-chain.');
+        }
 
         this.setApproveBtnText('Updating Database...');
 
