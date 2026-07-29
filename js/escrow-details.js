@@ -597,7 +597,7 @@ document.documentElement.classList.add('js-enabled');
           if (balance < totalCharge) {
             const userFormatted = ethers.formatUnits(balance, decimals);
             const requiredFormatted = ethers.formatUnits(totalCharge, decimals);
-            throw new Error(`Insufficient USDC balance. You have $${userFormatted} USDC, but $${requiredFormatted} USDC is required.`);
+            throw new Error(`Insufficient USDC balance. You have $${userFormatted} USDC, but this vault requires $${requiredFormatted} USDC.`);
           }
         } catch (balanceErr) {
           if (balanceErr.message.includes('Insufficient USDC')) throw balanceErr;
