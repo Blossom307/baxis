@@ -1,7 +1,7 @@
 /**
  * ============================================================================
  * BAXIS PROTOCOL — REAL-TIME NOTIFICATION SERVICE (`js/notifications.service.js`)
- * Instant Red-Dot Clearing & Permanent DB Sync
+ * Zero-Conflict Inline Scrollbox (Guaranteed 240px Capped Height)
  * ============================================================================
  */
 
@@ -30,10 +30,7 @@ class NotificationService {
 
       this.currentUserId = session.user.id;
 
-      // Inject Bell UI into topbar
       this.injectBellUI();
-      
-      // Load user-specific notifications & subscribe to Realtime
       await this.loadNotifications();
       this.subscribeRealtime();
     });
@@ -41,100 +38,81 @@ class NotificationService {
 
   injectBellUI() {
     const topbarActions = document.querySelector('.topbar-actions');
-    if (!topbarActions || document.getElementById('baxis-bell-wrapper')) return;
+    if (!topbarActions || document.getElementById('bx-bell-wrapper')) return;
 
-    // Inject CSS
-    const style = document.createElement('style');
-    style.textContent = `
-      .bell-wrapper { position: relative; display: inline-block; }
-      .btn-bell {
-        width: 36px; height: 36px; border-radius: 8px;
-        background: var(--bg-surface-1, #171717); border: 1px solid var(--border-default, #2A2A2A);
-        color: var(--text-secondary, #A0A0A0); display: flex; align-items: center; justify-content: center;
-        cursor: pointer; position: relative; transition: all 150ms ease;
-      }
-      .btn-bell:hover { color: #FFFFFF; border-color: #404040; background: #222222; }
-      .bell-badge {
-        position: absolute; top: -4px; right: -4px;
-        background: #EF4444; color: #FFFFFF; font-family: var(--font-mono, monospace);
-        font-size: 10px; font-weight: 700; padding: 1px 5px; border-radius: 999px;
-        border: 2px solid #090909; display: none;
-      }
-      .notif-dropdown {
-        position: absolute; top: 46px; right: 0; width: 340px;
-        background: #111111; border: 1px solid #2A2A2A; border-radius: 12px;
-        box-shadow: 0 16px 40px rgba(0,0,0,0.8); z-index: 9999;
-        display: none; flex-direction: column; overflow: hidden;
-      }
-      .notif-dropdown.active { display: flex; }
-      .notif-header {
-        padding: 12px 16px; border-bottom: 1px solid #1F1F1F;
-        display: flex; align-items: center; justify-content: space-between; background: #171717;
-      }
-      .notif-header span { font-size: 13px; font-weight: 700; color: #FFFFFF; }
-      .notif-clear-btn { font-size: 11px; color: #A0A0A0; cursor: pointer; }
-      .notif-clear-btn:hover { color: #FFFFFF; }
-      .notif-body { max-height: 320px; overflow-y: auto; display: flex; flex-direction: column; }
-      .notif-item {
-        padding: 12px 16px; border-bottom: 1px solid #1F1F1F; color: #FFFFFF;
-        text-decoration: none; font-size: 12px; transition: background 150ms ease; display: block;
-      }
-      .notif-item:hover { background: #171717; }
-      .notif-item.unread { border-left: 3px solid #EF4444; background: rgba(239, 68, 68, 0.05); }
-      .notif-item-title { font-weight: 700; margin-bottom: 2px; color: #FFFFFF; }
-      .notif-item-msg { color: #A0A0A0; margin-bottom: 4px; line-height: 1.4; }
-      .notif-item-time { font-family: var(--font-mono, monospace); font-size: 10px; color: #6B6B6B; }
-      .notif-empty { padding: 24px; text-align: center; color: #6B6B6B; font-size: 12px; }
-    `;
-    document.head.appendChild(style);
-
-    // Inject HTML
+    // Create Bell Wrapper
     const bellWrapper = document.createElement('div');
-    bellWrapper.className = 'bell-wrapper';
-    bellWrapper.id = 'baxis-bell-wrapper';
-    bellWrapper.innerHTML = `
-      <button type="button" class="btn-bell" id="btn-bell-toggle" aria-label="Notifications">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-        <span class="bell-badge" id="bell-unread-badge">0</span>
-      </button>
+    bellWrapper.id = 'bx-bell-wrapper';
+    bellWrapper.style.cssText = 'position: relative !important; display: inline-block !important;';
 
-      <div class="notif-dropdown" id="notif-dropdown-menu">
-        <div class="notif-header">
-          <span>Notifications</span>
-          <span class="notif-clear-btn" id="btn-mark-all-read">Mark all as read</span>
-        </div>
-        <div class="notif-body" id="notif-list-container">
-          <div class="notif-empty">Loading notifications...</div>
-        </div>
+    // Create Bell Button
+    const btnBell = document.createElement('button');
+    btnBell.type = 'button';
+    btnBell.id = 'bx-btn-bell-toggle';
+    btnBell.setAttribute('aria-label', 'Notifications');
+    btnBell.style.cssText = `
+      width: 36px !important; height: 36px !important; border-radius: 8px !important;
+      background: #171717 !important; border: 1px solid #2A2A2A !important;
+      color: #A0A0A0 !important; display: flex !important; align-items: center !important;
+      justify-content: center !important; cursor: pointer !important; position: relative !important;
+    `;
+    btnBell.innerHTML = `
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <span id="bx-bell-unread-badge" style="position: absolute !important; top: -4px !important; right: -4px !important; background: #EF4444 !important; color: #FFFFFF !important; font-family: monospace !important; font-size: 10px !important; font-weight: 700 !important; padding: 1px 5px !important; border-radius: 999px !important; border: 2px solid #090909 !important; display: none;">0</span>
+    `;
+
+    // Create Dropdown Box
+    const dropdown = document.createElement('div');
+    dropdown.id = 'bx-notif-dropdown-menu';
+    dropdown.style.cssText = `
+      position: absolute !important; top: 46px !important; right: 0 !important;
+      width: 320px !important; max-width: 85vw !important; height: 320px !important;
+      max-height: 320px !important; background: #111111 !important;
+      border: 1px solid #2A2A2A !important; border-radius: 12px !important;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.95) !important; z-index: 100000 !important;
+      display: none; flex-direction: column !important; overflow: hidden !important;
+      box-sizing: border-box !important;
+    `;
+
+    dropdown.innerHTML = `
+      <div style="padding: 12px 16px !important; border-bottom: 1px solid #1F1F1F !important; display: flex !important; align-items: center !important; justify-content: space-between !important; background: #171717 !important; height: 42px !important; box-sizing: border-box !important;">
+        <span style="font-size: 13px !important; font-weight: 700 !important; color: #FFFFFF !important;">Notifications</span>
+        <span id="bx-btn-mark-all-read" style="font-size: 11px !important; color: #38BDF8 !important; cursor: pointer !important; font-weight: 600 !important;">Mark all as read</span>
+      </div>
+
+      <!-- INLINE STRICT SCROLLBOX (240px HEIGHT CAP) -->
+      <div id="bx-notif-scroll-box" style="display: block !important; height: 260px !important; max-height: 260px !important; min-height: 260px !important; overflow-y: auto !important; overflow-x: hidden !important; width: 100% !important; box-sizing: border-box !important; padding: 0 !important; margin: 0 !important;">
+        <div id="bx-notif-empty-state" style="padding: 24px !important; text-align: center !important; color: #6B6B6B !important; font-size: 12px !important;">Loading notifications...</div>
       </div>
     `;
 
+    bellWrapper.appendChild(btnBell);
+    bellWrapper.appendChild(dropdown);
     topbarActions.prepend(bellWrapper);
 
-    const toggleBtn = document.getElementById('btn-bell-toggle');
-    const dropdown = document.getElementById('notif-dropdown-menu');
-    const markReadBtn = document.getElementById('btn-mark-all-read');
+    // Event listeners
+    btnBell.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isVisible = dropdown.style.display === 'flex';
+      dropdown.style.display = isVisible ? 'none' : 'flex';
 
-    if (toggleBtn && dropdown) {
-      toggleBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const isActive = dropdown.classList.toggle('active');
+      if (!isVisible && this.unreadCount > 0) {
+        this.markAllAsRead();
+      }
+    });
 
-        // INSTANTLY CLEAR RED DOT WHENEVER DROPDOWN IS OPENED
-        if (isActive) {
-          this.markAllAsRead();
-        }
-      });
+    document.addEventListener('click', (e) => {
+      if (!bellWrapper.contains(e.target)) {
+        dropdown.style.display = 'none';
+      }
+    });
 
-      document.addEventListener('click', (e) => {
-        if (!bellWrapper.contains(e.target)) {
-          dropdown.classList.remove('active');
-        }
-      });
-    }
-
+    const markReadBtn = document.getElementById('bx-btn-mark-all-read');
     if (markReadBtn) {
-      markReadBtn.addEventListener('click', () => this.markAllAsRead());
+      markReadBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.markAllAsRead();
+      });
     }
   }
 
@@ -147,7 +125,7 @@ class NotificationService {
       .select('*')
       .eq('user_id', this.currentUserId)
       .order('created_at', { ascending: false })
-      .limit(10);
+      .limit(20);
 
     if (!error && data) {
       this.notifications = data;
@@ -156,8 +134,8 @@ class NotificationService {
   }
 
   renderNotifications() {
-    const badge = document.getElementById('bell-unread-badge');
-    const container = document.getElementById('notif-list-container');
+    const badge = document.getElementById('bx-bell-unread-badge');
+    const container = document.getElementById('bx-notif-scroll-box');
     if (!container) return;
 
     this.unreadCount = this.notifications.filter(n => !n.is_read).length;
@@ -172,22 +150,29 @@ class NotificationService {
     }
 
     if (this.notifications.length === 0) {
-      container.innerHTML = '<div class="notif-empty">No notifications yet.</div>';
+      container.innerHTML = '<div style="padding: 24px !important; text-align: center !important; color: #6B6B6B !important; font-size: 12px !important;">No notifications yet.</div>';
       return;
     }
 
     container.innerHTML = '';
     this.notifications.forEach(n => {
       const a = document.createElement('a');
-      a.className = `notif-item ${!n.is_read ? 'unread' : ''}`;
       a.href = n.link || 'dashboard.html';
+      a.style.cssText = `
+        display: block !important; padding: 12px 16px !important;
+        border-bottom: 1px solid #1F1F1F !important; color: #FFFFFF !important;
+        text-decoration: none !important; font-size: 12px !important;
+        background: ${!n.is_read ? 'rgba(239, 68, 68, 0.06)' : 'transparent'} !important;
+        border-left: ${!n.is_read ? '3px solid #EF4444' : 'none'} !important;
+        box-sizing: border-box !important; width: 100% !important;
+      `;
 
       const timeAgo = new Date(n.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
       a.innerHTML = `
-        <div class="notif-item-title">${n.title}</div>
-        <div class="notif-item-msg">${n.message}</div>
-        <div class="notif-item-time">${timeAgo}</div>
+        <div style="font-weight: 700 !important; margin-bottom: 2px !important; color: #FFFFFF !important;">${n.title}</div>
+        <div style="color: #A0A0A0 !important; margin-bottom: 4px !important; line-height: 1.4 !important; word-break: break-word !important;">${n.message}</div>
+        <div style="font-family: monospace !important; font-size: 10px !important; color: #6B6B6B !important;">${timeAgo}</div>
       `;
 
       a.addEventListener('click', () => this.markAsRead(n.id));
@@ -206,22 +191,16 @@ class NotificationService {
   }
 
   async markAllAsRead() {
-    // 1. INSTANTLY HIDE RED DOT IN DOM (0ms delay!)
-    const badge = document.getElementById('bell-unread-badge');
+    const badge = document.getElementById('bx-bell-unread-badge');
     if (badge) {
       badge.style.display = 'none';
       badge.textContent = '0';
     }
     this.unreadCount = 0;
 
-    // 2. Remove unread visual highlights
-    document.querySelectorAll('.notif-item.unread').forEach(item => {
-      item.classList.remove('unread');
-    });
-
     this.notifications.forEach(n => n.is_read = true);
+    this.renderNotifications();
 
-    // 3. Update Supabase Database in background
     const supabase = this.getClient();
     if (supabase && this.currentUserId) {
       try {
