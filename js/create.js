@@ -240,6 +240,15 @@ document.documentElement.classList.add('js-enabled');
 
           const newEscrowCode = data.id;
 
+          // Validation in escrow creation form submission:
+           const counterpartyInput = document.getElementById('counterparty-input').value.trim();
+           const isEvmAddress = /^0x[a-fA-F0-9]{40}$/.test(counterpartyInput);
+
+          if (!isEvmAddress) {
+           alert('Please enter a valid 0x EVM Wallet Address for the freelancer (e.g. 0x71C...3A9).');
+          return;
+           }
+
           // Log activity event
           await supabase.from('activity_logs').insert([{
             escrow_id: newEscrowCode,

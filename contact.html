@@ -877,42 +877,60 @@
 
   <!-- FORM VALIDATION SCRIPT -->
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const form = document.getElementById('contact-message-form');
-      const alertBanner = document.getElementById('form-alert-banner');
+  document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('contact-message-form');
+    const alertBanner = document.getElementById('form-alert-banner');
 
-      if (form) {
-        form.addEventListener('submit', (e) => {
-          e.preventDefault();
+    if (form) {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
 
-          const name = document.getElementById('field-name').value.trim();
-          const email = document.getElementById('field-email').value.trim();
-          const subject = document.getElementById('field-subject').value.trim();
-          const message = document.getElementById('field-message').value.trim();
+        const name = document.getElementById('field-name').value.trim();
+        const email = document.getElementById('field-email').value.trim();
+        const subject = document.getElementById('field-subject').value.trim();
+        const category = document.getElementById('field-category').value;
+        const message = document.getElementById('field-message').value.trim();
 
-          if (!name || !email || !subject || !message) {
-            showAlert('Please complete all required fields.', 'error');
-            return;
-          }
+        if (!name || !email || !subject || !message) {
+          showAlert('Please complete all required fields.', 'error');
+          return;
+        }
 
-          if (!email.includes('@') || !email.includes('.')) {
-            showAlert('Please enter a valid email address.', 'error');
-            return;
+        if (!email.includes('@') || !email.includes('.')) {
+          showAlert('Please enter a valid email address.', 'error');
+          return;
+        }
+
+        try {
+          // Save message to Supabase database
+          const supabase = window.baxisSupabase || window.supabaseClient || (window.supabase && window.supabase.auth ? window.supabase : null);
+          
+          if (supabase) {
+            const { error } = await supabase
+              .from('contact_messages')
+              .insert([{ name, email, subject, category, message }]);
+
+            if (error) throw error;
           }
 
           showAlert('Message received! The Baxis team will respond via email shortly.', 'success');
           form.reset();
-        });
-      }
 
-      function showAlert(msg, type) {
-        if (!alertBanner) return;
-        alertBanner.textContent = msg;
-        alertBanner.className = `form-alert ${type}`;
-        alertBanner.style.display = 'block';
-      }
-    });
-  </script>
+        } catch (err) {
+          console.error('Contact submission error:', err);
+          showAlert('Failed to send message. Please try again or email support@baxis.io directly.', 'error');
+        }
+      });
+    }
+
+    function showAlert(msg, type) {
+      if (!alertBanner) return;
+      alertBanner.textContent = msg;
+      alertBanner.className = `form-alert ${type}`;
+      alertBanner.style.display = 'block';
+    }
+  });
+</script>
 
 </body>
 </html>

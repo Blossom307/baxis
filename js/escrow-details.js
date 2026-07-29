@@ -602,12 +602,13 @@ document.documentElement.classList.add('js-enabled');
 
         this.setApproveBtnText('2/2: Confirm in MetaMask...');
 
-        let freelancerAddr = "0x0000000000000000000000000000000000000002";
-        if (this.currentEscrow?.counterparty_identifier && ethers.isAddress(this.currentEscrow.counterparty_identifier)) {
-          freelancerAddr = this.currentEscrow.counterparty_identifier;
+       
+         const freelancerAddr = this.currentEscrow?.counterparty_identifier || '';
+          if (!freelancerAddr || !ethers.isAddress(freelancerAddr)) {
+          throw new Error('Invalid Freelancer Wallet Address. The counterparty must be a valid 0x EVM wallet address before funding.');
         }
-        if (freelancerAddr.toLowerCase() === userAddr.toLowerCase()) {
-          freelancerAddr = "0x0000000000000000000000000000000000000002";
+          if (freelancerAddr.toLowerCase() === userAddr.toLowerCase()) {
+           throw new Error('You cannot create an escrow with yourself as the freelancer.');
         }
 
         const rawHours = this.currentEscrow?.auto_release_hours || 48;
