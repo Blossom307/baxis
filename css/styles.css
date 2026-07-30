@@ -1125,3 +1125,176 @@ code { font-family: var(--font-mono); color: var(--text-primary); }
 .footer-social-link:hover svg {
   transform: translateY(-1px);
 }
+
+/* ============================================================================
+   TRUST BOUNDARY CARD RESPONSIVE MOBILE FIX (< 768px)
+   ============================================================================ */
+.trust-boundary-card {
+  box-sizing: border-box !important;
+  max-width: 100% !important;
+  word-break: break-word !important;
+}
+
+@media (max-width: 768px) {
+  .trust-boundary-card {
+    margin-top: 2rem !important;
+    padding: 1.25rem 1rem !important; /* Prevents 32px desktop padding from squishing mobile text */
+    border-radius: 12px !important;
+  }
+
+  .trust-boundary-card h3 {
+    font-size: 1rem !important;
+  }
+
+  .trust-boundary-card p {
+    font-size: 0.875rem !important;
+    line-height: 1.55 !important;
+  }
+}
+
+/* ============================================================================
+   BAXIS PROTOCOL — TABLET & IPAD RESPONSIVE OVERHAUL (768px - 1024px)
+   Fixes iPad Mini, iPad Air, iPad Pro & Android Tablets
+   ============================================================================ */
+
+@media (max-width: 1024px) {
+  /* 1. Global Container Padding */
+  .container, 
+  .hud-container,
+  .footer-container {
+    padding-left: 1.5rem !important;
+    padding-right: 1.5rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* 2. Hero Section Stacking on iPad */
+  .hero-section {
+    padding-top: 5rem !important;
+    padding-bottom: 3.5rem !important;
+  }
+
+  .hero-grid {
+    grid-template-columns: 1fr !important;
+    gap: 3rem !important;
+  }
+
+  .hero-left {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    margin: 0 auto !important;
+    max-width: 720px !important;
+  }
+
+  .hero-headline {
+    font-size: clamp(2.25rem, 4.5vw, 3.25rem) !important;
+  }
+
+  .hero-subhead {
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+
+  .hero-actions {
+    justify-content: center !important;
+    width: 100% !important;
+  }
+
+  .hero-metrics-strip {
+    justify-content: center !important;
+    width: 100% !important;
+  }
+
+  .hero-right {
+    width: 100% !important;
+    max-width: 580px !important;
+    margin: 0 auto !important;
+  }
+
+  .hero-workflow-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* 3. Problem Narrative Grid (Scenario 1, 2, 3) */
+  .problem-narrative-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1.5rem !important;
+  }
+
+  /* 4. Timeline Grid (How It Works 4 Steps) */
+  .timeline-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 1.5rem !important;
+  }
+
+  /* 5. Comparison Grid */
+  .comparison-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1.5rem !important;
+  }
+
+  /* 6. Security Pillars Grid */
+  .security-pillars-grid {
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)) !important;
+    gap: 1.25rem !important;
+  }
+
+  /* 7. Personas Grid */
+  .personas-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 1.25rem !important;
+  }
+
+  /* 8. Footer Main Grid on iPad */
+  .footer-main-grid {
+    grid-template-columns: 2fr repeat(2, 1fr) !important;
+    gap: 2.5rem 1.5rem !important;
+  }
+
+  .footer-brand-col {
+    grid-column: span 3 !important;
+    margin-bottom: 1rem !important;
+  }
+
+  .footer-brand-desc {
+    max-width: 500px !important;
+  }
+}
+
+/* Mobile & Portrait iPad (Under 768px) */
+@media (max-width: 768px) {
+  .timeline-grid,
+  .personas-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .footer-main-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  .footer-brand-col {
+    grid-column: span 2 !important;
+  }
+
+  .footer-bottom-bar {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 1rem !important;
+  }
+
+  .footer-tagline-text {
+    text-align: left !important;
+  }
+
+  /* Trust Boundary Card Fix */
+  .trust-boundary-card {
+    margin-top: 2rem !important;
+    padding: 1.25rem 1rem !important;
+    border-radius: 12px !important;
+  }
+}
