@@ -182,13 +182,34 @@ document.documentElement.classList.add('js-enabled');
       this.tabSignIn.classList.toggle('active', isSignIn);
       this.tabSignUp.classList.toggle('active', !isSignIn);
 
+      const tabSwitcher = document.getElementById('auth-tab-switcher');
+      if (tabSwitcher) tabSwitcher.style.display = 'flex';
+
+      const viewForgot = document.getElementById('view-forgot-password');
+      if (viewForgot) {
+        viewForgot.setAttribute('hidden', 'true');
+        viewForgot.style.display = 'none';
+      }
+
       if (isSignIn) {
-        this.viewSignIn.removeAttribute('hidden');
-        this.viewSignUp.setAttribute('hidden', 'true');
+        if (this.viewSignIn) {
+          this.viewSignIn.removeAttribute('hidden');
+          this.viewSignIn.style.display = 'block';
+        }
+        if (this.viewSignUp) {
+          this.viewSignUp.setAttribute('hidden', 'true');
+          this.viewSignUp.style.display = 'none';
+        }
         document.getElementById('signin-email')?.focus();
       } else {
-        this.viewSignUp.removeAttribute('hidden');
-        this.viewSignIn.setAttribute('hidden', 'true');
+        if (this.viewSignUp) {
+          this.viewSignUp.removeAttribute('hidden');
+          this.viewSignUp.style.display = 'block';
+        }
+        if (this.viewSignIn) {
+          this.viewSignIn.setAttribute('hidden', 'true');
+          this.viewSignIn.style.display = 'none';
+        }
         document.getElementById('signup-name')?.focus();
       }
       this.clearAlerts();
@@ -249,7 +270,7 @@ document.documentElement.classList.add('js-enabled');
       const spinner = btn.querySelector('.btn-spinner');
 
       if (spinner) spinner.setAttribute('hidden', 'true');
-      btn.style.background = 'var(--emerald)';
+      btn.style.background = 'var(--state-success, #10B981)';
       btn.style.color = '#FFFFFF';
       if (text) text.textContent = `✓ ${successText}`;
     }
@@ -262,7 +283,6 @@ document.documentElement.classList.add('js-enabled');
     constructor() {
       this.ui = new AuthUI();
       this.passwordManager = new PasswordManager();
-      this.supabase = window.baxisSupabase;
       this.init();
     }
 
@@ -271,11 +291,19 @@ document.documentElement.classList.add('js-enabled');
       this.bindFormSubmissions();
     }
 
+    getSupabase() {
+      if (window.baxisSupabase) return window.baxisSupabase;
+      if (window.supabaseClient) return window.supabaseClient;
+      if (window.supabase && window.supabase.auth) return window.supabase;
+      return null;
+    }
+
     async checkActiveSession() {
-      if (!this.supabase) return;
-      const { data: { session } } = await this.supabase.auth.getSession();
-      if (session) {
-        // Already logged in, redirect to dashboard
+      const supabase = this.getSupabase();
+      if (!supabase) return;
+      
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session && !window.location.search.includes('mode=reset') && !window.location.hash.includes('type=recovery')) {
         window.location.href = 'dashboard.html';
       }
     }
@@ -300,9 +328,10 @@ document.documentElement.classList.add('js-enabled');
         this.ui.setButtonLoading('btn-submit-signin', true);
 
         try {
-          if (!this.supabase) throw new Error('Supabase client not initialized in supabase.js');
+          const activeClient = this.getSupabase();
+          if (!activeClient) throw new Error('Supabase client not initialized.');
 
-          const { data, error } = await this.supabase.auth.signInWithPassword({
+          const { data, error } = await activeClient.auth.signInWithPassword({
             email: email.trim(),
             password: password
           });
@@ -347,9 +376,10 @@ document.documentElement.classList.add('js-enabled');
         this.ui.setButtonLoading('btn-submit-signup', true);
 
         try {
-          if (!this.supabase) throw new Error('Supabase client not initialized in supabase.js');
+          const activeClient = this.getSupabase();
+          if (!activeClient) throw new Error('Supabase client not initialized.');
 
-          const { data, error } = await this.supabase.auth.signUp({
+          const { data, error } = await activeClient.auth.signUp({
             email: email.trim(),
             password: password,
             options: {
@@ -376,6 +406,155 @@ document.documentElement.classList.add('js-enabled');
     }
   }
 
+  /* ==========================================================================
+     5. PASSWORD RECOVERY LOGIC (FORGOT & RESET PASSWORD)
+     ========================================================================== */
+  
+  // 1. Click "Forgot Password?" -> Toggle Views
+  document.addEventListener('click', (e) => {
+    const target = e.target.closest('#link-forgot-password') || e.target.closest('#link-forgot-pass');
+    if (target) {
+      e.preventDefault();
+      const viewForgot = document.getElementById('view-forgot-password');
+      const viewSignIn = document.getElementById('view-signin') || document.getElementById('view-login');
+      const tabSwitcher = document.getElementById('auth-tab-switcher');
+
+      if (tabSwitcher) tabSwitcher.style.display = 'none';
+      if (viewSignIn) {
+        viewSignIn.setAttribute('hidden', 'true');
+        viewSignIn.style.display = 'none';
+      }
+      if (viewForgot) {
+        viewForgot.removeAttribute('hidden');
+        viewForgot.style.display = 'block';
+      }
+    }
+
+    const backTarget = e.target.closest('#link-back-to-login');
+    if (backTarget) {
+      e.preventDefault();
+      const viewForgot = document.getElementById('view-forgot-password');
+      const viewSignIn = document.getElementById('view-signin') || document.getElementById('view-login');
+      const tabSwitcher = document.getElementById('auth-tab-switcher');
+
+      if (tabSwitcher) tabSwitcher.style.display = 'flex';
+      if (viewForgot) {
+        viewForgot.setAttribute('hidden', 'true');
+        viewForgot.style.display = 'none';
+      }
+      if (viewSignIn) {
+        viewSignIn.removeAttribute('hidden');
+        viewSignIn.style.display = 'block';
+      }
+    }
+  });
+
+  // 2. Submit "Send Recovery Link"
+  document.addEventListener('submit', async (e) => {
+    if (e.target && e.target.id === 'form-forgot-password') {
+      e.preventDefault();
+      const emailInput = document.getElementById('forgot-email');
+      const email = emailInput ? emailInput.value.trim() : '';
+      const alertErr = document.getElementById('alert-forgot-error');
+      const alertOk = document.getElementById('alert-forgot-success');
+      const btn = document.getElementById('btn-send-reset');
+
+      if (!email) return;
+
+      try {
+        if (btn) btn.disabled = true;
+        const supabase = window.baxisSupabase || window.supabaseClient || (window.supabase && window.supabase.auth ? window.supabase : null);
+        if (!supabase) throw new Error('Supabase client unavailable.');
+
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/auth.html?mode=reset`
+        });
+
+        if (error) throw error;
+
+        if (alertOk) {
+          alertOk.textContent = 'Recovery link sent! Check your email inbox.';
+          alertOk.style.display = 'flex';
+        }
+        if (alertErr) alertErr.style.display = 'none';
+        e.target.reset();
+
+      } catch (err) {
+        console.error('Password reset request error:', err);
+        if (alertErr) {
+          const msgSpan = document.getElementById('alert-forgot-error-msg') || alertErr;
+          msgSpan.textContent = err.message || 'Failed to send recovery link.';
+          alertErr.style.display = 'flex';
+        }
+        if (alertOk) alertOk.style.display = 'none';
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    }
+
+    // 3. Submit "Update Password"
+    if (e.target && e.target.id === 'form-new-password') {
+      e.preventDefault();
+      const passInput = document.getElementById('new-password-input');
+      const newPassword = passInput ? passInput.value.trim() : '';
+      const alertErr = document.getElementById('alert-new-pass-error');
+      const btn = document.getElementById('btn-save-new-pass');
+
+      if (!newPassword || newPassword.length < 6) {
+        if (alertErr) {
+          alertErr.textContent = 'Password must be at least 6 characters.';
+          alertErr.style.display = 'flex';
+        }
+        return;
+      }
+
+      try {
+        if (btn) btn.disabled = true;
+        const supabase = window.baxisSupabase || window.supabaseClient || (window.supabase && window.supabase.auth ? window.supabase : null);
+        if (!supabase) throw new Error('Supabase client unavailable.');
+
+        const { error } = await supabase.auth.updateUser({ password: newPassword });
+        if (error) throw error;
+
+        alert('Password updated successfully! Redirecting to workspace...');
+        window.location.href = 'dashboard.html';
+
+      } catch (err) {
+        console.error('Password update error:', err);
+        if (alertErr) {
+          alertErr.textContent = err.message || 'Failed to update password.';
+          alertErr.style.display = 'flex';
+        }
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    }
+  });
+
+  // 4. Detect when user returns from clicking password recovery link in email
+  document.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const isResetMode = urlParams.get('mode') === 'reset' || window.location.hash.includes('type=recovery');
+
+    if (isResetMode) {
+      document.querySelectorAll('.auth-form-view').forEach(v => {
+        v.setAttribute('hidden', 'true');
+        v.style.display = 'none';
+      });
+      const tabSwitcher = document.getElementById('auth-tab-switcher');
+      if (tabSwitcher) tabSwitcher.style.display = 'none';
+
+      const viewNewPass = document.getElementById('view-new-password');
+      if (viewNewPass) {
+        viewNewPass.removeAttribute('hidden');
+        viewNewPass.style.display = 'block';
+      }
+    }
+  });
+
+  /* ==========================================================================
+     INIT APP
+     ========================================================================== */
   document.addEventListener('DOMContentLoaded', () => {
     new AuthApp();
   });

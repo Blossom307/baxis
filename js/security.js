@@ -104,9 +104,13 @@
         if (session && session.user) {
           await this.loadUserContext(session.user);
           
-          // If already logged in and visiting auth/login, redirect to dashboard
+          // Check if user is in password recovery mode
+          const isResetMode = window.location.search.includes('mode=reset') || 
+                              window.location.hash.includes('type=recovery');
+
+          // If already logged in and visiting auth/login, redirect to dashboard (UNLESS RESETTING PASSWORD)
           const currentPath = window.location.pathname.toLowerCase();
-          if (currentPath.includes('auth') || currentPath.includes('login')) {
+          if ((currentPath.includes('auth') || currentPath.includes('login')) && !isResetMode) {
             window.location.href = 'dashboard.html';
             return;
           }
