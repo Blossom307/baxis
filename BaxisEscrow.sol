@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.28;
 
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/Pausable.sol";
@@ -8,15 +8,15 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable2Step.sol";
 
 /**
- * @title BaxisEscrow Protocol v1.0.0
+ * @title BaxisEscrow Protocol v1.1.0
  * @author Baxis Protocol
  * @notice Production-grade non-custodial smart contract escrow for digital contracts & freelancing.
- * @dev Lifecycle: FUNDED ➔ SUBMITTED (Inspection Window Starts) ➔ RELEASED / REFUNDED / DISPUTED
+ * @dev Lifecycle: FUNDED ➔ SUBMITTED (Inspection Window Starts) ➔ RELEASED / REFUNDED / DISPUTED ➔ RESOLVED
  */
 contract BaxisEscrow is ReentrancyGuard, Pausable, Ownable2Step {
     using SafeERC20 for IERC20;
 
-    string public constant VERSION = "1.0.0";
+    string public constant VERSION = "1.1.0";
 
     // --- ENUMS & STRUCTS ---
 
@@ -27,22 +27,24 @@ contract BaxisEscrow is ReentrancyGuard, Pausable, Ownable2Step {
         RELEASED,   // 3: Funds transferred to freelancer
         REFUNDED,   // 4: Funds returned to client
         DISPUTED,   // 5: Frozen in dispute mode
-        RESOLVED    // 6: Resolved by arbitrator
+        RESOLVED    // 6: Resolved by arbitrator or timeout fallback
     }
 
     /**
-     * @dev Gas-optimized struct layout (packed into 32-byte storage slots)
+     * @dev Gas-optimized struct layout (packed into storage slots)
      */
     struct Escrow {
         address client;            // 20 bytes (Slot 1)
         address freelancer;        // 20 bytes (Slot 2)
         address token;             // 20 bytes (Slot 3)
         uint256 amount;            // 32 bytes (Slot 4 - net amount for freelancer)
-        uint64 createdAt;          // 8 bytes  (Slot 5)
-        uint64 submittedAt;        // 8 bytes  (Slot 5)
-        uint64 inspectionWindow;   // 8 bytes  (Slot 5)
-        uint64 completedAt;        // 8 bytes  (Slot 6)
-        EscrowStatus status;       // 1 byte   (Slot 6)
+        bytes32 agreementHash;     // 32 bytes (Slot 5 - off-chain scope/terms hash)
+        uint64 createdAt;          // 8 bytes  (Slot 6 - packed)
+        uint64 submittedAt;        // 8 bytes  (Slot 6 - packed)
+        uint64 inspectionWindow;   // 8 bytes  (Slot 6 - packed)
+        uint64 disputedAt;         // 8 bytes  (Slot 6 - packed, total 32 bytes)
+        uint64 completedAt;        // 8 bytes  (Slot 7)
+        EscrowStatus status;       // 1 byte   (Slot 7)
     }
 
     // --- STATE VARIABLES ---
@@ -55,6 +57,9 @@ contract BaxisEscrow is ReentrancyGuard, Pausable, Ownable2Step {
 
     uint64 public constant MIN_INSPECTION_WINDOW = 1 days;   // 86,400 seconds
     uint64 public constant MAX_INSPECTION_WINDOW = 90 days;  // 7,776,000 seconds
+    uint64 public constant DISPUTE_TIMEOUT = 45 days;        // Fallback split if arbitrator inactive
+
+    uint256 public maxEscrowAmount = 5000 * 1e6; // Default $5,000 USDC cap during beta (0 = unlimited)
 
     // Whitelist for official stablecoins (USDC, USDT, etc.)
     mapping(address => bool) public isSupportedToken;
@@ -78,6 +83,9 @@ contract BaxisEscrow is ReentrancyGuard, Pausable, Ownable2Step {
     error Unauthorized();
     error FeeTooHigh();
     error InspectionPeriodNotExpired();
+    error WorkAlreadySubmitted();
+    error ExceedsMaxEscrowAmount();
+    error DisputeTimeoutNotReached();
 
     // --- EVENTS ---
 
@@ -88,12 +96,14 @@ contract BaxisEscrow is ReentrancyGuard, Pausable, Ownable2Step {
         address token,
         uint256 gigAmount,
         uint256 feePaid,
-        uint64 inspectionWindow
+        uint64 inspectionWindow,
+        bytes32 agreementHash
     );
 
     event WorkSubmitted(bytes32 indexed gigId, address indexed freelancer, uint64 submittedAt, uint64 inspectionDeadline);
     event EscrowReleased(bytes32 indexed gigId, address indexed freelancer, uint256 amount);
     event EscrowRefunded(bytes32 indexed gigId, address indexed client, uint256 amount);
+    event EscrowCancelled(bytes32 indexed gigId, address indexed client, uint256 refundAmount);
     event DisputeRaised(bytes32 indexed gigId, address indexed initiator, bytes32 indexed evidenceHash);
     event DisputeResolved(
         bytes32 indexed gigId,
@@ -102,11 +112,13 @@ contract BaxisEscrow is ReentrancyGuard, Pausable, Ownable2Step {
         address indexed client,
         uint256 clientRefund
     );
+    event DisputeTimeoutClaimed(bytes32 indexed gigId, uint256 freelancerAmount, uint256 clientAmount);
 
     event SupportedTokenUpdated(address indexed token, bool supported);
     event ArbitratorUpdated(address indexed arbitrator, bool status);
     event ConfigUpdated(string setting, address indexed value);
     event FeeUpdated(uint256 newFeeBps);
+    event MaxEscrowAmountUpdated(uint256 newMaxAmount);
 
     /**
      * @notice Initializes the Baxis Escrow Protocol with the treasury and deployer as initial arbitrator
@@ -144,6 +156,11 @@ contract BaxisEscrow is ReentrancyGuard, Pausable, Ownable2Step {
         emit FeeUpdated(_newFeeBps);
     }
 
+    function setMaxEscrowAmount(uint256 _newMaxAmount) external onlyOwner {
+        maxEscrowAmount = _newMaxAmount;
+        emit MaxEscrowAmountUpdated(_newMaxAmount);
+    }
+
     function pause() external onlyOwner { _pause(); }
     function unpause() external onlyOwner { _unpause(); }
 
@@ -154,12 +171,14 @@ contract BaxisEscrow is ReentrancyGuard, Pausable, Ownable2Step {
         address _freelancer,
         address _token,
         uint256 _gigAmount,
-        uint64 _inspectionWindowSeconds
+        uint64 _inspectionWindowSeconds,
+        bytes32 _agreementHash
     ) external nonReentrant whenNotPaused {
         if (_gigId == bytes32(0)) revert InvalidGigId();
         if (_freelancer == address(0) || _token == address(0)) revert InvalidAddress();
         if (_freelancer == msg.sender) revert InvalidFreelancer();
         if (_gigAmount == 0) revert InvalidAmount();
+        if (maxEscrowAmount > 0 && _gigAmount > maxEscrowAmount) revert ExceedsMaxEscrowAmount();
         if (!isSupportedToken[_token]) revert UnsupportedToken();
         if (_inspectionWindowSeconds < MIN_INSPECTION_WINDOW || _inspectionWindowSeconds > MAX_INSPECTION_WINDOW) {
             revert InvalidTimelock();
@@ -174,9 +193,11 @@ contract BaxisEscrow is ReentrancyGuard, Pausable, Ownable2Step {
             freelancer: _freelancer,
             token: _token,
             amount: _gigAmount,
+            agreementHash: _agreementHash,
             createdAt: uint64(block.timestamp),
             submittedAt: 0,
             inspectionWindow: _inspectionWindowSeconds,
+            disputedAt: 0,
             completedAt: 0,
             status: EscrowStatus.FUNDED
         });
@@ -188,7 +209,16 @@ contract BaxisEscrow is ReentrancyGuard, Pausable, Ownable2Step {
             tokenContract.safeTransfer(treasury, fee);
         }
 
-        emit EscrowFunded(_gigId, msg.sender, _freelancer, _token, _gigAmount, fee, _inspectionWindowSeconds);
+        emit EscrowFunded(
+            _gigId, 
+            msg.sender, 
+            _freelancer, 
+            _token, 
+            _gigAmount, 
+            fee, 
+            _inspectionWindowSeconds, 
+            _agreementHash
+        );
     }
 
     function submitWork(bytes32 _gigId) external whenNotPaused {
@@ -239,6 +269,27 @@ contract BaxisEscrow is ReentrancyGuard, Pausable, Ownable2Step {
         emit EscrowReleased(_gigId, escrow.freelancer, escrow.amount);
     }
 
+    /**
+     * @notice Allows client to unilaterally cancel escrow ONLY if work has NOT been submitted yet.
+     */
+    function cancelEscrow(bytes32 _gigId) external nonReentrant whenNotPaused {
+        Escrow storage escrow = escrows[_gigId];
+
+        if (msg.sender != escrow.client) revert Unauthorized();
+        if (escrow.status == EscrowStatus.SUBMITTED) revert WorkAlreadySubmitted();
+        if (escrow.status != EscrowStatus.FUNDED) revert InvalidStatus();
+
+        escrow.status = EscrowStatus.REFUNDED;
+        escrow.completedAt = uint64(block.timestamp);
+
+        IERC20(escrow.token).safeTransfer(escrow.client, escrow.amount);
+
+        emit EscrowCancelled(_gigId, escrow.client, escrow.amount);
+    }
+
+    /**
+     * @notice Voluntary refund triggered by freelancer to return funds to client.
+     */
     function refundClient(bytes32 _gigId) external nonReentrant whenNotPaused {
         Escrow storage escrow = escrows[_gigId];
 
@@ -264,6 +315,7 @@ contract BaxisEscrow is ReentrancyGuard, Pausable, Ownable2Step {
         }
 
         escrow.status = EscrowStatus.DISPUTED;
+        escrow.disputedAt = uint64(block.timestamp);
 
         emit DisputeRaised(_gigId, msg.sender, _evidenceHash);
     }
@@ -291,6 +343,35 @@ contract BaxisEscrow is ReentrancyGuard, Pausable, Ownable2Step {
         }
 
         emit DisputeResolved(_gigId, escrow.freelancer, _freelancerAmount, escrow.client, clientRefund);
+    }
+
+    /**
+     * @notice Fallback split if dispute sits un-arbitrated for longer than 45 days (Bus-factor safeguard).
+     */
+    function claimDisputeTimeoutFallback(bytes32 _gigId) external nonReentrant whenNotPaused {
+        Escrow storage escrow = escrows[_gigId];
+
+        if (msg.sender != escrow.client && msg.sender != escrow.freelancer) revert Unauthorized();
+        if (escrow.status != EscrowStatus.DISPUTED) revert InvalidStatus();
+        if (block.timestamp < escrow.disputedAt + DISPUTE_TIMEOUT) revert DisputeTimeoutNotReached();
+
+        uint256 freelancerShare = escrow.amount / 2;
+        uint256 clientShare = escrow.amount - freelancerShare;
+
+        escrow.status = EscrowStatus.RESOLVED;
+        escrow.completedAt = uint64(block.timestamp);
+
+        IERC20 tokenContract = IERC20(escrow.token);
+
+        if (freelancerShare > 0) {
+            tokenContract.safeTransfer(escrow.freelancer, freelancerShare);
+        }
+
+        if (clientShare > 0) {
+            tokenContract.safeTransfer(escrow.client, clientShare);
+        }
+
+        emit DisputeTimeoutClaimed(_gigId, freelancerShare, clientShare);
     }
 
     // --- VIEW HELPERS ---

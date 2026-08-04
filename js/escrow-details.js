@@ -627,13 +627,17 @@ document.documentElement.classList.add('js-enabled');
         const rawHours = this.currentEscrow?.auto_release_hours || 48;
         const timelockSeconds = Math.max(rawHours * 3600, 86400);
 
+        // GENERATE AGREEMENT HASH (Cryptographic Proof of Title + Terms)
+        const agreementHash = ethers.id(this.currentEscrow.title + (this.currentEscrow.description || ''));
+
         const contractInterface = new ethers.Interface(BAXIS_CONTRACT_ABI);
         const calldata = contractInterface.encodeFunctionData('fundEscrow', [
           bytes32GigId,
           freelancerAddr,
           USDC_TOKEN_ADDRESS,
           parsedAmount,
-          timelockSeconds
+          timelockSeconds,
+          agreementHash
         ]);
 
         const txHash = await window.ethereum.request({
