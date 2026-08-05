@@ -81,12 +81,18 @@ document.documentElement.classList.add('js-enabled');
 
     updatePreview() {
       const title = this.titleInput?.value.trim() || 'Brand Identity & Website Design';
-      const counterparty = this.counterpartyInput?.value.trim();
+      const counterparty = this.counterpartyInput?.value.trim() || '';
       const rawAmount = this.amountInput?.value;
       const token = this.tokenSelect?.value || 'USDC';
       const network = this.networkSelect?.value || 'Base';
       const timelock = this.timelockSelect?.value || '48';
       const userRole = this.getSelectedRole();
+
+      // Format 42-character 0x addresses to short format for smooth preview rendering
+      let displayCounterparty = counterparty;
+      if (counterparty && counterparty.startsWith('0x') && counterparty.length === 42) {
+        displayCounterparty = `${counterparty.substring(0, 6)}...${counterparty.substring(38)}`;
+      }
 
       if (this.previewTitle) this.previewTitle.textContent = title;
       if (this.previewAmount) this.previewAmount.textContent = this.formatCurrency(rawAmount, token);
@@ -94,10 +100,10 @@ document.documentElement.classList.add('js-enabled');
 
       if (userRole === 'client') {
         if (this.previewClientName) this.previewClientName.textContent = 'You (Client)';
-        if (this.previewTalentName) this.previewTalentName.textContent = counterparty || 'Counterparty pending';
+        if (this.previewTalentName) this.previewTalentName.textContent = displayCounterparty || 'Counterparty pending';
       } else {
         if (this.previewTalentName) this.previewTalentName.textContent = 'You (Freelancer)';
-        if (this.previewClientName) this.previewClientName.textContent = counterparty || 'Client pending';
+        if (this.previewClientName) this.previewClientName.textContent = displayCounterparty || 'Client pending';
       }
 
       if (this.previewStatusText) {

@@ -1094,3 +1094,38 @@ a:focus-visible, button:focus-visible, input:focus-visible {
     display: none !important;
   }
 }
+
+/* ============================================================================
+   DASHBOARD TABLE MOBILE ADDRESS TRUNCATION (< 768px)
+   ============================================================================ */
+
+.data-table td code,
+.data-table td .counterparty-addr {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75rem;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+@media (max-width: 768px) {
+  .table-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important; /* Prevents back-and-forth box scrolling */
+  }
+
+  .data-table td, 
+  .data-table th {
+    padding: 10px 8px !important;
+    font-size: 0.75rem !important;
+  }
+
+  .data-table td code,
+  .data-table td .counterparty-addr {
+    max-width: 90px !important; /* Fits comfortably on 360px mobile screens */
+  }
+}

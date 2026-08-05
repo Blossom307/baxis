@@ -9,6 +9,15 @@ document.documentElement.classList.add('js-enabled');
   'use strict';
 
   const System = {
+    formatShortAddress(addr) {
+      if (!addr) return '0x...';
+      const clean = addr.trim();
+      if (clean.startsWith('0x') && clean.length === 42) {
+        return `${clean.substring(0, 6)}...${clean.substring(clean.length - 4)}`;
+      }
+      return clean.length > 16 ? `${clean.substring(0, 14)}...` : clean;
+    },
+
     announce(message) {
       let announcer = document.getElementById('a11y-announcer');
       if (!announcer) {
@@ -254,7 +263,9 @@ document.documentElement.classList.add('js-enabled');
 
     getSupabase() {
       if (window.baxisSupabase) return window.baxisSupabase;
-      if (window.supabase) {
+      if (window.supabaseClient) return window.supabaseClient;
+      if (window.supabase && window.supabase.auth) return window.supabase;
+      if (window.supabase && typeof window.supabase.createClient === 'function') {
         window.baxisSupabase = window.supabase.createClient(
           'https://sytnwsuqoeqlwybkkhhj.supabase.co',
           'sb_publishable_Qtiz_CfMKreLNiDHgVjYag_nFulAMjt'
@@ -345,7 +356,6 @@ document.documentElement.classList.add('js-enabled');
       }
     }
 
-    /* BIND FILTER TABS (ALL, NEEDS ACTION, IN PROGRESS, COMPLETED) */
     bindFilterTabs() {
       const tabs = document.querySelectorAll('.table-filter-tabs .tab-btn');
       tabs.forEach((tab) => {
@@ -359,7 +369,6 @@ document.documentElement.classList.add('js-enabled');
       });
     }
 
-    /* DYNAMIC FILTER LOGIC & CONTEXTUAL EMPTY STATES */
     applyTableFilter(filter) {
       const messages = {
         all: {
@@ -414,7 +423,6 @@ document.documentElement.classList.add('js-enabled');
       `;
     }
 
-    /* RENDER DYNAMIC EMPTY STATE (ZERO EMOJIS, 100% SVG) */
     renderEmptyState(title = 'No Active Escrow Contracts', desc = 'Create your first protected escrow agreement in under 60 seconds.') {
       if (!this.tableBody) return;
       this.tableBody.innerHTML = `
@@ -442,7 +450,9 @@ document.documentElement.classList.add('js-enabled');
         const tr = document.createElement('tr');
         tr.className = 'table-row';
 
-        const formattedAmount = `$${parseFloat(deal.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })} ${deal.currency}`;
+        const formattedAmount = `$${parseFloat(deal.amount || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })} ${deal.currency || 'USDC'}`;
+        const formattedCounterparty = System.formatShortAddress(deal.counterparty_identifier);
+
         const statusMap = {
           'awaiting_deposit': '<span class="status-pill info">Awaiting Deposit</span>',
           'funds_locked': '<span class="status-pill green">Funds Locked</span>',
@@ -454,11 +464,11 @@ document.documentElement.classList.add('js-enabled');
         tr.innerHTML = `
           <td>
             <div class="deal-title-group">
-              <a href="escrow-details.html?id=${deal.id}" class="deal-title">${deal.title}</a>
+              <a href="escrow-details.html?id=${deal.id}" class="deal-title">${deal.title || 'Escrow Agreement'}</a>
               <span class="deal-id">#${deal.id}</span>
             </div>
           </td>
-          <td><span style="font-family: var(--font-mono); font-size: 12px; color: #A0A0A0;">${deal.counterparty_identifier}</span></td>
+          <td><code class="counterparty-addr" title="${deal.counterparty_identifier}">${formattedCounterparty}</code></td>
           <td><span class="amount-bold">${formattedAmount}</span></td>
           <td>${statusMap[deal.status] || deal.status}</td>
           <td><a href="escrow-details.html?id=${deal.id}" class="btn btn-secondary btn-xs">View Vault</a></td>
