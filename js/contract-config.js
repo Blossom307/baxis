@@ -1,15 +1,12 @@
 /**
  * BAXIS PROTOCOL — SMART CONTRACT CONFIGURATION (`contract-config.js`)
- * Compatible with BaxisEscrow v1.1.0 & Ethers.js v6
  */
 
-// REPLACE with your newly deployed BaxisEscrow v1.1.0 contract address (from Remix/Hardhat)
-const BAXIS_CONTRACT_ADDRESS = '0x0503e84A8d42379e1c7b5Acb5A4DABdc6E75Ce8d'; 
+//  Base Mainnet Deployed Contract Address
+const BAXIS_CONTRACT_ADDRESS = '0xebc5942d0053B1acEfF18B01086272667209Df5b'; 
 
-// TOKEN ADDRESSES
-// Base Sepolia Testnet USDC: 0x036CbD53842c5426634e7929541eC2318f3dCF7e
-// Base Mainnet Official Native USDC: 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
-const USDC_TOKEN_ADDRESS = '0x036CbD53842c5426634e7929541eC2318f3dCF7e';
+// Official Base Mainnet Native USDC Address
+const USDC_TOKEN_ADDRESS = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
 
 const BAXIS_CONTRACT_ABI = [
   // Core Escrow Actions
@@ -54,9 +51,7 @@ const ERC20_ABI = [
   "function balanceOf(address account) external view returns (uint256)"
 ];
 
-/**
- * Converts a string escrow ID into a 32-byte hex hash for smart contract mapping
- */
+
 function getGigIdBytes32(escrowIdString) {
   return ethers.id(escrowIdString);
 }

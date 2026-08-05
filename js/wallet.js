@@ -1,5 +1,6 @@
 /**
  * BAXIS PROTOCOL — MULTI-WALLET CONNECTOR (`wallet.js`)
+ * Live Base Mainnet (Chain ID 8453 / 0x2105) Configuration
  * Powered by Ethers.js v6
  */
 
@@ -11,7 +12,7 @@
       this.provider = null;
       this.signer = null;
       this.userAddress = null;
-      this.targetChainId = '0x14a34'; // Base Sepolia Testnet (84532 in hex)
+      this.targetChainId = '0x2105'; // Base Mainnet (8453 in hex)
 
       this.init();
     }
@@ -101,7 +102,7 @@
     }
 
     /**
-     * Ensures Base Sepolia Network (0x14a34)
+     * Ensures Base Mainnet Network (0x2105 / 8453)
      */
     async ensureCorrectNetwork(ethereum) {
       const currentChainId = await ethereum.request({ method: 'eth_chainId' });
@@ -116,11 +117,11 @@
             await ethereum.request({
               method: 'wallet_addEthereumChain',
               params: [{
-                chainId: '0x14a34',
-                chainName: 'Base Sepolia Testnet',
+                chainId: '0x2105',
+                chainName: 'Base Mainnet',
                 nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
-                rpcUrls: ['https://base-sepolia.blockpi.network/v1/rpc/public', 'https://sepolia.base.org'],
-                blockExplorerUrls: ['https://sepolia.basescan.org']
+                rpcUrls: ['https://mainnet.base.org', 'https://developer-access-mainnet.base.org'],
+                blockExplorerUrls: ['https://basescan.org']
               }]
             });
           }
