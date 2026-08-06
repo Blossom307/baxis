@@ -455,10 +455,13 @@ document.documentElement.classList.add('js-enabled');
         statusPillEl.textContent = statusMap[escrow.status] || escrow.status.toUpperCase();
       }
 
-      // SHOW / HIDE CANCEL BUTTON DYNAMICALLY DURING 'FUNDS_LOCKED'
+      // DETERMINISTIC CANCEL BUTTON & DOM RESET
       if (this.cancelBtn) {
+        const cancelSpan = this.cancelBtn.querySelector('span') || this.cancelBtn;
         if (escrow.status === 'funds_locked') {
           this.cancelBtn.style.display = 'inline-flex';
+          this.cancelBtn.disabled = false;
+          if (cancelSpan) cancelSpan.textContent = 'Cancel & Refund Escrow';
         } else {
           this.cancelBtn.style.display = 'none';
         }
@@ -752,7 +755,8 @@ document.documentElement.classList.add('js-enabled');
           ? getGigIdBytes32(this.escrowId) 
           : ethers.id(this.escrowId);
 
-        // Instantiate contract directly via Ethers with signer
+        // REUSE SIGNER PROVIDER FROM wallet.js (Prevents multi-provider collisions)
+        const provider = signer.provider || new ethers.BrowserProvider(window.ethereum);
         const baxisContract = new ethers.Contract(BAXIS_CONTRACT_ADDRESS, BAXIS_CONTRACT_ABI, signer);
 
         // 1. PRE-FLIGHT CHECK: Verify on-chain state before firing transaction
@@ -799,21 +803,20 @@ document.documentElement.classList.add('js-enabled');
         const span = this.cancelBtn?.querySelector('span') || this.cancelBtn;
         if (span) span.textContent = 'Waiting for Blockchain Confirmation...';
 
-        // 3. HARDENED POLLING FOR BASE MAINNET (Prevents Ethers BrowserProvider hanging)
-        const provider = new ethers.BrowserProvider(window.ethereum);
+        // 3. STATELESS RPC RECEIPT QUERY (Does not rely on Ethers event filters)
         let txReceipt = null;
         let attempts = 0;
-        const maxAttempts = 25; // Try polling for up to 50 seconds
+        const maxAttempts = 30; // Check for up to 45 seconds
 
         while (!txReceipt && attempts < maxAttempts) {
           attempts++;
           try {
             txReceipt = await provider.getTransactionReceipt(tx.hash);
           } catch (e) {
-            console.warn('Polling for receipt...', e);
+            console.warn('Polling RPC for transaction receipt...', e);
           }
           if (!txReceipt) {
-            await new Promise((resolve) => setTimeout(resolve, 2000)); // Poll every 2 seconds
+            await new Promise((resolve) => setTimeout(resolve, 1500)); // Poll every 1.5s
           }
         }
 
@@ -821,7 +824,7 @@ document.documentElement.classList.add('js-enabled');
           throw new Error('Cancel transaction failed or timed out on Base Mainnet. Check your wallet history.');
         }
 
-        // 4. UPDATE SUPABASE DATABASE
+        // 4. UPDATE SUPABASE DATABASE & RENDER DETERMINISTIC UI
         const supabase = this.getSupabase();
         if (supabase) {
           await supabase.from('escrows').update({
@@ -832,6 +835,7 @@ document.documentElement.classList.add('js-enabled');
 
         if (this.currentEscrow) {
           this.currentEscrow.status = 'refunded';
+          this.renderEscrowDetails(this.currentEscrow);
         }
 
         this.toast.show({
@@ -841,14 +845,15 @@ document.documentElement.classList.add('js-enabled');
           duration: 6000
         });
 
-        await this.fetchEscrowFromDatabase();
-
       } catch (err) {
-        if (this.cancelBtn) {
+        if (this.currentEscrow) {
+          this.renderEscrowDetails(this.currentEscrow);
+        } else if (this.cancelBtn) {
           this.cancelBtn.disabled = false;
           const span = this.cancelBtn.querySelector('span') || this.cancelBtn;
           span.textContent = 'Cancel & Refund Escrow';
         }
+
         console.error('Cancel Failed:', err);
 
         let errorMsg = err.reason || err.message || 'Transaction rejected or failed.';
