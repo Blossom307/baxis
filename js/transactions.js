@@ -325,7 +325,8 @@ document.documentElement.classList.add('js-enabled');
 
         const txHash = tx.release_tx_hash || tx.deposit_tx_hash || '0x...';
         const truncatedHash = `${txHash.substring(0, 8)}...${txHash.substring(txHash.length - 6)}`;
-        const baseScanUrl = `https://sepolia.basescan.org/tx/${txHash}`;
+        const baseScanUrl = `https://basescan.org/tx/${txHash}`;
+
 
         const formattedAmount = `$${parseFloat(tx.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })} ${tx.currency}`;
 

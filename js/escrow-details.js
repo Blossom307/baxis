@@ -337,36 +337,31 @@ document.documentElement.classList.add('js-enabled');
       try {
         const provider = new ethers.BrowserProvider(window.ethereum);
         const baxisContract = new ethers.Contract(BAXIS_CONTRACT_ADDRESS, BAXIS_CONTRACT_ABI, provider);
-        const bytes32GigId = typeof getGigIdBytes32 === 'function' ? getGigIdBytes32(this.escrowId) : ethers.id(this.escrowId);
+        const bytes32GigId = getGigIdBytes32(this.escrowId);
 
         const escrowStruct = await baxisContract.escrows(bytes32GigId);
         if (!escrowStruct) return;
 
         const statusNum = Number(escrowStruct.status);
-        const supabase = this.getSupabase();
 
-        let dbStatus = null;
-
-        // Map On-Chain Enum to Supabase DB Status
         if (statusNum === 1 || statusNum === 2) {
-          dbStatus = 'funds_locked';
-        } else if (statusNum === 3) {
-          dbStatus = 'released';
-        } else if (statusNum === 4) {
-          dbStatus = 'refunded';
-        } else if (statusNum === 5) {
-          dbStatus = 'disputed';
-        } else if (statusNum === 6) {
-          dbStatus = 'resolved';
-        }
-
-        // Auto-sync Supabase & UI if DB status is behind Blockchain truth
-        if (dbStatus && this.currentEscrow && this.currentEscrow.status !== dbStatus) {
-          if (supabase) {
-            await supabase.from('escrows').update({ status: dbStatus }).eq('id', this.escrowId);
+          const supabase = this.getSupabase();
+          if (supabase && this.currentEscrow?.status !== 'funds_locked') {
+            await supabase.from('escrows').update({ status: 'funds_locked' }).eq('id', this.escrowId);
           }
-          this.currentEscrow.status = dbStatus;
-          this.renderEscrowDetails(this.currentEscrow);
+          if (this.currentEscrow) {
+            this.currentEscrow.status = 'funds_locked';
+            this.renderEscrowDetails(this.currentEscrow);
+          }
+        } else if (statusNum === 3) {
+          const supabase = this.getSupabase();
+          if (supabase && this.currentEscrow?.status !== 'released') {
+            await supabase.from('escrows').update({ status: 'released' }).eq('id', this.escrowId);
+          }
+          if (this.currentEscrow) {
+            this.currentEscrow.status = 'released';
+            this.renderEscrowDetails(this.currentEscrow);
+          }
         }
       } catch (err) {
         console.warn('Silent on-chain status check:', err.message);
@@ -455,13 +450,10 @@ document.documentElement.classList.add('js-enabled');
         statusPillEl.textContent = statusMap[escrow.status] || escrow.status.toUpperCase();
       }
 
-      // DETERMINISTIC CANCEL BUTTON & DOM RESET
+      // SHOW / HIDE CANCEL BUTTON DYNAMICALLY DURING 'FUNDS_LOCKED'
       if (this.cancelBtn) {
-        const cancelSpan = this.cancelBtn.querySelector('span') || this.cancelBtn;
         if (escrow.status === 'funds_locked') {
           this.cancelBtn.style.display = 'inline-flex';
-          this.cancelBtn.disabled = false;
-          if (cancelSpan) cancelSpan.textContent = 'Cancel & Refund Escrow';
         } else {
           this.cancelBtn.style.display = 'none';
         }
@@ -616,7 +608,7 @@ document.documentElement.classList.add('js-enabled');
         this.setApproveBtnText('Checking On-Chain Allowance...');
 
         const userAddr = await signer.getAddress();
-        const bytes32GigId = typeof getGigIdBytes32 === 'function' ? getGigIdBytes32(this.escrowId) : ethers.id(this.escrowId);
+        const bytes32GigId = getGigIdBytes32(this.escrowId);
         const amount = this.currentEscrow ? this.currentEscrow.amount : 10;
         const decimals = 6;
         const parsedAmount = ethers.parseUnits(amount.toString(), decimals);
@@ -739,9 +731,11 @@ document.documentElement.classList.add('js-enabled');
     }
 
     /* ==========================================================================
-       SECURED CLIENT CANCEL & UNILATERAL REFUND
+       PRODUCTION-SECURED CLIENT CANCEL & UNILATERAL REFUND
        ========================================================================== */
-
+    /* ==========================================================================
+       PRODUCTION-SECURED CLIENT CANCEL & UNILATERAL REFUND
+       ========================================================================== */
     async executeOnChainCancel(signer) {
       try {
         if (this.cancelBtn) {
@@ -755,11 +749,10 @@ document.documentElement.classList.add('js-enabled');
           ? getGigIdBytes32(this.escrowId) 
           : ethers.id(this.escrowId);
 
-        // REUSE SIGNER PROVIDER FROM wallet.js (Prevents multi-provider collisions)
-        const provider = signer.provider || new ethers.BrowserProvider(window.ethereum);
+        // Instantiate contract directly via Ethers with signer
         const baxisContract = new ethers.Contract(BAXIS_CONTRACT_ADDRESS, BAXIS_CONTRACT_ABI, signer);
 
-        // 1. PRE-FLIGHT CHECK: Verify on-chain state before firing transaction
+        // 1. PRE-FLIGHT CHECK: Verify on-chain state before firing tx
         const onChainEscrow = await baxisContract.escrows(bytes32GigId);
 
         if (!onChainEscrow || onChainEscrow.client === ethers.ZeroAddress) {
@@ -770,61 +763,28 @@ document.documentElement.classList.add('js-enabled');
           throw new Error(`Unauthorized: Your connected wallet (${userAddr.substring(0, 6)}...) is not the client for this escrow.`);
         }
 
-        const statusNum = Number(onChainEscrow.status); // 0=NULL, 1=FUNDED, 2=SUBMITTED, 3=RELEASED, 4=REFUNDED
-
-        if (statusNum === 4) {
-          const supabase = this.getSupabase();
-          if (supabase) {
-            await supabase.from('escrows').update({ status: 'refunded' }).eq('id', this.escrowId);
-          }
-          if (this.currentEscrow) {
-            this.currentEscrow.status = 'refunded';
-            this.renderEscrowDetails(this.currentEscrow);
-          }
-          this.toast.show({
-            title: 'Escrow Already Cancelled',
-            message: 'This escrow was previously refunded on-chain. UI updated.',
-            type: 'info'
-          });
-          return;
-        }
-
+        const statusNum = Number(onChainEscrow.status); // 1 = FUNDED, 2 = SUBMITTED
         if (statusNum === 2) {
-          throw new Error('Work has already been submitted by the freelancer! You cannot cancel directly now.');
+          throw new Error('Work has already been submitted by the freelancer! You cannot cancel directly now. Please raise a dispute if needed.');
         }
-
         if (statusNum !== 1) {
-          throw new Error(`Cannot cancel: On-chain escrow status is not FUNDED (Status code: ${statusNum}).`);
+          throw new Error(`Cannot cancel: On-chain escrow status is not FUNDED (Current status code: ${statusNum}).`);
         }
 
-        // 2. SUBMIT TRANSACTION
+        // 2. EXECUTE CANCEL TRANSACTION VIA ETHERS CONTRACT CALL
         const tx = await baxisContract.cancelEscrow(bytes32GigId);
 
         const span = this.cancelBtn?.querySelector('span') || this.cancelBtn;
         if (span) span.textContent = 'Waiting for Blockchain Confirmation...';
 
-        // 3. STATELESS RPC RECEIPT QUERY (Does not rely on Ethers event filters)
-        let txReceipt = null;
-        let attempts = 0;
-        const maxAttempts = 30; // Check for up to 45 seconds
-
-        while (!txReceipt && attempts < maxAttempts) {
-          attempts++;
-          try {
-            txReceipt = await provider.getTransactionReceipt(tx.hash);
-          } catch (e) {
-            console.warn('Polling RPC for transaction receipt...', e);
-          }
-          if (!txReceipt) {
-            await new Promise((resolve) => setTimeout(resolve, 1500)); // Poll every 1.5s
-          }
-        }
+        // 3. WAIT FOR 1 BLOCK CONFIRMATION ON BASE
+        const txReceipt = await tx.wait(1);
 
         if (!txReceipt || txReceipt.status !== 1) {
-          throw new Error('Cancel transaction failed or timed out on Base Mainnet. Check your wallet history.');
+          throw new Error('Cancel transaction reverted on Base Mainnet.');
         }
 
-        // 4. UPDATE SUPABASE DATABASE & RENDER DETERMINISTIC UI
+        // 4. UPDATE SUPABASE DATABASE
         const supabase = this.getSupabase();
         if (supabase) {
           await supabase.from('escrows').update({
@@ -835,25 +795,23 @@ document.documentElement.classList.add('js-enabled');
 
         if (this.currentEscrow) {
           this.currentEscrow.status = 'refunded';
-          this.renderEscrowDetails(this.currentEscrow);
         }
 
         this.toast.show({
           title: 'Escrow Cancelled & Refunded!',
-          message: `100% of funds returned to your wallet. TX: ${tx.hash.substring(0, 12)}...`,
+          message: `Funds returned to your wallet. TX: ${tx.hash.substring(0, 12)}...`,
           type: 'success',
           duration: 6000
         });
 
+        await this.fetchEscrowFromDatabase();
+
       } catch (err) {
-        if (this.currentEscrow) {
-          this.renderEscrowDetails(this.currentEscrow);
-        } else if (this.cancelBtn) {
+        if (this.cancelBtn) {
           this.cancelBtn.disabled = false;
           const span = this.cancelBtn.querySelector('span') || this.cancelBtn;
           span.textContent = 'Cancel & Refund Escrow';
         }
-
         console.error('Cancel Failed:', err);
 
         let errorMsg = err.reason || err.message || 'Transaction rejected or failed.';
@@ -869,13 +827,12 @@ document.documentElement.classList.add('js-enabled');
       }
     }
 
-
     async executeOnChainRelease(signer) {
       try {
         this.approveBtn.disabled = true;
         this.setApproveBtnText('Signing On-Chain Release...');
 
-        const bytes32GigId = typeof getGigIdBytes32 === 'function' ? getGigIdBytes32(this.escrowId) : ethers.id(this.escrowId);
+        const bytes32GigId = getGigIdBytes32(this.escrowId);
         const contractInterface = new ethers.Interface(BAXIS_CONTRACT_ABI);
         const calldata = contractInterface.encodeFunctionData('releaseFunds', [bytes32GigId]);
 
@@ -1080,7 +1037,7 @@ document.documentElement.classList.add('js-enabled');
             try {
               const signer = await window.baxisWallet.connectWallet();
               if (signer) {
-                const bytes32GigId = typeof getGigIdBytes32 === 'function' ? getGigIdBytes32(currentEscrow.gigId) : ethers.id(currentEscrow.gigId);
+                const bytes32GigId = typeof getGigIdBytes32 === 'function' ? getGigIdBytes32(currentEscrow.gigId) : currentEscrow.gigId;
                 const evidenceHash = ethers.id(dispute.id);
                 const contractInterface = new ethers.Interface(BAXIS_CONTRACT_ABI);
                 const calldata = contractInterface.encodeFunctionData('raiseDispute', [bytes32GigId, evidenceHash]);
