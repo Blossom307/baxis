@@ -733,6 +733,9 @@ document.documentElement.classList.add('js-enabled');
     /* ==========================================================================
        PRODUCTION-SECURED CLIENT CANCEL & UNILATERAL REFUND
        ========================================================================== */
+    /* ==========================================================================
+       PRODUCTION-SECURED CLIENT CANCEL & UNILATERAL REFUND
+       ========================================================================== */
     async executeOnChainCancel(signer) {
       try {
         if (this.cancelBtn) {
@@ -741,30 +744,47 @@ document.documentElement.classList.add('js-enabled');
           span.textContent = 'Signing On-Chain Cancel...';
         }
 
-        const provider = new ethers.BrowserProvider(window.ethereum);
-        const bytes32GigId = getGigIdBytes32(this.escrowId);
-        const contractInterface = new ethers.Interface(BAXIS_CONTRACT_ABI);
-        const calldata = contractInterface.encodeFunctionData('cancelEscrow', [bytes32GigId]);
-
         const userAddr = await signer.getAddress();
-        const txHash = await window.ethereum.request({
-          method: 'eth_sendTransaction',
-          params: [{
-            from: userAddr,
-            to: BAXIS_CONTRACT_ADDRESS,
-            data: calldata
-          }]
-        });
+        const bytes32GigId = typeof getGigIdBytes32 === 'function' 
+          ? getGigIdBytes32(this.escrowId) 
+          : ethers.id(this.escrowId);
+
+        // Instantiate contract directly via Ethers with signer
+        const baxisContract = new ethers.Contract(BAXIS_CONTRACT_ADDRESS, BAXIS_CONTRACT_ABI, signer);
+
+        // 1. PRE-FLIGHT CHECK: Verify on-chain state before firing tx
+        const onChainEscrow = await baxisContract.escrows(bytes32GigId);
+
+        if (!onChainEscrow || onChainEscrow.client === ethers.ZeroAddress) {
+          throw new Error('Escrow not found on-chain. Ensure it was successfully funded on Base first.');
+        }
+
+        if (onChainEscrow.client.toLowerCase() !== userAddr.toLowerCase()) {
+          throw new Error(`Unauthorized: Your connected wallet (${userAddr.substring(0, 6)}...) is not the client for this escrow.`);
+        }
+
+        const statusNum = Number(onChainEscrow.status); // 1 = FUNDED, 2 = SUBMITTED
+        if (statusNum === 2) {
+          throw new Error('Work has already been submitted by the freelancer! You cannot cancel directly now. Please raise a dispute if needed.');
+        }
+        if (statusNum !== 1) {
+          throw new Error(`Cannot cancel: On-chain escrow status is not FUNDED (Current status code: ${statusNum}).`);
+        }
+
+        // 2. EXECUTE CANCEL TRANSACTION VIA ETHERS CONTRACT CALL
+        const tx = await baxisContract.cancelEscrow(bytes32GigId);
 
         const span = this.cancelBtn?.querySelector('span') || this.cancelBtn;
         if (span) span.textContent = 'Waiting for Blockchain Confirmation...';
 
-        const txReceipt = await provider.waitForTransaction(txHash);
+        // 3. WAIT FOR 1 BLOCK CONFIRMATION ON BASE
+        const txReceipt = await tx.wait(1);
 
         if (!txReceipt || txReceipt.status !== 1) {
-          throw new Error('Cancel transaction reverted on-chain.');
+          throw new Error('Cancel transaction reverted on Base Mainnet.');
         }
 
+        // 4. UPDATE SUPABASE DATABASE
         const supabase = this.getSupabase();
         if (supabase) {
           await supabase.from('escrows').update({
@@ -773,9 +793,13 @@ document.documentElement.classList.add('js-enabled');
           }).eq('id', this.escrowId);
         }
 
+        if (this.currentEscrow) {
+          this.currentEscrow.status = 'refunded';
+        }
+
         this.toast.show({
           title: 'Escrow Cancelled & Refunded!',
-          message: `100% of funds returned to your wallet. TX: ${txHash.substring(0, 12)}...`,
+          message: `Funds returned to your wallet. TX: ${tx.hash.substring(0, 12)}...`,
           type: 'success',
           duration: 6000
         });
@@ -789,9 +813,15 @@ document.documentElement.classList.add('js-enabled');
           span.textContent = 'Cancel & Refund Escrow';
         }
         console.error('Cancel Failed:', err);
+
+        let errorMsg = err.reason || err.message || 'Transaction rejected or failed.';
+        if (err.code === 'ACTION_REJECTED' || err.code === 4001) {
+          errorMsg = 'Transaction was rejected in your wallet.';
+        }
+
         this.toast.show({
           title: 'Cancellation Failed',
-          message: err.reason || err.message || 'Transaction rejected.',
+          message: errorMsg,
           type: 'rust'
         });
       }
