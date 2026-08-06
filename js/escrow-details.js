@@ -736,8 +736,9 @@ document.documentElement.classList.add('js-enabled');
     }
 
     /* ==========================================================================
-       PRODUCTION-SECURED CLIENT CANCEL & UNILATERAL REFUND
+       SECURED CLIENT CANCEL & UNILATERAL REFUND
        ========================================================================== */
+
     async executeOnChainCancel(signer) {
       try {
         if (this.cancelBtn) {
@@ -767,7 +768,6 @@ document.documentElement.classList.add('js-enabled');
 
         const statusNum = Number(onChainEscrow.status); // 0=NULL, 1=FUNDED, 2=SUBMITTED, 3=RELEASED, 4=REFUNDED
 
-        // Handle case where escrow was already refunded on-chain
         if (statusNum === 4) {
           const supabase = this.getSupabase();
           if (supabase) {
@@ -779,31 +779,46 @@ document.documentElement.classList.add('js-enabled');
           }
           this.toast.show({
             title: 'Escrow Already Cancelled',
-            message: 'This escrow was previously refunded on-chain. UI has been updated.',
+            message: 'This escrow was previously refunded on-chain. UI updated.',
             type: 'info'
           });
           return;
         }
 
         if (statusNum === 2) {
-          throw new Error('Work has already been submitted by the freelancer! You cannot cancel directly now. Please raise a dispute if needed.');
+          throw new Error('Work has already been submitted by the freelancer! You cannot cancel directly now.');
         }
 
         if (statusNum !== 1) {
-          throw new Error(`Cannot cancel: On-chain escrow status is not FUNDED (Current status code: ${statusNum}).`);
+          throw new Error(`Cannot cancel: On-chain escrow status is not FUNDED (Status code: ${statusNum}).`);
         }
 
-        // 2. EXECUTE CANCEL TRANSACTION VIA ETHERS CONTRACT CALL
+        // 2. SUBMIT TRANSACTION
         const tx = await baxisContract.cancelEscrow(bytes32GigId);
 
         const span = this.cancelBtn?.querySelector('span') || this.cancelBtn;
         if (span) span.textContent = 'Waiting for Blockchain Confirmation...';
 
-        // 3. WAIT FOR 1 BLOCK CONFIRMATION ON BASE
-        const txReceipt = await tx.wait(1);
+        // 3. HARDENED POLLING FOR BASE MAINNET (Prevents Ethers BrowserProvider hanging)
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        let txReceipt = null;
+        let attempts = 0;
+        const maxAttempts = 25; // Try polling for up to 50 seconds
+
+        while (!txReceipt && attempts < maxAttempts) {
+          attempts++;
+          try {
+            txReceipt = await provider.getTransactionReceipt(tx.hash);
+          } catch (e) {
+            console.warn('Polling for receipt...', e);
+          }
+          if (!txReceipt) {
+            await new Promise((resolve) => setTimeout(resolve, 2000)); // Poll every 2 seconds
+          }
+        }
 
         if (!txReceipt || txReceipt.status !== 1) {
-          throw new Error('Cancel transaction reverted on Base Mainnet.');
+          throw new Error('Cancel transaction failed or timed out on Base Mainnet. Check your wallet history.');
         }
 
         // 4. UPDATE SUPABASE DATABASE
@@ -821,7 +836,7 @@ document.documentElement.classList.add('js-enabled');
 
         this.toast.show({
           title: 'Escrow Cancelled & Refunded!',
-          message: `Funds returned to your wallet. TX: ${tx.hash.substring(0, 12)}...`,
+          message: `100% of funds returned to your wallet. TX: ${tx.hash.substring(0, 12)}...`,
           type: 'success',
           duration: 6000
         });
@@ -848,6 +863,7 @@ document.documentElement.classList.add('js-enabled');
         });
       }
     }
+
 
     async executeOnChainRelease(signer) {
       try {
