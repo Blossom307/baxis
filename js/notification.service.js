@@ -175,7 +175,14 @@ class NotificationService {
         <div style="font-family: monospace !important; font-size: 10px !important; color: #6B6B6B !important;">${timeAgo}</div>
       `;
 
-      a.addEventListener('click', () => this.markAsRead(n.id));
+      // FIXED: Mark read and navigate on click
+      a.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const targetUrl = n.link || 'dashboard.html';
+        await this.markAsRead(n.id);
+        window.location.href = targetUrl;
+      });
+
       container.appendChild(a);
     });
   }

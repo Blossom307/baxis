@@ -246,7 +246,7 @@ document.documentElement.classList.add('js-enabled');
   }
 
   /* ==========================================================================
-     4. REAL SUPABASE DASHBOARD ENGINE WITH DYNAMIC FILTER TABS
+     4. REAL SUPABASE DASHBOARD ENGINE WITH DYNAMIC FILTER TABS & ADMIN GUARD
      ========================================================================== */
   class DashboardApp {
     constructor() {
@@ -311,6 +311,7 @@ document.documentElement.classList.add('js-enabled');
 
         await this.fetchUserEscrows(user.id);
         await this.fetchUserNotifications();
+        await this.checkAndRenderAdminNav(user.id); // Strict RBAC check for Admin Panel
         this.bindNotificationActions();
         this.bindLogout();
       });
@@ -327,6 +328,51 @@ document.documentElement.classList.add('js-enabled');
           this.fetchUserNotifications();
         })
         .subscribe();
+    }
+
+    /**
+     * STRICT RBAC GUARD: Only renders the Admin Panel link if user has admin/arbitrator role in Supabase
+     */
+    async checkAndRenderAdminNav(userId) {
+      const supabase = this.getSupabase();
+      if (!supabase || !userId) return;
+
+      try {
+        const { data: roleRow, error } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', userId)
+          .in('role', ['admin', 'arbitrator'])
+          .maybeSingle();
+
+        // Not an authorized admin: Exit silently (DO NOT render nav item)
+        if (error || !roleRow) return;
+
+        // User IS an Admin: Render Admin Link in Sidebar Navigation (Points to admin.html)
+        const navList = document.querySelector('.sidebar-nav') || 
+                        document.querySelector('.sidebar-menu') || 
+                        document.querySelector('.nav-list') ||
+                        document.querySelector('nav ul');
+
+        if (navList && !document.getElementById('nav-item-admin-portal')) {
+          const li = document.createElement('li');
+          li.id = 'nav-item-admin-portal';
+          li.className = 'nav-item sidebar-nav-item';
+          li.style.cssText = 'margin-top: 12px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 12px;';
+          
+          li.innerHTML = `
+            <a href="admin.html" class="nav-link sidebar-nav-link" style="color: #38BDF8 !important; font-weight: 700; display: flex; align-items: center; gap: 10px; text-decoration: none;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+              <span>Admin Panel</span>
+            </a>
+          `;
+          navList.appendChild(li);
+        }
+      } catch (err) {
+        console.warn('[DashboardApp] Admin RBAC check error:', err);
+      }
     }
 
     async fetchUserEscrows(userId) {

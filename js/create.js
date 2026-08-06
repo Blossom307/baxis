@@ -42,7 +42,6 @@ document.documentElement.classList.add('js-enabled');
       this.tokenSelect = document.getElementById('deal-token');
       this.networkSelect = document.getElementById('deal-network');
       this.timelockSelect = document.getElementById('auto-release-timelock');
-      this.roleRadios = document.querySelectorAll('input[name="user-role"]');
 
       this.previewTitle = document.getElementById('preview-title');
       this.previewAmount = document.getElementById('preview-amount');
@@ -64,14 +63,7 @@ document.documentElement.classList.add('js-enabled');
       if (this.networkSelect) this.networkSelect.addEventListener('change', updateHandler);
       if (this.timelockSelect) this.timelockSelect.addEventListener('change', updateHandler);
 
-      this.roleRadios.forEach((radio) => radio.addEventListener('change', updateHandler));
       this.updatePreview();
-    }
-
-    getSelectedRole() {
-      let role = 'client';
-      this.roleRadios.forEach((r) => { if (r.checked) role = r.value; });
-      return role;
     }
 
     formatCurrency(val, token) {
@@ -86,9 +78,8 @@ document.documentElement.classList.add('js-enabled');
       const token = this.tokenSelect?.value || 'USDC';
       const network = this.networkSelect?.value || 'Base';
       const timelock = this.timelockSelect?.value || '48';
-      const userRole = this.getSelectedRole();
 
-      // Format 42-character 0x addresses to short format for smooth preview rendering
+      // Format 42-character 0x addresses for smooth preview
       let displayCounterparty = counterparty;
       if (counterparty && counterparty.startsWith('0x') && counterparty.length === 42) {
         displayCounterparty = `${counterparty.substring(0, 6)}...${counterparty.substring(38)}`;
@@ -98,13 +89,8 @@ document.documentElement.classList.add('js-enabled');
       if (this.previewAmount) this.previewAmount.textContent = this.formatCurrency(rawAmount, token);
       if (this.previewNetwork) this.previewNetwork.textContent = network;
 
-      if (userRole === 'client') {
-        if (this.previewClientName) this.previewClientName.textContent = 'You (Client)';
-        if (this.previewTalentName) this.previewTalentName.textContent = displayCounterparty || 'Counterparty pending';
-      } else {
-        if (this.previewTalentName) this.previewTalentName.textContent = 'You (Freelancer)';
-        if (this.previewClientName) this.previewClientName.textContent = displayCounterparty || 'Client pending';
-      }
+      if (this.previewClientName) this.previewClientName.textContent = 'You (Client)';
+      if (this.previewTalentName) this.previewTalentName.textContent = displayCounterparty || 'Freelancer pending';
 
       if (this.previewStatusText) {
         this.previewStatusText.textContent = `Ready to Lock Funds • ${timelock}h Auto-Release`;
@@ -202,16 +188,13 @@ document.documentElement.classList.add('js-enabled');
         const tokenVal = document.getElementById('deal-token') ? document.getElementById('deal-token').value : 'USDC';
         const networkVal = document.getElementById('deal-network') ? document.getElementById('deal-network').value : 'Base';
         const timelockVal = document.getElementById('auto-release-timelock') ? document.getElementById('auto-release-timelock').value : '48';
-        
-        let roleVal = 'client';
-        document.querySelectorAll('input[name="user-role"]').forEach((r) => { if (r.checked) roleVal = r.value; });
 
         // Clear previous errors
         this.clearFieldError('deal-title');
         this.clearFieldError('counterparty-id');
         this.clearFieldError('deal-amount');
 
-        // Form Validation (Including EVM Wallet Address Validation)
+        // Form Validation
         const titleRes = FormValidator.validateTitle(titleVal);
         const cpRes = FormValidator.validateCounterparty(counterpartyVal);
         const amountRes = FormValidator.validateAmount(amountVal);
@@ -233,14 +216,14 @@ document.documentElement.classList.add('js-enabled');
             title: titleVal.trim(),
             description: descVal.trim(),
             counterparty_identifier: counterpartyVal.trim(),
-            creator_role: roleVal,
+            creator_role: 'client',
             amount: parseFloat(amountVal),
             currency: tokenVal,
             network: networkVal,
             auto_release_hours: parseInt(timelockVal, 10),
             creator_id: currentUserId,
-            client_id: roleVal === 'client' ? currentUserId : null,
-            freelancer_id: roleVal === 'freelancer' ? currentUserId : null,
+            client_id: currentUserId,
+            freelancer_id: null,
             status: 'awaiting_deposit'
           };
 

@@ -150,44 +150,10 @@
           <!-- LEFT COLUMN: STEP-BY-STEP DEAL FORM -->
           <div class="builder-form-column">
             <form id="form-create-escrow" novalidate>
-              
-              <!-- Step 1: Role Selection -->
+
+              <!-- Step 1: Deal Scope & Title -->
               <div class="form-card">
                 <span class="card-step-badge">STEP 01</span>
-                <h2 class="card-title">Your Role in this Deal</h2>
-                
-                <div class="role-selector-grid">
-                  <label class="role-radio-card">
-                    <input type="radio" name="user-role" value="client" checked>
-                    <div class="role-card-inner">
-                      <span class="role-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-                      </span>
-                      <div>
-                        <span class="role-title">I am the Client</span>
-                        <span class="role-desc">I am funding the escrow to hire talent.</span>
-                      </div>
-                    </div>
-                  </label>
-
-                  <label class="role-radio-card">
-                    <input type="radio" name="user-role" value="freelancer">
-                    <div class="role-card-inner">
-                      <span class="role-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-                      </span>
-                      <div>
-                        <span class="role-title">I am the Freelancer</span>
-                        <span class="role-desc">I am delivering work and getting paid.</span>
-                      </div>
-                    </div>
-                  </label>
-                </div>
-              </div>
-
-              <!-- Step 2: Deal Scope & Title -->
-              <div class="form-card">
-                <span class="card-step-badge">STEP 02</span>
                 <h2 class="card-title">Agreement Details</h2>
 
                 <div class="form-group">
@@ -198,20 +164,20 @@
 
                 <div class="form-group">
                   <label for="deal-description" class="form-label">Scope & Deliverables</label>
-                  <textarea id="deal-description" class="form-textarea" rows="3" placeholder="Describe your deliverables as clearly as possible. Vague scopes may make disputes harder to resolve.... "></textarea>
+                  <textarea id="deal-description" class="form-textarea" rows="3" placeholder="Describe deliverables clearly. Included assets, revisions, format requirements..."></textarea>
                 </div>
 
                 <div class="form-group">
-                  <label for="counterparty-id" class="form-label">Counterparty 0x EVM Wallet Address <span class="req">*</span></label>
+                  <label for="counterparty-id" class="form-label">Freelancer 0x EVM Wallet Address <span class="req">*</span></label>
                   <input type="text" id="counterparty-id" class="form-input-sm" placeholder="e.g. 0x71C...39A1" required>
-                  <span class="field-hint">We notify them via DM or email when you generate the link.</span>
+                  <span class="field-hint">The freelancer wallet address that will receive payout upon completion.</span>
                   <span class="field-error" id="err-counterparty-id"></span>
                 </div>
               </div>
 
-              <!-- Step 3: Financial Terms & Network -->
+              <!-- Step 2: Financial Terms & Network -->
               <div class="form-card">
-                <span class="card-step-badge">STEP 03</span>
+                <span class="card-step-badge">STEP 02</span>
                 <h2 class="card-title">Financial Terms</h2>
 
                 <div class="form-row-2col">
@@ -230,7 +196,6 @@
                       <option value="USDC">USDC (USD Coin)</option>
                       <option value="USDT">USDT (Tether)</option>
                       <option value="ETH">ETH (Ethereum)</option>
-                      <option value="SOL">SOL (Solana)</option>
                     </select>
                   </div>
                 </div>
@@ -242,7 +207,6 @@
                       <option value="Base">Base Network (Fast, &lt;$0.01 gas)</option>
                       <option value="Arbitrum">Arbitrum One</option>
                       <option value="Ethereum">Ethereum Mainnet</option>
-                      <option value="Solana">Solana</option>
                     </select>
                   </div>
 
@@ -292,12 +256,12 @@
                 <div class="unfurl-parties-box">
                   <div class="party-mini">
                     <span class="mini-role">Client</span>
-                    <span class="mini-name" id="preview-client-name">alex.eth (You)</span>
+                    <span class="mini-name" id="preview-client-name">You (Client)</span>
                   </div>
                   <div class="party-mini-sep">➔</div>
                   <div class="party-mini">
-                    <span class="mini-role">Talent</span>
-                    <span class="mini-name" id="preview-talent-name">Counterparty pending</span>
+                    <span class="mini-role">Freelancer</span>
+                    <span class="mini-name" id="preview-talent-name">Freelancer pending</span>
                   </div>
                 </div>
 
@@ -316,7 +280,7 @@
                   <span>Escrow Agreement Created!</span>
                 </div>
                 <div class="copy-url-wrapper">
-                  <input type="text" id="generated-url-input" class="generated-url-input" value="https://baxis.io/pay/BX-9012" readonly>
+                  <input type="text" id="generated-url-input" class="generated-url-input" value="https://baxis.io/escrow-details.html?id=BX-DRAFT" readonly>
                   <button type="button" class="btn btn-primary btn-sm" id="btn-copy-generated-url">Copy Link</button>
                 </div>
               </div>
@@ -339,7 +303,7 @@
       <span class="hud-nav-label">Home</span>
     </a>
 
-    <a href="create.html" class="hud-nav-item">
+    <a href="create.html" class="hud-nav-item active" aria-current="page">
       <svg class="hud-nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       <span class="hud-nav-label">Create</span>
     </a>

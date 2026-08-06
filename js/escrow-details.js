@@ -188,7 +188,7 @@ document.documentElement.classList.add('js-enabled');
   }
 
   /* ==========================================================================
-     4. REAL SUPABASE DATA, STORAGE & ON-CHAIN ENGINE
+     4. REAL SUPABASE DATA, STORAGE & ROLE-AWARE ON-CHAIN ENGINE
      ========================================================================== */
   class EscrowDetailsApp {
     constructor() {
@@ -204,6 +204,7 @@ document.documentElement.classList.add('js-enabled');
 
       this.escrowId = this.getEscrowIdFromURL();
       this.currentEscrow = null;
+      this.currentUserId = null;
 
       this.init();
     }
@@ -236,6 +237,12 @@ document.documentElement.classList.add('js-enabled');
     }
 
     async init() {
+      const supabase = this.getSupabase();
+      if (supabase) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) this.currentUserId = session.user.id;
+      }
+
       await this.fetchEscrowFromDatabase();
       await this.fetchDeliverables();
       await this.verifyOnChainContractState();
@@ -243,7 +250,6 @@ document.documentElement.classList.add('js-enabled');
       this.bindFileUpload();
 
       // REALTIME WEBSOCKET SUBSCRIPTION
-      const supabase = this.getSupabase();
       if (supabase && this.escrowId) {
         supabase
           .channel(`escrow-realtime-${this.escrowId}`)
@@ -278,6 +284,7 @@ document.documentElement.classList.add('js-enabled');
 
         const { data: { session } } = await supabase.auth.getSession();
         if (session) {
+          this.currentUserId = session.user.id;
           const { data: userDeals } = await supabase
             .from('escrows')
             .select('id')
@@ -337,31 +344,33 @@ document.documentElement.classList.add('js-enabled');
       try {
         const provider = new ethers.BrowserProvider(window.ethereum);
         const baxisContract = new ethers.Contract(BAXIS_CONTRACT_ADDRESS, BAXIS_CONTRACT_ABI, provider);
-        const bytes32GigId = getGigIdBytes32(this.escrowId);
+        const bytes32GigId = typeof getGigIdBytes32 === 'function' ? getGigIdBytes32(this.escrowId) : ethers.id(this.escrowId);
 
         const escrowStruct = await baxisContract.escrows(bytes32GigId);
         if (!escrowStruct) return;
 
         const statusNum = Number(escrowStruct.status);
+        const supabase = this.getSupabase();
 
+        let dbStatus = null;
         if (statusNum === 1 || statusNum === 2) {
-          const supabase = this.getSupabase();
-          if (supabase && this.currentEscrow?.status !== 'funds_locked') {
-            await supabase.from('escrows').update({ status: 'funds_locked' }).eq('id', this.escrowId);
-          }
-          if (this.currentEscrow) {
-            this.currentEscrow.status = 'funds_locked';
-            this.renderEscrowDetails(this.currentEscrow);
-          }
+          dbStatus = 'funds_locked';
         } else if (statusNum === 3) {
-          const supabase = this.getSupabase();
-          if (supabase && this.currentEscrow?.status !== 'released') {
-            await supabase.from('escrows').update({ status: 'released' }).eq('id', this.escrowId);
+          dbStatus = 'released';
+        } else if (statusNum === 4) {
+          dbStatus = 'refunded';
+        } else if (statusNum === 5) {
+          dbStatus = 'disputed';
+        } else if (statusNum === 6) {
+          dbStatus = 'resolved';
+        }
+
+        if (dbStatus && this.currentEscrow && this.currentEscrow.status !== dbStatus) {
+          if (supabase) {
+            await supabase.from('escrows').update({ status: dbStatus }).eq('id', this.escrowId);
           }
-          if (this.currentEscrow) {
-            this.currentEscrow.status = 'released';
-            this.renderEscrowDetails(this.currentEscrow);
-          }
+          this.currentEscrow.status = dbStatus;
+          this.renderEscrowDetails(this.currentEscrow);
         }
       } catch (err) {
         console.warn('Silent on-chain status check:', err.message);
@@ -410,6 +419,9 @@ document.documentElement.classList.add('js-enabled');
       });
     }
 
+    /**
+     * STRICT ROLE-AWARE UI RENDERER
+     */
     renderEscrowDetails(escrow) {
       window.currentEscrowVault = {
         gigId: escrow.id,
@@ -420,57 +432,88 @@ document.documentElement.classList.add('js-enabled');
       const mainContent = document.getElementById('details-main');
       if (mainContent) mainContent.style.opacity = '1'; 
 
-      const titleEl = document.querySelector('.contract-title');
+      const titleEl = document.getElementById('detail-contract-title') || document.querySelector('.contract-title');
       if (titleEl) titleEl.textContent = escrow.title;
 
-      const codeEl = document.querySelector('.contract-id-code');
+      const codeEl = document.getElementById('detail-contract-code') || document.querySelector('.contract-id-code');
       if (codeEl) {
         const createdDate = new Date(escrow.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         codeEl.textContent = `Contract ID: #${escrow.id} • Created ${createdDate}`;
       }
 
-      const amountNumEl = document.querySelector('.amount-number');
+      const amountNumEl = document.getElementById('detail-amount-num') || document.querySelector('.amount-number');
       if (amountNumEl) {
         amountNumEl.textContent = `$${parseFloat(escrow.amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
       }
 
-      const tokenEl = document.querySelector('.amount-token');
+      const tokenEl = document.getElementById('detail-token-symbol') || document.querySelector('.amount-token');
       if (tokenEl) tokenEl.textContent = escrow.currency;
 
-      const statusPillEl = document.querySelector('.status-pill');
-      if (statusPillEl) {
-        const statusMap = {
-          'awaiting_deposit': 'AWAITING DEPOSIT',
-          'funds_locked': 'FUNDS LOCKED IN VAULT',
-          'in_review': 'IN REVIEW',
-          'released': 'PAYMENT RELEASED',
-          'refunded': 'REFUNDED TO CLIENT',
-          'disputed': 'IN DISPUTE'
-        };
-        statusPillEl.textContent = statusMap[escrow.status] || escrow.status.toUpperCase();
+      const statusPillText = document.getElementById('detail-status-text');
+
+      const statusMap = {
+        'awaiting_deposit': 'AWAITING DEPOSIT',
+        'funds_locked': 'FUNDS LOCKED IN VAULT',
+        'in_review': 'IN REVIEW',
+        'released': 'PAYMENT RELEASED',
+        'refunded': 'REFUNDED TO CLIENT',
+        'disputed': 'IN DISPUTE'
+      };
+
+      if (statusPillText) statusPillText.textContent = statusMap[escrow.status] || escrow.status.toUpperCase();
+
+      if (this.cancelBtn) {
+        this.cancelBtn.style.display = 'none';
       }
 
-      // SHOW / HIDE CANCEL BUTTON DYNAMICALLY DURING 'FUNDS_LOCKED'
-      if (this.cancelBtn) {
-        if (escrow.status === 'funds_locked') {
-          this.cancelBtn.style.display = 'inline-flex';
+      // ACCURATE ROLE DETERMINATION
+      let clientId = escrow.client_id;
+      let freelancerId = escrow.freelancer_id;
+
+      if (!clientId && escrow.creator_role === 'client') clientId = escrow.creator_id;
+      if (!freelancerId && escrow.creator_role === 'freelancer') freelancerId = escrow.creator_id;
+
+      const isClient = this.currentUserId && (this.currentUserId === clientId);
+      const isFreelancer = this.currentUserId && !isClient;
+
+      // HIDE FILE UPLOAD DROPZONE FOR CLIENTS (ONLY FREELANCER SEES FILE DROPZONE)
+      const uploadCard = document.querySelector('.deliverable-upload-card');
+      if (uploadCard) {
+        if (isFreelancer && (escrow.status === 'funds_locked' || escrow.status === 'in_review')) {
+          uploadCard.style.display = 'block'; // Freelancer sees upload box!
         } else {
-          this.cancelBtn.style.display = 'none';
+          uploadCard.style.display = 'none';  // Hidden for Client & Spectators!
         }
       }
 
       if (this.approveBtn) {
         if (escrow.status === 'awaiting_deposit') {
-          this.setApproveBtnText(`Deposit & Lock $${escrow.amount} ${escrow.currency}`);
+          if (isClient) {
+            this.setApproveBtnText(`Deposit & Lock $${escrow.amount} ${escrow.currency}`);
+            this.approveBtn.style.display = 'inline-flex';
+          } else {
+            this.setApproveBtnText('Awaiting Client Deposit');
+            this.approveBtn.disabled = true;
+          }
         } else if (escrow.status === 'funds_locked' || escrow.status === 'in_review') {
-          this.setApproveBtnText(`Approve & Release $${escrow.amount} ${escrow.currency}`);
+          if (isClient) {
+            this.setApproveBtnText(`Approve & Release $${escrow.amount} ${escrow.currency}`);
+            this.approveBtn.style.display = 'inline-flex';
+          } else {
+            this.setApproveBtnText('Funds Secured in Vault');
+            this.approveBtn.disabled = true;
+            this.approveBtn.style.background = 'var(--state-success)';
+          }
         } else if (escrow.status === 'released') {
           this.setApproveBtnText('Payment Released');
           this.approveBtn.disabled = true;
+          this.approveBtn.style.display = 'inline-flex';
           this.approveBtn.style.background = 'var(--state-success)';
+          if (this.disputeBtn) this.disputeBtn.style.display = 'none';
         } else if (escrow.status === 'refunded') {
           this.setApproveBtnText('Escrow Cancelled & Refunded');
           this.approveBtn.disabled = true;
+          if (this.disputeBtn) this.disputeBtn.style.display = 'none';
         }
       }
 
@@ -580,17 +623,6 @@ document.documentElement.classList.add('js-enabled');
         });
       }
 
-      if (this.cancelBtn) {
-        this.cancelBtn.addEventListener('click', async () => {
-          if (!window.baxisWallet) return alert('Wallet provider not found. Check wallet.js!');
-
-          const signer = await window.baxisWallet.connectWallet();
-          if (!signer) return;
-
-          await this.executeOnChainCancel(signer);
-        });
-      }
-
       if (this.shareBtn) {
         this.shareBtn.addEventListener('click', () => {
           if (navigator.clipboard) {
@@ -608,7 +640,7 @@ document.documentElement.classList.add('js-enabled');
         this.setApproveBtnText('Checking On-Chain Allowance...');
 
         const userAddr = await signer.getAddress();
-        const bytes32GigId = getGigIdBytes32(this.escrowId);
+        const bytes32GigId = typeof getGigIdBytes32 === 'function' ? getGigIdBytes32(this.escrowId) : ethers.id(this.escrowId);
         const amount = this.currentEscrow ? this.currentEscrow.amount : 10;
         const decimals = 6;
         const parsedAmount = ethers.parseUnits(amount.toString(), decimals);
@@ -730,109 +762,12 @@ document.documentElement.classList.add('js-enabled');
       }
     }
 
-    /* ==========================================================================
-       PRODUCTION-SECURED CLIENT CANCEL & UNILATERAL REFUND
-       ========================================================================== */
-    /* ==========================================================================
-       PRODUCTION-SECURED CLIENT CANCEL & UNILATERAL REFUND
-       ========================================================================== */
-    async executeOnChainCancel(signer) {
-      try {
-        if (this.cancelBtn) {
-          this.cancelBtn.disabled = true;
-          const span = this.cancelBtn.querySelector('span') || this.cancelBtn;
-          span.textContent = 'Signing On-Chain Cancel...';
-        }
-
-        const userAddr = await signer.getAddress();
-        const bytes32GigId = typeof getGigIdBytes32 === 'function' 
-          ? getGigIdBytes32(this.escrowId) 
-          : ethers.id(this.escrowId);
-
-        // Instantiate contract directly via Ethers with signer
-        const baxisContract = new ethers.Contract(BAXIS_CONTRACT_ADDRESS, BAXIS_CONTRACT_ABI, signer);
-
-        // 1. PRE-FLIGHT CHECK: Verify on-chain state before firing tx
-        const onChainEscrow = await baxisContract.escrows(bytes32GigId);
-
-        if (!onChainEscrow || onChainEscrow.client === ethers.ZeroAddress) {
-          throw new Error('Escrow not found on-chain. Ensure it was successfully funded on Base first.');
-        }
-
-        if (onChainEscrow.client.toLowerCase() !== userAddr.toLowerCase()) {
-          throw new Error(`Unauthorized: Your connected wallet (${userAddr.substring(0, 6)}...) is not the client for this escrow.`);
-        }
-
-        const statusNum = Number(onChainEscrow.status); // 1 = FUNDED, 2 = SUBMITTED
-        if (statusNum === 2) {
-          throw new Error('Work has already been submitted by the freelancer! You cannot cancel directly now. Please raise a dispute if needed.');
-        }
-        if (statusNum !== 1) {
-          throw new Error(`Cannot cancel: On-chain escrow status is not FUNDED (Current status code: ${statusNum}).`);
-        }
-
-        // 2. EXECUTE CANCEL TRANSACTION VIA ETHERS CONTRACT CALL
-        const tx = await baxisContract.cancelEscrow(bytes32GigId);
-
-        const span = this.cancelBtn?.querySelector('span') || this.cancelBtn;
-        if (span) span.textContent = 'Waiting for Blockchain Confirmation...';
-
-        // 3. WAIT FOR 1 BLOCK CONFIRMATION ON BASE
-        const txReceipt = await tx.wait(1);
-
-        if (!txReceipt || txReceipt.status !== 1) {
-          throw new Error('Cancel transaction reverted on Base Mainnet.');
-        }
-
-        // 4. UPDATE SUPABASE DATABASE
-        const supabase = this.getSupabase();
-        if (supabase) {
-          await supabase.from('escrows').update({
-            status: 'refunded',
-            released_at: new Date().toISOString()
-          }).eq('id', this.escrowId);
-        }
-
-        if (this.currentEscrow) {
-          this.currentEscrow.status = 'refunded';
-        }
-
-        this.toast.show({
-          title: 'Escrow Cancelled & Refunded!',
-          message: `Funds returned to your wallet. TX: ${tx.hash.substring(0, 12)}...`,
-          type: 'success',
-          duration: 6000
-        });
-
-        await this.fetchEscrowFromDatabase();
-
-      } catch (err) {
-        if (this.cancelBtn) {
-          this.cancelBtn.disabled = false;
-          const span = this.cancelBtn.querySelector('span') || this.cancelBtn;
-          span.textContent = 'Cancel & Refund Escrow';
-        }
-        console.error('Cancel Failed:', err);
-
-        let errorMsg = err.reason || err.message || 'Transaction rejected or failed.';
-        if (err.code === 'ACTION_REJECTED' || err.code === 4001) {
-          errorMsg = 'Transaction was rejected in your wallet.';
-        }
-
-        this.toast.show({
-          title: 'Cancellation Failed',
-          message: errorMsg,
-          type: 'rust'
-        });
-      }
-    }
-
     async executeOnChainRelease(signer) {
       try {
         this.approveBtn.disabled = true;
         this.setApproveBtnText('Signing On-Chain Release...');
 
-        const bytes32GigId = getGigIdBytes32(this.escrowId);
+        const bytes32GigId = typeof getGigIdBytes32 === 'function' ? getGigIdBytes32(this.escrowId) : ethers.id(this.escrowId);
         const contractInterface = new ethers.Interface(BAXIS_CONTRACT_ABI);
         const calldata = contractInterface.encodeFunctionData('releaseFunds', [bytes32GigId]);
 
@@ -1037,7 +972,7 @@ document.documentElement.classList.add('js-enabled');
             try {
               const signer = await window.baxisWallet.connectWallet();
               if (signer) {
-                const bytes32GigId = typeof getGigIdBytes32 === 'function' ? getGigIdBytes32(currentEscrow.gigId) : currentEscrow.gigId;
+                const bytes32GigId = typeof getGigIdBytes32 === 'function' ? getGigIdBytes32(currentEscrow.gigId) : ethers.id(currentEscrow.gigId);
                 const evidenceHash = ethers.id(dispute.id);
                 const contractInterface = new ethers.Interface(BAXIS_CONTRACT_ABI);
                 const calldata = contractInterface.encodeFunctionData('raiseDispute', [bytes32GigId, evidenceHash]);
@@ -1089,20 +1024,80 @@ document.documentElement.classList.add('js-enabled');
       btnText.textContent = isLoading ? 'Submitting Dispute...' : 'Submit Dispute';
     }
 
+    /**
+     * DISPUTE STATE RENDERER
+     */
     function renderInPlaceDisputeState(dispute) {
-      const statusPill = document.querySelector('.status-pill');
-      if (statusPill) {
-        statusPill.className = 'status-pill rust';
-        statusPill.textContent = 'IN DISPUTE';
-      }
+      if (!dispute) return;
 
+      const statusPillText = document.getElementById('detail-status-text');
+      const statusPill = document.getElementById('detail-status-pill') || document.querySelector('.status-pill');
       const btnApprove = document.getElementById('btn-approve-release');
-      if (btnApprove) btnApprove.disabled = true;
-      if (btnRaiseDispute) btnRaiseDispute.disabled = true;
-
+      const btnRaiseDispute = document.getElementById('btn-raise-dispute');
       const hubDesc = document.getElementById('action-hub-desc');
-      if (hubDesc) {
-        hubDesc.innerHTML = `<strong style="color: var(--state-error, #EF4444);">Contract Locked in Dispute.</strong> Reason: "${dispute.reason}". Awaiting Baxis Arbitrator review.`;
+      const actionAlertText = document.getElementById('action-alert-text');
+
+      const isResolved = dispute.status && dispute.status.startsWith('RESOLVED');
+
+      if (isResolved) {
+        if (statusPill) {
+          statusPill.className = 'status-pill green';
+        }
+        if (statusPillText) {
+          statusPillText.textContent = 'DISPUTE RESOLVED';
+        }
+
+        if (btnApprove) {
+          btnApprove.disabled = true;
+          btnApprove.style.display = 'inline-flex';
+          btnApprove.style.background = 'var(--state-success, #10B981)';
+          const span = btnApprove.querySelector('span') || btnApprove;
+          span.textContent = 'Dispute Settled by Arbitrator';
+        }
+
+        if (btnRaiseDispute) {
+          btnRaiseDispute.style.display = 'none';
+        }
+
+        if (actionAlertText) {
+          actionAlertText.textContent = 'Contract Resolved';
+        }
+
+        if (hubDesc) {
+          const payoutInfo = (dispute.freelancer_payout_amount !== undefined && dispute.client_refund_amount !== undefined)
+            ? `Settlement: $${dispute.freelancer_payout_amount} USDC Freelancer / $${dispute.client_refund_amount} USDC Client. `
+            : '';
+          hubDesc.innerHTML = `<strong style="color: #10B981;">Dispute Resolved by Baxis Arbitrator.</strong> ${payoutInfo}Notes: "${dispute.resolution_notes || 'Case closed.'}"`;
+        }
+
+      } else {
+        // ACTIVE OPEN DISPUTE
+        if (statusPill) {
+          statusPill.className = 'status-pill rust';
+        }
+        if (statusPillText) {
+          statusPillText.textContent = 'IN DISPUTE';
+        }
+
+        if (btnApprove) {
+          btnApprove.disabled = true;
+          btnApprove.style.display = 'none'; // HIDE RELEASE BUTTON DURING DISPUTE
+        }
+
+        if (btnRaiseDispute) {
+          btnRaiseDispute.disabled = true;
+          btnRaiseDispute.style.display = 'inline-flex';
+          const span = btnRaiseDispute.querySelector('span') || btnRaiseDispute;
+          span.textContent = 'Dispute Under Review';
+        }
+
+        if (actionAlertText) {
+          actionAlertText.textContent = 'Contract Locked';
+        }
+
+        if (hubDesc) {
+          hubDesc.innerHTML = `<strong style="color: #EF4444;">Contract Locked in Dispute.</strong> Reason: "${dispute.reason}". Awaiting Baxis Arbitrator review.`;
+        }
       }
 
       const auditContainer = document.getElementById('audit-timeline-container');
@@ -1111,7 +1106,7 @@ document.documentElement.classList.add('js-enabled');
         row.className = 'audit-row';
         row.innerHTML = `
           <span class="audit-time">Just now</span>
-          <span class="audit-event" style="color: var(--state-error, #EF4444);">Dispute Opened — Evidence Uploaded</span>
+          <span class="audit-event" style="color: ${isResolved ? '#10B981' : '#EF4444'};">${isResolved ? 'Dispute Settled by Arbitrator' : 'Dispute Opened — Evidence Uploaded'}</span>
         `;
         auditContainer.prepend(row);
       }
