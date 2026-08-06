@@ -197,6 +197,7 @@ document.documentElement.classList.add('js-enabled');
       this.sidebar = new SidebarManager();
       this.tabs = new ContractTabsManager();
       this.approveBtn = document.getElementById('btn-approve-release');
+      this.cancelBtn = document.getElementById('btn-cancel-escrow');
       this.disputeBtn = document.getElementById('btn-raise-dispute');
       this.shareBtn = document.getElementById('btn-share-contract');
       this.uploadBtn = document.getElementById('btn-upload-deliverable');
@@ -261,41 +262,43 @@ document.documentElement.classList.add('js-enabled');
       try {
         let targetId = this.escrowId;
 
-        if (!targetId) {
-          const { data: { session } } = await supabase.auth.getSession();
-          if (session) {
-            const { data: userDeals } = await supabase
-              .from('escrows')
-              .select('id')
-              .or(`creator_id.eq.${session.user.id},client_id.eq.${session.user.id},freelancer_id.eq.${session.user.id}`)
-              .order('created_at', { ascending: false })
-              .limit(1);
+        if (targetId) {
+          const { data } = await supabase
+            .from('escrows')
+            .select('*')
+            .eq('id', targetId)
+            .maybeSingle();
+
+          if (data) {
+            this.currentEscrow = data;
+            this.renderEscrowDetails(data);
+            return;
+          }
+        }
+
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          const { data: userDeals } = await supabase
+            .from('escrows')
+            .select('id')
+            .or(`creator_id.eq.${session.user.id},client_id.eq.${session.user.id},freelancer_id.eq.${session.user.id}`)
+            .order('created_at', { ascending: false })
+            .limit(1);
 
             if (userDeals && userDeals.length > 0) {
               targetId = userDeals[0].id;
               this.escrowId = targetId;
+
+              const { data } = await supabase.from('escrows').select('*').eq('id', targetId).maybeSingle();
+              if (data) {
+                this.currentEscrow = data;
+                this.renderEscrowDetails(data);
+                return;
+              }
             }
-          }
         }
 
-        if (!targetId) {
-          this.renderEmptyVaultState();
-          return;
-        }
-
-        const { data, error } = await supabase
-          .from('escrows')
-          .select('*')
-          .eq('id', targetId)
-          .single();
-
-        if (error || !data) {
-          this.renderEmptyVaultState();
-          return;
-        }
-
-        this.currentEscrow = data;
-        this.renderEscrowDetails(data);
+        this.renderEmptyVaultState();
 
       } catch (err) {
         console.error('Fetch escrow error:', err);
@@ -441,9 +444,19 @@ document.documentElement.classList.add('js-enabled');
           'funds_locked': 'FUNDS LOCKED IN VAULT',
           'in_review': 'IN REVIEW',
           'released': 'PAYMENT RELEASED',
+          'refunded': 'REFUNDED TO CLIENT',
           'disputed': 'IN DISPUTE'
         };
         statusPillEl.textContent = statusMap[escrow.status] || escrow.status.toUpperCase();
+      }
+
+      // SHOW / HIDE CANCEL BUTTON DYNAMICALLY DURING 'FUNDS_LOCKED'
+      if (this.cancelBtn) {
+        if (escrow.status === 'funds_locked') {
+          this.cancelBtn.style.display = 'inline-flex';
+        } else {
+          this.cancelBtn.style.display = 'none';
+        }
       }
 
       if (this.approveBtn) {
@@ -455,6 +468,9 @@ document.documentElement.classList.add('js-enabled');
           this.setApproveBtnText('Payment Released');
           this.approveBtn.disabled = true;
           this.approveBtn.style.background = 'var(--state-success)';
+        } else if (escrow.status === 'refunded') {
+          this.setApproveBtnText('Escrow Cancelled & Refunded');
+          this.approveBtn.disabled = true;
         }
       }
 
@@ -564,6 +580,17 @@ document.documentElement.classList.add('js-enabled');
         });
       }
 
+      if (this.cancelBtn) {
+        this.cancelBtn.addEventListener('click', async () => {
+          if (!window.baxisWallet) return alert('Wallet provider not found. Check wallet.js!');
+
+          const signer = await window.baxisWallet.connectWallet();
+          if (!signer) return;
+
+          await this.executeOnChainCancel(signer);
+        });
+      }
+
       if (this.shareBtn) {
         this.shareBtn.addEventListener('click', () => {
           if (navigator.clipboard) {
@@ -613,7 +640,7 @@ document.documentElement.classList.add('js-enabled');
           await approveTx.wait();
         }
 
-        this.setApproveBtnText('2/2: Confirm in MetaMask...');
+        this.setApproveBtnText('2/2: Confirm in Wallet...');
 
         // STRICT REAL-MONEY EVM ADDRESS SAFEGUARD
         const freelancerAddr = this.currentEscrow?.counterparty_identifier || '';
@@ -692,12 +719,79 @@ document.documentElement.classList.add('js-enabled');
 
         let errorMsg = err.reason || err.message || 'Transaction failed.';
         if (err.code === -32002) {
-          errorMsg = 'MetaMask popup is open! Click your browser extension icon to approve.';
+          errorMsg = 'Wallet popup is open! Click your browser extension icon to approve.';
         }
 
         this.toast.show({
           title: 'Deposit Transaction Failed',
           message: errorMsg,
+          type: 'rust'
+        });
+      }
+    }
+
+    /* ==========================================================================
+       PRODUCTION-SECURED CLIENT CANCEL & UNILATERAL REFUND
+       ========================================================================== */
+    async executeOnChainCancel(signer) {
+      try {
+        if (this.cancelBtn) {
+          this.cancelBtn.disabled = true;
+          const span = this.cancelBtn.querySelector('span') || this.cancelBtn;
+          span.textContent = 'Signing On-Chain Cancel...';
+        }
+
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const bytes32GigId = getGigIdBytes32(this.escrowId);
+        const contractInterface = new ethers.Interface(BAXIS_CONTRACT_ABI);
+        const calldata = contractInterface.encodeFunctionData('cancelEscrow', [bytes32GigId]);
+
+        const userAddr = await signer.getAddress();
+        const txHash = await window.ethereum.request({
+          method: 'eth_sendTransaction',
+          params: [{
+            from: userAddr,
+            to: BAXIS_CONTRACT_ADDRESS,
+            data: calldata
+          }]
+        });
+
+        const span = this.cancelBtn?.querySelector('span') || this.cancelBtn;
+        if (span) span.textContent = 'Waiting for Blockchain Confirmation...';
+
+        const txReceipt = await provider.waitForTransaction(txHash);
+
+        if (!txReceipt || txReceipt.status !== 1) {
+          throw new Error('Cancel transaction reverted on-chain.');
+        }
+
+        const supabase = this.getSupabase();
+        if (supabase) {
+          await supabase.from('escrows').update({
+            status: 'refunded',
+            released_at: new Date().toISOString()
+          }).eq('id', this.escrowId);
+        }
+
+        this.toast.show({
+          title: 'Escrow Cancelled & Refunded!',
+          message: `100% of funds returned to your wallet. TX: ${txHash.substring(0, 12)}...`,
+          type: 'success',
+          duration: 6000
+        });
+
+        await this.fetchEscrowFromDatabase();
+
+      } catch (err) {
+        if (this.cancelBtn) {
+          this.cancelBtn.disabled = false;
+          const span = this.cancelBtn.querySelector('span') || this.cancelBtn;
+          span.textContent = 'Cancel & Refund Escrow';
+        }
+        console.error('Cancel Failed:', err);
+        this.toast.show({
+          title: 'Cancellation Failed',
+          message: err.reason || err.message || 'Transaction rejected.',
           type: 'rust'
         });
       }
@@ -722,7 +816,6 @@ document.documentElement.classList.add('js-enabled');
           }]
         });
 
-        // WAIT FOR REAL ON-CHAIN BLOCKCHAIN CONFIRMATION RECEIPT
         this.setApproveBtnText('Waiting for Blockchain Confirmation...');
         const provider = new ethers.BrowserProvider(window.ethereum);
         const txReceipt = await provider.waitForTransaction(txHash);
@@ -842,7 +935,6 @@ document.documentElement.classList.add('js-enabled');
       });
     }
 
-    // RENDER SELECTED FILES INSIDE DROPZONE WITH EVENT PROPAGATION STOPPER
     function renderSelectedFiles() {
       if (!filesContainer) return;
       filesContainer.innerHTML = '';
@@ -860,11 +952,10 @@ document.documentElement.classList.add('js-enabled');
         filesContainer.appendChild(pill);
       });
 
-      // Attach Delete Listeners with e.stopPropagation() & e.preventDefault()
       filesContainer.querySelectorAll('.remove-file-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.preventDefault();
-          e.stopPropagation(); // STOPS FILE DIALOG FROM RE-OPENING WHEN DELETING A FILE!
+          e.stopPropagation();
           const idx = parseInt(e.currentTarget.dataset.index, 10);
           selectedFiles.splice(idx, 1);
           renderSelectedFiles();
