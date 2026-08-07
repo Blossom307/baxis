@@ -154,14 +154,14 @@
                         </svg>
                     </button>
 
-                    <div class="breadcrumb">
-                        <a href="dashboard.html" class="breadcrumb-item">Workspace</a>
-                        <span class="breadcrumb-separator">/</span>
-                        <span class="breadcrumb-item active">Profile & Reputation</span>
-                    </div>
+                    
                 </div>
 
                 <div class="topbar-actions">
+                    <button type="button" class="btn btn-secondary btn-sm" id="btn-edit-profile-hero">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        <span>Edit Profile</span>
+                    </button>
                     <button type="button" class="btn btn-primary btn-sm" id="btn-share-profile">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -202,9 +202,9 @@
                             </label>
                         </div>
 
-                        <div class="profile-meta-row" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
+                        <div class="profile-meta-row">
                             <div class="profile-titles-box">
-                                <div class="title-with-pill" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                <div class="title-with-pill">
                                     <h1 class="profile-display-name" id="profile-display-name">User Account</h1>
                                     <span class="ens-badge" id="profile-ens-badge" hidden>--</span>
                                     <span class="trust-score-badge" id="profile-trust-badge">New Member</span>
@@ -212,23 +212,16 @@
                                 <p class="profile-job-title" id="profile-job-title">Digital Contract Member</p>
 
                                 <!-- PROFILE BIO DISPLAY -->
-                                <p class="profile-bio-text" id="profile-bio-display" style="font-size: 0.875rem; color: rgba(255,255,255,0.7); margin-top: 6px; line-height: 1.5; max-width: 520px;">
+                                <p class="profile-bio-text" id="profile-bio-display">
                                     Digital Contract Member on Baxis Protocol.
                                 </p>
 
                                 <span class="profile-address-code" id="profile-address-code">0x... • Wallet Not Connected</span>
                             </div>
 
-                            <!-- FAR RIGHT HERO ACTIONS -->
-                            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
-                                <div class="profile-status-pill">
-                                    <span class="pulse-dot green"></span>
-                                    <span>Verified Escrow User</span>
-                                </div>
-                                <button type="button" class="btn btn-secondary btn-sm" id="btn-edit-profile-hero" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; font-size: 12px;">
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                                    <span>Edit Profile</span>
-                                </button>
+                            <div class="profile-status-pill">
+                                <span class="pulse-dot green"></span>
+                                <span>Verified Escrow User</span>
                             </div>
                         </div>
                     </div>
