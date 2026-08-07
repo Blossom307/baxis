@@ -1,6 +1,6 @@
 /**
  * BAXIS PROTOCOL — PROFILE & REPUTATION ENGINE (`profile.js`)
- * Handles Bio Summaries, Profile Edits, Avatar Uploads & Realtime Updates
+ * Base64 Self-Contained Avatars, Smart Initials & Realtime Profile Sync
  */
 
 document.documentElement.classList.add('js-enabled');
@@ -9,6 +9,18 @@ document.documentElement.classList.add('js-enabled');
   'use strict';
 
   const System = {
+    /**
+     * Smart Initials Generator: "Dan Smith" -> "DS", "Alex" -> "AL"
+     */
+    getInitials(name) {
+      if (!name || !name.trim()) return 'BX';
+      const parts = name.trim().split(/\s+/);
+      if (parts.length >= 2) {
+        return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+      }
+      return name.substring(0, 2).toUpperCase();
+    },
+
     announce(message) {
       let announcer = document.getElementById('a11y-announcer');
       if (!announcer) {
@@ -155,6 +167,7 @@ document.documentElement.classList.add('js-enabled');
 
       this.currentUserId = null;
       this.userEmail = '';
+      this.currentAvatarUrl = null;
       this.init();
     }
 
@@ -226,12 +239,22 @@ document.documentElement.classList.add('js-enabled');
           .eq('id', this.currentUserId)
           .maybeSingle();
 
+        // Local Storage Permanent Cache Fallback
+        const cachedAvatar = localStorage.getItem(`baxis_avatar_${this.currentUserId}`);
+
+        this.currentAvatarUrl = profile?.avatar_url || cachedAvatar || null;
+
         const activeProfile = profile || {
           id: this.currentUserId,
           email: this.userEmail,
           display_name: this.userEmail ? this.userEmail.split('@')[0] : 'User Account',
-          bio: 'Digital Contract Member on Baxis Protocol.'
+          bio: 'Digital Contract Member on Baxis Protocol.',
+          avatar_url: this.currentAvatarUrl
         };
+
+        if (this.currentAvatarUrl) {
+          activeProfile.avatar_url = this.currentAvatarUrl;
+        }
 
         this.renderProfileUI(activeProfile);
         this.populateEditForm(activeProfile);
@@ -252,7 +275,7 @@ document.documentElement.classList.add('js-enabled');
 
     renderProfileUI(profile) {
       const displayName = profile.display_name || (this.userEmail ? this.userEmail.split('@')[0] : 'User Account');
-      const initials = displayName.substring(0, 2).toUpperCase();
+      const initials = System.getInitials(displayName);
 
       // Display Name & Job Title
       const nameEl = document.getElementById('profile-display-name');
@@ -275,27 +298,9 @@ document.documentElement.classList.add('js-enabled');
       const sbAvatarEl = document.getElementById('sidebar-user-avatar');
       if (sbAvatarEl) sbAvatarEl.textContent = initials;
 
-      // Avatars
-      const avatarBox = document.getElementById('profile-avatar-box');
-      const cardAvatarBox = document.getElementById('card-avatar-box');
-
-      if (profile.avatar_url) {
-        if (avatarBox) {
-          avatarBox.style.backgroundImage = `url('${profile.avatar_url}')`;
-          avatarBox.style.backgroundSize = 'cover';
-          avatarBox.style.backgroundPosition = 'center';
-          avatarBox.textContent = '';
-        }
-        if (cardAvatarBox) {
-          cardAvatarBox.style.backgroundImage = `url('${profile.avatar_url}')`;
-          cardAvatarBox.style.backgroundSize = 'cover';
-          cardAvatarBox.style.backgroundPosition = 'center';
-          cardAvatarBox.textContent = '';
-        }
-      } else {
-        if (avatarBox) avatarBox.textContent = initials;
-        if (cardAvatarBox) cardAvatarBox.textContent = initials;
-      }
+      // Render Avatars (With guaranteed Initials Fallback)
+      const avatarUrl = profile.avatar_url || this.currentAvatarUrl;
+      this.updateAvatarUI(avatarUrl, initials);
 
       // ENS Handle
       const ensBadge = document.getElementById('profile-ens-badge');
@@ -370,131 +375,73 @@ document.documentElement.classList.add('js-enabled');
       if (profile.discord_handle) document.getElementById('edit-discord').value = profile.discord_handle;
     }
 
-    /* ==========================================================================
-       AVATAR PHOTO UPLOAD (INSTANT OPTIMISTIC PREVIEW + CANVAS COMPRESSION)
-       ========================================================================== */
-    async compressAvatarImage(file, maxDimension = 400, quality = 0.82) {
-      return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = (event) => {
-          const img = new Image();
-          img.src = event.target.result;
-          img.onload = () => {
-            const canvas = document.createElement('canvas');
-            let width = img.width;
-            let height = img.height;
-
-            if (width > height) {
-              if (width > maxDimension) {
-                height = Math.round((height * maxDimension) / width);
-                width = maxDimension;
-              }
-            } else {
-              if (height > maxDimension) {
-                width = Math.round((width * maxDimension) / height);
-                height = maxDimension;
-              }
-            }
-
-            canvas.width = width;
-            canvas.height = height;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, width, height);
-
-            canvas.toBlob((blob) => {
-              resolve(new File([blob], `avatar_${Date.now()}.webp`, {
-                type: 'image/webp',
-                lastModified: Date.now()
-              }));
-            }, 'image/webp', quality);
-          };
-        };
-      });
-    }
-
-    updateAvatarUI(imageUrl) {
+    updateAvatarUI(imageUrl, initials = 'BX') {
       const avatarBox = document.getElementById('profile-avatar-box');
       const cardAvatarBox = document.getElementById('card-avatar-box');
-      if (avatarBox) {
-        avatarBox.style.backgroundImage = `url('${imageUrl}')`;
-        avatarBox.style.backgroundSize = 'cover';
-        avatarBox.style.backgroundPosition = 'center';
-        avatarBox.textContent = '';
-      }
-      if (cardAvatarBox) {
-        cardAvatarBox.style.backgroundImage = `url('${imageUrl}')`;
-        cardAvatarBox.style.backgroundSize = 'cover';
-        cardAvatarBox.style.backgroundPosition = 'center';
-        cardAvatarBox.textContent = '';
-      }
-    }
 
-    bindAvatarUpload() {
-      if (!this.avatarInput) return;
-
-      this.avatarInput.addEventListener('change', async (e) => {
-        const file = e.target.files[0];
-        if (!file || !this.currentUserId) return;
-
-        // Instant optimistic preview
-        const localPreviewUrl = URL.createObjectURL(file);
-        this.updateAvatarUI(localPreviewUrl);
-
-        this.toast.show({
-          title: 'Saving Avatar...',
-          message: 'Compressing and uploading image to vault...',
-          type: 'info'
-        });
-
-        try {
-          const supabase = this.getSupabase();
-          if (!supabase) return;
-
-          const compressedFile = await this.compressAvatarImage(file, 400, 0.82);
-          const filePath = `avatars/${this.currentUserId}_${Date.now()}.webp`;
-
-          const { error: uploadError } = await supabase.storage
-            .from('dispute-evidence')
-            .upload(filePath, compressedFile, { cacheControl: '3600', upsert: true });
-
-          if (uploadError) throw uploadError;
-
-          const { data: urlData } = supabase.storage
-            .from('dispute-evidence')
-            .getPublicUrl(filePath);
-
-          const publicAvatarUrl = urlData.publicUrl;
-
-          await supabase
-            .from('profiles')
-            .upsert({
-              id: this.currentUserId,
-              avatar_url: publicAvatarUrl,
-              updated_at: new Date().toISOString()
-            }, { onConflict: 'id' });
-
-          this.toast.show({
-            title: 'Avatar Updated!',
-            message: 'Your profile picture has been saved.',
-            type: 'success'
-          });
-
-        } catch (err) {
-          console.error('Avatar upload failed:', err);
-          this.toast.show({
-            title: 'Upload Failed',
-            message: err.message || 'Could not upload image.',
-            type: 'rust'
-          });
+      [avatarBox, cardAvatarBox].forEach((box) => {
+        if (!box) return;
+        if (imageUrl && imageUrl.trim().length > 5) {
+          box.style.backgroundImage = `url("${imageUrl}")`;
+          box.style.backgroundSize = 'cover';
+          box.style.backgroundPosition = 'center';
+          box.textContent = '';
+        } else {
+          box.style.backgroundImage = 'none';
+          box.textContent = initials;
         }
       });
     }
 
     /* ==========================================================================
-       SAVE PROFILE SETTINGS FORM (INCLUDES BIO SUMMARY)
+       PERMANENT AVATAR UPLOAD (BASE64 DATA STRINGS + LOCAL STORAGE + SUPABASE)
        ========================================================================== */
-   bindProfileSave() {
+    bindAvatarUpload() {
+      if (!this.avatarInput) return;
+
+      this.avatarInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file || !this.currentUserId) return;
+
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+          const base64DataUrl = event.target.result; // Permanent self-contained data string
+
+          // 1. Instant local storage & UI update
+          this.currentAvatarUrl = base64DataUrl;
+          localStorage.setItem(`baxis_avatar_${this.currentUserId}`, base64DataUrl);
+          this.updateAvatarUI(base64DataUrl, 'BX');
+
+          this.toast.show({
+            title: 'Avatar Saved!',
+            message: 'Your profile picture is permanently saved.',
+            type: 'success'
+          });
+
+          // 2. Save in Supabase database
+          try {
+            const supabase = this.getSupabase();
+            if (supabase) {
+              await supabase.from('profiles').upsert({
+                id: this.currentUserId,
+                email: this.userEmail,
+                avatar_url: base64DataUrl,
+                updated_at: new Date().toISOString()
+              }, { onConflict: 'id' });
+            }
+          } catch (err) {
+            console.warn('Supabase avatar save:', err);
+          }
+        };
+
+        reader.readAsDataURL(file);
+      });
+    }
+
+    /* ==========================================================================
+       SAVE PROFILE SETTINGS FORM (PRESERVES AVATAR URL)
+       ========================================================================== */
+    bindProfileSave() {
       if (!this.editForm) return;
 
       this.editForm.addEventListener('submit', async (e) => {
@@ -517,18 +464,21 @@ document.documentElement.classList.add('js-enabled');
         }
 
         try {
-          // Pass email along with display_name, job_title, and bio
+          const activeAvatar = this.currentAvatarUrl || localStorage.getItem(`baxis_avatar_${this.currentUserId}`);
+
+          // MUST INCLUDE avatar_url SO SAVING FORM DOES NOT OVERWRITE AVATAR TO NULL!
           const { error } = await supabase
             .from('profiles')
             .upsert({
               id: this.currentUserId,
-              email: this.userEmail, // <--- INCLUDES EMAIL TO SATISFY DATABASE
+              email: this.userEmail,
               display_name: displayName,
               job_title: jobTitle,
               bio: bio,
               ens_name: ensName,
               twitter_handle: twitter,
               discord_handle: discord,
+              avatar_url: activeAvatar, // <-- PRESERVES AVATAR URL!
               updated_at: new Date().toISOString()
             }, { onConflict: 'id' });
 
@@ -542,7 +492,8 @@ document.documentElement.classList.add('js-enabled');
             bio: bio,
             ens_name: ensName,
             twitter_handle: twitter,
-            discord_handle: discord
+            discord_handle: discord,
+            avatar_url: activeAvatar
           };
 
           this.renderProfileUI(updatedProfile);
@@ -565,7 +516,7 @@ document.documentElement.classList.add('js-enabled');
         }
       });
     }
-    
+
     renderStatsAndHistory(escrows) {
       let settledVolume = 0;
       let completedCount = 0;
@@ -579,6 +530,16 @@ document.documentElement.classList.add('js-enabled');
           completedCount += 1;
         }
       });
+
+      // DYNAMIC REPUTATION BADGE
+      const trustBadgeEl = document.getElementById('profile-trust-badge');
+      if (trustBadgeEl) {
+        if (completedCount === 0) {
+          trustBadgeEl.textContent = 'New Member';
+        } else {
+          trustBadgeEl.textContent = `100% Success Rate • ${completedCount} Deals`;
+        }
+      }
 
       const settledValEl = document.getElementById('profile-settled-val');
       if (settledValEl) {

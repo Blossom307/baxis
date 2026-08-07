@@ -144,7 +144,6 @@
             <!-- TOPBAR WITH MOBILE HAMBURGER -->
             <header class="topbar">
                 <div class="topbar-left">
-                    <!-- MOBILE HAMBURGER TOGGLE -->
                     <button class="topbar-mobile-toggle" id="btn-mobile-sidebar-toggle"
                         aria-label="Open Mobile Navigation Drawer">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -162,7 +161,11 @@
                     </div>
                 </div>
 
-                <div class="topbar-actions">
+                <div class="topbar-actions" style="display: flex; gap: 8px;">
+                    <button type="button" class="btn btn-secondary btn-sm" id="btn-toggle-edit-profile">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                        <span>Edit Profile</span>
+                    </button>
                     <button class="btn btn-primary btn-sm" id="btn-share-profile">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2">
@@ -208,7 +211,8 @@
                                 <div class="title-with-pill">
                                     <h1 class="profile-display-name" id="profile-display-name">User Account</h1>
                                     <span class="ens-badge" id="profile-ens-badge" hidden>--</span>
-                                    <span class="trust-score-badge" id="profile-trust-badge">99.4 Trust Score</span>
+                                    <!-- DYNAMIC REPUTATION BADGE -->
+                                    <span class="trust-score-badge" id="profile-trust-badge">New Member</span>
                                 </div>
                                 <p class="profile-job-title" id="profile-job-title">Digital Contract Member</p>
 
@@ -300,8 +304,8 @@
                     <!-- LEFT COLUMN: EDIT PROFILE SETUP & VERIFIED HISTORY -->
                     <div class="profile-primary-column">
 
-                        <!-- EDIT PROFILE SETTINGS CARD -->
-                        <div class="profile-card">
+                        <!-- EDIT PROFILE SETTINGS CARD (TOGGLEABLE) -->
+                        <div class="profile-card" id="profile-edit-card" style="display: none;">
                             <div class="card-box-header">
                                 <div>
                                     <span class="card-eyebrow">PROFILE SETUP</span>
@@ -314,7 +318,7 @@
                                     <div class="form-group">
                                         <label for="edit-display-name" class="form-label">Display Name or Business Name</label>
                                         <input type="text" id="edit-display-name" class="form-input-sm"
-                                            placeholder="e.g. Alex Turner / Acme Design Studio">
+                                            placeholder="e.g. Dan Smith / Acme Studio">
                                     </div>
 
                                     <div class="form-group">
@@ -354,6 +358,27 @@
                                     <span>Save Profile Changes</span>
                                 </button>
                             </form>
+                        </div>
+
+                        <!-- Recent Verified Contracts Table -->
+                        <div class="profile-card">
+                            <h2 class="card-section-heading">Verified Escrow History</h2>
+
+                            <div class="table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Agreement Title</th>
+                                            <th scope="col">Counterparty</th>
+                                            <th scope="col">Amount</th>
+                                            <th scope="col">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="profile-history-table-body">
+                                        <!-- Rendered dynamically from Supabase or Empty State -->
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
 
                         <!-- SHAREABLE MOBILE TRUST CARD PREVIEW -->
@@ -403,27 +428,6 @@
                                 <div class="trust-card-action">
                                     <a href="create.html" class="btn btn-primary btn-sm full-width">Hire via Baxis Escrow ➔</a>
                                 </div>
-                            </div>
-                        </div>
-
-                        <!-- Recent Verified Contracts Table -->
-                        <div class="profile-card">
-                            <h2 class="card-section-heading">Verified Escrow History</h2>
-
-                            <div class="table-container">
-                                <table class="data-table">
-                                    <thead>
-                                        <tr>
-                                            <th scope="col">Agreement Title</th>
-                                            <th scope="col">Counterparty</th>
-                                            <th scope="col">Amount</th>
-                                            <th scope="col">Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="profile-history-table-body">
-                                        <!-- Rendered dynamically from Supabase or Empty State -->
-                                    </tbody>
-                                </table>
                             </div>
                         </div>
 
