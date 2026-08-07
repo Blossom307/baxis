@@ -1,6 +1,6 @@
 /**
  * BAXIS PROTOCOL — PROFILE & REPUTATION ENGINE (`profile.js`)
- * Guaranteed Panel Toggle, Base64 Avatars, Smart Initials & Zero Emojis
+ * Dynamic Web3 Wallet Handler, Fail-Safe Edit Toggle & Base64 Avatars
  */
 
 document.documentElement.classList.add('js-enabled');
@@ -225,30 +225,49 @@ document.documentElement.classList.add('js-enabled');
       if (heroBtn) heroBtn.addEventListener('click', toggleEditPanel);
     }
 
+    /**
+     * DYNAMIC WEB3 WALLET CHECKER & REAL-TIME LISTENER
+     */
     async checkConnectedWallet() {
+      const addrEl = document.getElementById('profile-address-code');
+      const walletAddrEl = document.getElementById('display-wallet-address');
+      const walletTagEl = document.getElementById('wallet-status-tag');
+
+      const updateWalletUI = (addr) => {
+        if (addr) {
+          const shortAddr = `${addr.substring(0, 6)}...${addr.substring(addr.length - 4)}`;
+          if (addrEl) addrEl.textContent = `${shortAddr} • Base Network Connected`;
+          if (walletAddrEl) walletAddrEl.textContent = shortAddr;
+          if (walletTagEl) {
+            walletTagEl.textContent = 'Connected';
+            walletTagEl.className = 'wallet-tag active';
+          }
+        } else {
+          if (addrEl) addrEl.textContent = 'Wallet Not Connected';
+          if (walletAddrEl) walletAddrEl.textContent = 'Not Connected';
+          if (walletTagEl) {
+            walletTagEl.textContent = 'Disconnected';
+            walletTagEl.className = 'wallet-tag';
+          }
+        }
+      };
+
       if (window.ethereum) {
         try {
+          // Listen for live wallet switches/connections
+          window.ethereum.on('accountsChanged', (accounts) => {
+            updateWalletUI(accounts.length > 0 ? accounts[0] : null);
+          });
+
           const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-          if (accounts && accounts.length > 0) {
-            const addr = accounts[0];
-            const shortAddr = `${addr.substring(0, 6)}...${addr.substring(addr.length - 4)}`;
-            
-            const addrEl = document.getElementById('profile-address-code');
-            if (addrEl) addrEl.textContent = `${shortAddr} • Base Network Connected`;
-
-            const walletAddrEl = document.getElementById('display-wallet-address');
-            if (walletAddrEl) walletAddrEl.textContent = shortAddr;
-
-            const walletTagEl = document.getElementById('wallet-status-tag');
-            if (walletTagEl) {
-              walletTagEl.textContent = 'Connected';
-              walletTagEl.className = 'wallet-tag active';
-            }
-          }
+          updateWalletUI(accounts.length > 0 ? accounts[0] : null);
+          return;
         } catch (err) {
-          console.warn('Wallet address check:', err);
+          console.warn('Wallet check warning:', err);
         }
       }
+
+      updateWalletUI(null);
     }
 
     async loadUserProfile() {
@@ -271,7 +290,7 @@ document.documentElement.classList.add('js-enabled');
           .eq('id', this.currentUserId)
           .maybeSingle();
 
-        // Local Storage Permanent Fallback
+        // Local Storage Permanent Cache Fallback
         const cachedAvatar = localStorage.getItem(`baxis_avatar_${this.currentUserId}`);
 
         this.currentAvatarUrl = profile?.avatar_url || cachedAvatar || null;
