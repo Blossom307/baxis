@@ -8,8 +8,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
     <!-- Primary SEO Meta Tags -->
-    <title>User Profile & Trust Score | Baxis Protocol</title>
-    <meta name="title" content="User Profile & Trust Score — Baxis Protocol">
+    <title>User Profile & Reputation | Baxis Protocol</title>
+    <meta name="title" content="User Profile & Reputation — Baxis Protocol">
     <meta name="description"
         content="View verified on-chain escrow history, completed contract volume, and connected credentials on Baxis Protocol.">
     <meta name="robots" content="noindex, nofollow">
@@ -161,14 +161,14 @@
                     </div>
                 </div>
 
-                <div class="topbar-actions" style="display: flex; gap: 8px;">
+                <div class="topbar-actions">
                     <button type="button" class="btn btn-secondary btn-sm" id="btn-toggle-edit-profile">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                         <span>Edit Profile</span>
                     </button>
-                    <button class="btn btn-primary btn-sm" id="btn-share-profile">
+                    <button type="button" class="btn btn-primary btn-sm" id="btn-share-profile">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
                             <polyline points="16 6 12 2 8 6" />
                             <line x1="12" y1="2" x2="12" y2="15" />
@@ -208,15 +208,14 @@
 
                         <div class="profile-meta-row">
                             <div class="profile-titles-box">
-                                <div class="title-with-pill">
+                                <div class="title-with-pill" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                                     <h1 class="profile-display-name" id="profile-display-name">User Account</h1>
                                     <span class="ens-badge" id="profile-ens-badge" hidden>--</span>
-                                    <!-- DYNAMIC REPUTATION BADGE -->
                                     <span class="trust-score-badge" id="profile-trust-badge">New Member</span>
                                 </div>
                                 <p class="profile-job-title" id="profile-job-title">Digital Contract Member</p>
 
-                                <!-- PROFILE BIO / SUMMARY DISPLAY PARAGRAPH -->
+                                <!-- PROFILE BIO DISPLAY -->
                                 <p class="profile-bio-text" id="profile-bio-display" style="font-size: 0.875rem; color: rgba(255,255,255,0.7); margin-top: 6px; line-height: 1.5; max-width: 520px;">
                                     Digital Contract Member on Baxis Protocol.
                                 </p>
@@ -231,6 +230,61 @@
                         </div>
                     </div>
                 </section>
+
+                <!-- EDIT PROFILE SETTINGS CARD (TOGGLEABLE) -->
+                <div class="profile-card" id="profile-edit-card" hidden style="display: none; margin-bottom: 1.5rem;">
+                    <div class="card-box-header">
+                        <div>
+                            <span class="card-eyebrow">PROFILE SETUP</span>
+                            <h2 class="card-title-sm">Edit Your Profile & Social Handles</h2>
+                        </div>
+                    </div>
+
+                    <form id="form-edit-profile" novalidate style="margin-top: 1rem;">
+                        <div class="form-row-2col">
+                            <div class="form-group">
+                                <label for="edit-display-name" class="form-label">Display Name or Business Name</label>
+                                <input type="text" id="edit-display-name" class="form-input-sm"
+                                    placeholder="e.g. Dan Smith / Acme Studio">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="edit-job-title" class="form-label">Role or Specialization</label>
+                                <input type="text" id="edit-job-title" class="form-input-sm"
+                                    placeholder="e.g. Fullstack Engineer / UI Designer">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="edit-bio" class="form-label">Profile Bio / Summary</label>
+                            <textarea id="edit-bio" class="form-input-sm" rows="3" placeholder="Explain your services, background, or work focus..." style="height: auto; padding: 10px; resize: vertical; width: 100%;"></textarea>
+                        </div>
+
+                        <div class="form-row-2col">
+                            <div class="form-group">
+                                <label for="edit-ens-name" class="form-label">ENS Handle (Optional)</label>
+                                <input type="text" id="edit-ens-name" class="form-input-sm"
+                                    placeholder="e.g. alex.eth">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="edit-twitter" class="form-label">Twitter / X Handle</label>
+                                <input type="text" id="edit-twitter" class="form-input-sm"
+                                    placeholder="e.g. @alex_turner">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="edit-discord" class="form-label">Discord Username</label>
+                            <input type="text" id="edit-discord" class="form-input-sm"
+                                placeholder="e.g. alex#1042">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-sm" id="btn-save-profile">
+                            <span>Save Profile Changes</span>
+                        </button>
+                    </form>
+                </div>
 
                 <!-- ==========================================================================
              4. REPUTATION METRICS GRID 
@@ -301,64 +355,8 @@
              ========================================================================== -->
                 <div class="profile-main-grid">
 
-                    <!-- LEFT COLUMN: EDIT PROFILE SETUP & VERIFIED HISTORY -->
+                    <!-- LEFT COLUMN: VERIFIED HISTORY -->
                     <div class="profile-primary-column">
-
-                        <!-- EDIT PROFILE SETTINGS CARD (TOGGLEABLE) -->
-                        <div class="profile-card" id="profile-edit-card" style="display: none;">
-                            <div class="card-box-header">
-                                <div>
-                                    <span class="card-eyebrow">PROFILE SETUP</span>
-                                    <h2 class="card-title-sm">Edit Your Profile & Social Handles</h2>
-                                </div>
-                            </div>
-
-                            <form id="form-edit-profile" novalidate style="margin-top: 1rem;">
-                                <div class="form-row-2col">
-                                    <div class="form-group">
-                                        <label for="edit-display-name" class="form-label">Display Name or Business Name</label>
-                                        <input type="text" id="edit-display-name" class="form-input-sm"
-                                            placeholder="e.g. Dan Smith / Acme Studio">
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label for="edit-job-title" class="form-label">Role or Specialization</label>
-                                        <input type="text" id="edit-job-title" class="form-input-sm"
-                                            placeholder="e.g. Fullstack Engineer / UI Designer">
-                                    </div>
-                                </div>
-
-                                <!-- PROFILE BIO TEXTAREA FIELD -->
-                                <div class="form-group">
-                                    <label for="edit-bio" class="form-label">Profile Bio / Summary</label>
-                                    <textarea id="edit-bio" class="form-input-sm" rows="3" placeholder="Explain your services, background, or work focus..." style="height: auto; padding: 10px; resize: vertical; width: 100%;"></textarea>
-                                </div>
-
-                                <div class="form-row-2col">
-                                    <div class="form-group">
-                                        <label for="edit-ens-name" class="form-label">ENS Handle (Optional)</label>
-                                        <input type="text" id="edit-ens-name" class="form-input-sm"
-                                            placeholder="e.g. alex.eth">
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label for="edit-twitter" class="form-label">Twitter / X Handle</label>
-                                        <input type="text" id="edit-twitter" class="form-input-sm"
-                                            placeholder="e.g. @alex_turner">
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="edit-discord" class="form-label">Discord Username</label>
-                                    <input type="text" id="edit-discord" class="form-input-sm"
-                                        placeholder="e.g. alex#1042">
-                                </div>
-
-                                <button type="submit" class="btn btn-primary btn-sm" id="btn-save-profile">
-                                    <span>Save Profile Changes</span>
-                                </button>
-                            </form>
-                        </div>
 
                         <!-- Recent Verified Contracts Table -->
                         <div class="profile-card">

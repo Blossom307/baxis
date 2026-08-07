@@ -1,6 +1,6 @@
 /**
  * BAXIS PROTOCOL — PROFILE & REPUTATION ENGINE (`profile.js`)
- * Base64 Self-Contained Avatars, Smart Initials & Realtime Profile Sync
+ * Guaranteed Panel Toggle, Base64 Avatars, Smart Initials & Zero Emojis
  */
 
 document.documentElement.classList.add('js-enabled');
@@ -186,11 +186,43 @@ document.documentElement.classList.add('js-enabled');
     }
 
     async init() {
+      this.bindEditToggle();
       await this.loadUserProfile();
       await this.checkConnectedWallet();
       this.bindAvatarUpload();
       this.bindProfileSave();
       this.bindClipboardActions();
+    }
+
+    /**
+     * GUARANTEED FAIL-SAFE EDIT PANEL TOGGLE
+     */
+    bindEditToggle() {
+      const toggleEditPanel = (e) => {
+        if (e) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+        const card = document.getElementById('profile-edit-card');
+        if (!card) return;
+
+        const isHidden = card.hasAttribute('hidden') || card.style.display === 'none' || getComputedStyle(card).display === 'none';
+
+        if (isHidden) {
+          card.removeAttribute('hidden');
+          card.style.display = 'block';
+          card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        } else {
+          card.setAttribute('hidden', 'true');
+          card.style.display = 'none';
+        }
+      };
+
+      const topbarBtn = document.getElementById('btn-toggle-edit-profile');
+      const heroBtn = document.getElementById('btn-edit-profile-hero');
+
+      if (topbarBtn) topbarBtn.addEventListener('click', toggleEditPanel);
+      if (heroBtn) heroBtn.addEventListener('click', toggleEditPanel);
     }
 
     async checkConnectedWallet() {
@@ -239,7 +271,7 @@ document.documentElement.classList.add('js-enabled');
           .eq('id', this.currentUserId)
           .maybeSingle();
 
-        // Local Storage Permanent Cache Fallback
+        // Local Storage Permanent Fallback
         const cachedAvatar = localStorage.getItem(`baxis_avatar_${this.currentUserId}`);
 
         this.currentAvatarUrl = profile?.avatar_url || cachedAvatar || null;
@@ -466,7 +498,6 @@ document.documentElement.classList.add('js-enabled');
         try {
           const activeAvatar = this.currentAvatarUrl || localStorage.getItem(`baxis_avatar_${this.currentUserId}`);
 
-          // MUST INCLUDE avatar_url SO SAVING FORM DOES NOT OVERWRITE AVATAR TO NULL!
           const { error } = await supabase
             .from('profiles')
             .upsert({
@@ -478,7 +509,7 @@ document.documentElement.classList.add('js-enabled');
               ens_name: ensName,
               twitter_handle: twitter,
               discord_handle: discord,
-              avatar_url: activeAvatar, // <-- PRESERVES AVATAR URL!
+              avatar_url: activeAvatar,
               updated_at: new Date().toISOString()
             }, { onConflict: 'id' });
 
@@ -497,6 +528,12 @@ document.documentElement.classList.add('js-enabled');
           };
 
           this.renderProfileUI(updatedProfile);
+
+          const editCard = document.getElementById('profile-edit-card');
+          if (editCard) {
+            editCard.setAttribute('hidden', 'true');
+            editCard.style.display = 'none'; // Auto-close panel on save
+          }
 
           this.toast.show({
             title: 'Profile Saved!',
