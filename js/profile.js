@@ -1,6 +1,6 @@
 /**
  * BAXIS PROTOCOL — PROFILE & REPUTATION ENGINE (`profile.js`)
- * Dynamic Web3 Wallet Handler, Fail-Safe Edit Toggle & Base64 Avatars
+ * Single Hero Edit Trigger, Base64 Avatars & Realtime Profile Sync
  */
 
 document.documentElement.classList.add('js-enabled');
@@ -195,16 +195,16 @@ document.documentElement.classList.add('js-enabled');
     }
 
     /**
-     * GUARANTEED FAIL-SAFE EDIT PANEL TOGGLE
+     * SINGLE HERO EDIT PANEL TOGGLE
      */
     bindEditToggle() {
-      const toggleEditPanel = (e) => {
-        if (e) {
-          e.preventDefault();
-          e.stopPropagation();
-        }
-        const card = document.getElementById('profile-edit-card');
-        if (!card) return;
+      const heroBtn = document.getElementById('btn-edit-profile-hero');
+      const card = document.getElementById('profile-edit-card');
+      if (!heroBtn || !card) return;
+
+      heroBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
 
         const isHidden = card.hasAttribute('hidden') || card.style.display === 'none' || getComputedStyle(card).display === 'none';
 
@@ -216,58 +216,33 @@ document.documentElement.classList.add('js-enabled');
           card.setAttribute('hidden', 'true');
           card.style.display = 'none';
         }
-      };
-
-      const topbarBtn = document.getElementById('btn-toggle-edit-profile');
-      const heroBtn = document.getElementById('btn-edit-profile-hero');
-
-      if (topbarBtn) topbarBtn.addEventListener('click', toggleEditPanel);
-      if (heroBtn) heroBtn.addEventListener('click', toggleEditPanel);
+      });
     }
 
-    /**
-     * DYNAMIC WEB3 WALLET CHECKER & REAL-TIME LISTENER
-     */
     async checkConnectedWallet() {
-      const addrEl = document.getElementById('profile-address-code');
-      const walletAddrEl = document.getElementById('display-wallet-address');
-      const walletTagEl = document.getElementById('wallet-status-tag');
-
-      const updateWalletUI = (addr) => {
-        if (addr) {
-          const shortAddr = `${addr.substring(0, 6)}...${addr.substring(addr.length - 4)}`;
-          if (addrEl) addrEl.textContent = `${shortAddr} • Base Network Connected`;
-          if (walletAddrEl) walletAddrEl.textContent = shortAddr;
-          if (walletTagEl) {
-            walletTagEl.textContent = 'Connected';
-            walletTagEl.className = 'wallet-tag active';
-          }
-        } else {
-          if (addrEl) addrEl.textContent = 'Wallet Not Connected';
-          if (walletAddrEl) walletAddrEl.textContent = 'Not Connected';
-          if (walletTagEl) {
-            walletTagEl.textContent = 'Disconnected';
-            walletTagEl.className = 'wallet-tag';
-          }
-        }
-      };
-
       if (window.ethereum) {
         try {
-          // Listen for live wallet switches/connections
-          window.ethereum.on('accountsChanged', (accounts) => {
-            updateWalletUI(accounts.length > 0 ? accounts[0] : null);
-          });
-
           const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-          updateWalletUI(accounts.length > 0 ? accounts[0] : null);
-          return;
+          if (accounts && accounts.length > 0) {
+            const addr = accounts[0];
+            const shortAddr = `${addr.substring(0, 6)}...${addr.substring(addr.length - 4)}`;
+            
+            const addrEl = document.getElementById('profile-address-code');
+            if (addrEl) addrEl.textContent = `${shortAddr} • Base Network Connected`;
+
+            const walletAddrEl = document.getElementById('display-wallet-address');
+            if (walletAddrEl) walletAddrEl.textContent = shortAddr;
+
+            const walletTagEl = document.getElementById('wallet-status-tag');
+            if (walletTagEl) {
+              walletTagEl.textContent = 'Connected';
+              walletTagEl.className = 'wallet-tag active';
+            }
+          }
         } catch (err) {
-          console.warn('Wallet check warning:', err);
+          console.warn('Wallet address check:', err);
         }
       }
-
-      updateWalletUI(null);
     }
 
     async loadUserProfile() {
