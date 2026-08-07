@@ -1,6 +1,7 @@
 /**
  * BAXIS PROTOCOL — MULTI-WALLET CONNECTOR (`wallet.js`)
  * Live Base Mainnet (Chain ID 8453 / 0x2105) Configuration
+ * Standard Web3 Auto-Resume Session Engine
  * Powered by Ethers.js v6
  */
 
@@ -30,8 +31,9 @@
         try {
           this.provider = new ethers.BrowserProvider(ethereum);
 
+          // Handle live account switching inside user's wallet
           ethereum.on('accountsChanged', (accounts) => {
-            if (accounts.length > 0) {
+            if (accounts && accounts.length > 0) {
               this.userAddress = accounts[0];
               this.updateUIAddress(accounts[0]);
             } else {
@@ -44,25 +46,31 @@
             window.location.reload();
           });
 
+          // Standard Web3 Auto-Resume: Check if THIS device's browser was previously connected
           const accounts = await ethereum.request({ method: 'eth_accounts' });
-          if (accounts.length > 0) {
+          if (accounts && accounts.length > 0) {
             this.signer = await this.provider.getSigner();
             this.userAddress = accounts[0];
             this.updateUIAddress(accounts[0]);
+          } else {
+            this.updateUIAddress(null);
           }
         } catch (e) {
           console.warn('[BaxisWallet] Silent init check:', e);
+          this.updateUIAddress(null);
         }
+      } else {
+        this.updateUIAddress(null);
       }
     }
 
     /**
-     * Primary Wallet Connection Handler
+     * Primary Wallet Connection Handler (Triggered on-demand or by Connect button)
      */
     async connectWallet() {
       const ethereum = this.getInjectedProvider();
 
-      // 1. Mobile Safari/Chrome or Desktop without wallet -> Show Multi-Wallet Modal
+      // Mobile Safari/Chrome without extension -> Show Mobile App Selector Modal
       if (!ethereum) {
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         if (isMobile) {
@@ -70,17 +78,14 @@
           return null;
         }
 
-        alert('Web3 wallet not detected! Please install MetaMask, Coinbase Wallet, or Trust Wallet extension.');
+        alert('Web3 wallet not detected. Please install MetaMask, Coinbase Wallet, or Trust Wallet extension.');
         return null;
       }
 
-      // 2. Injected Provider Present (Desktop Extension or Mobile Wallet App Browser)
       try {
-        // Request Account Access FIRST (Prevents mobile popup freeze)
         const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
         if (!accounts || accounts.length === 0) return null;
 
-        // Ensure Network SECOND
         await this.ensureCorrectNetwork(ethereum);
 
         this.provider = new ethers.BrowserProvider(ethereum);
@@ -93,7 +98,7 @@
       } catch (err) {
         console.error('[BaxisWallet] Connection error:', err);
         if (err.code === -32002) {
-          alert('Wallet popup is already open! Please check your extension icon to approve.');
+          alert('Wallet popup is open. Check your browser extension icon.');
         } else if (err.message) {
           alert('Wallet Error: ' + err.message);
         }
@@ -139,7 +144,6 @@
       const metaMaskLink = `https://metamask.app.link/dapp/${cleanUrl}`;
       const coinbaseLink = `https://go.cb-w.com/dapp?cb_url=${fullTargetUrl}`;
       const trustLink = `https://link.trustwallet.com/open_url?coin_id=60&url=${fullTargetUrl}`;
-      const rainbowLink = `https://rainbow.me/open-url?url=${fullTargetUrl}`;
 
       let modal = document.getElementById('baxis-mobile-wallet-modal');
       if (modal) modal.remove();
@@ -154,23 +158,23 @@
 
       modal.innerHTML = `
         <div style="background: #111111; border: 1px solid #2A2A2A; border-radius: 16px; padding: 24px; max-width: 400px; width: 100%; text-align: center; color: #FFFFFF; box-shadow: 0 16px 40px rgba(0,0,0,0.8);">
-          <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 6px;">Connect Mobile Wallet</h3>
-          <p style="font-size: 13px; color: #A0A0A0; margin-bottom: 20px; line-height: 1.5;">
+          <h3 style="font-size: 16px; font-weight: 800; margin-bottom: 6px;">Connect Mobile Wallet</h3>
+          <p style="font-size: 12px; color: #A0A0A0; margin-bottom: 20px; line-height: 1.5;">
             Select your Web3 wallet app to open this vault directly inside its dApp browser:
           </p>
 
           <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px;">
-            <a href="${metaMaskLink}" target="_blank" style="background: #171717; border: 1px solid #2A2A2A; color: #FFFFFF; padding: 12px; border-radius: 8px; font-weight: 600; font-size: 14px; text-decoration: none; display: flex; align-items: center; justify-content: space-between;">
-              <span>MetaMask App</span> <span>➔</span>
+            <a href="${metaMaskLink}" target="_blank" style="background: #171717; border: 1px solid #2A2A2A; color: #FFFFFF; padding: 12px; border-radius: 8px; font-weight: 600; font-size: 13px; text-decoration: none; display: flex; align-items: center; justify-content: space-between;">
+              <span>MetaMask App</span>
+              <span style="color: #38BDF8;">Open</span>
             </a>
-            <a href="${coinbaseLink}" target="_blank" style="background: #171717; border: 1px solid #2A2A2A; color: #FFFFFF; padding: 12px; border-radius: 8px; font-weight: 600; font-size: 14px; text-decoration: none; display: flex; align-items: center; justify-content: space-between;">
-              <span>Coinbase Wallet</span> <span>➔</span>
+            <a href="${coinbaseLink}" target="_blank" style="background: #171717; border: 1px solid #2A2A2A; color: #FFFFFF; padding: 12px; border-radius: 8px; font-weight: 600; font-size: 13px; text-decoration: none; display: flex; align-items: center; justify-content: space-between;">
+              <span>Coinbase Wallet</span>
+              <span style="color: #38BDF8;">Open</span>
             </a>
-            <a href="${trustLink}" target="_blank" style="background: #171717; border: 1px solid #2A2A2A; color: #FFFFFF; padding: 12px; border-radius: 8px; font-weight: 600; font-size: 14px; text-decoration: none; display: flex; align-items: center; justify-content: space-between;">
-              <span>Trust Wallet</span> <span>➔</span>
-            </a>
-            <a href="${rainbowLink}" target="_blank" style="background: #171717; border: 1px solid #2A2A2A; color: #FFFFFF; padding: 12px; border-radius: 8px; font-weight: 600; font-size: 14px; text-decoration: none; display: flex; align-items: center; justify-content: space-between;">
-              <span>Rainbow Wallet</span> <span>➔</span>
+            <a href="${trustLink}" target="_blank" style="background: #171717; border: 1px solid #2A2A2A; color: #FFFFFF; padding: 12px; border-radius: 8px; font-weight: 600; font-size: 13px; text-decoration: none; display: flex; align-items: center; justify-content: space-between;">
+              <span>Trust Wallet</span>
+              <span style="color: #38BDF8;">Open</span>
             </a>
           </div>
 
@@ -188,16 +192,39 @@
       }
     }
 
+    /**
+     * Updates Wallet UI elements (DOES NOT OVERWRITE USER ACCOUNT NAMES)
+     */
     updateUIAddress(address) {
       const formatted = address ? `${address.substring(0, 6)}...${address.substring(address.length - 4)}` : null;
 
-      document.querySelectorAll('.user-name, .prof-address').forEach((el) => {
-        if (formatted) el.textContent = formatted;
+      document.querySelectorAll('.prof-address, #display-wallet-address').forEach((el) => {
+        if (el) el.textContent = formatted || 'Not Connected';
       });
+
+      const walletTag = document.getElementById('wallet-status-tag');
+      if (walletTag) {
+        if (address) {
+          walletTag.textContent = 'Connected';
+          walletTag.className = 'wallet-tag active';
+        } else {
+          walletTag.textContent = 'Disconnected';
+          walletTag.className = 'wallet-tag';
+        }
+      }
+
+      const profileAddrCode = document.getElementById('profile-address-code');
+      if (profileAddrCode) {
+        profileAddrCode.textContent = address 
+          ? `${formatted} • Base Network Connected` 
+          : 'Wallet Not Connected';
+      }
 
       document.querySelectorAll('.user-status').forEach((el) => {
         if (address) {
           el.innerHTML = '<span class="status-dot green"></span> Wallet Connected';
+        } else {
+          el.innerHTML = '<span class="status-dot"></span> Base Network';
         }
       });
     }
