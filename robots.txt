@@ -1,0 +1,22 @@
+# Baxis Protocol — Public Search Indexing Rules
+User-agent: *
+
+# Allow public marketing & documentation pages
+Allow: /
+Allow: /index.html
+Allow: /about.html
+Allow: /docs.html
+Allow: /security.html
+Allow: /brand.html
+Allow: /privacy.html
+Allow: /terms.html
+
+# Block private workspace, admin, and deal pages from search crawlers
+Disallow: /dashboard.html
+Disallow: /escrow-details.html
+Disallow: /create.html
+Disallow: /admin.html
+Disallow: /profile.html
+Disallow: /transactions.html
+
+Sitemap: https://baxis.netlify.app/sitemap.xml
