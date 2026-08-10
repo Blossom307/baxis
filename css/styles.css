@@ -236,15 +236,17 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 .btn-arrow { transition: transform var(--transition-fast); }
 .btn:hover .btn-arrow { transform: translateX(4px); }
 
+/* --- EYEBROW BADGE WITH OPTIMIZED BREATHING ROOM --- */
 .badge-pill {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
-  padding: 4px var(--space-2);
+  padding: 6px var(--space-2);
   background: var(--bg-surface-0);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-full);
-  margin-bottom: var(--space-2);
+  margin-top: var(--space-1);
+  margin-bottom: var(--space-3);
 }
 
 .badge-dot {
@@ -597,7 +599,7 @@ code { font-family: var(--font-mono); color: var(--text-primary); }
 }
 
 /* ==========================================================================
-   8. THE PROBLEM SECTION (NARRATIVE ARC)
+   8. THE PROBLEM SECTION (PROBLEM VS SOLUTION CONTRAST)
    ========================================================================== */
 .problem-section { padding: var(--space-12) 0; }
 .problem-narrative-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-3); }
@@ -611,6 +613,16 @@ code { font-family: var(--font-mono); color: var(--text-primary); }
   flex-direction: column;
   justify-content: space-between;
   transition: transform var(--transition-normal), border-color var(--transition-normal);
+}
+
+/* --- TINTED BORDER CONTRAST ACCENTS --- */
+.narrative-card.border-danger {
+  border: 1px solid var(--border-danger, rgba(239, 68, 68, 0.30));
+}
+
+.narrative-card.border-success {
+  border: 1px solid var(--border-success, rgba(16, 185, 129, 0.30));
+  background: var(--state-success-subtle, rgba(16, 185, 129, 0.04));
 }
 
 .narrative-card:hover { transform: translateY(-3px); border-color: var(--border-hover); }
@@ -645,6 +657,16 @@ code { font-family: var(--font-mono); color: var(--text-primary); }
 .comparison-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-4); }
 
 .comparison-card { padding: var(--space-4); border-radius: var(--radius-xl); background: var(--bg-surface-0); border: 1px solid var(--border-subtle); }
+
+.comparison-card.bad {
+  border-color: rgba(239, 68, 68, 0.25);
+}
+
+.comparison-card.good {
+  border-color: rgba(16, 185, 129, 0.30);
+  background: rgba(16, 185, 129, 0.02);
+}
+
 .comp-title { font-size: var(--fs-h3); font-weight: 700; margin-bottom: var(--space-3); }
 .comp-list li { display: flex; align-items: flex-start; gap: var(--space-2); font-size: var(--fs-sm); color: var(--text-secondary); margin-bottom: var(--space-2); }
 
@@ -668,6 +690,12 @@ code { font-family: var(--font-mono); color: var(--text-primary); }
   border: 1px solid var(--border-subtle);
   padding: var(--space-3);
   border-radius: var(--radius-lg);
+  transition: transform var(--transition-fast), border-color var(--transition-fast);
+}
+
+.pillar-box:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-hover);
 }
 
 .pillar-title { font-size: var(--fs-body); font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
@@ -709,19 +737,22 @@ code { font-family: var(--font-mono); color: var(--text-primary); }
 .faq-item.is-open .faq-icon { transform: rotate(180deg); }
 .faq-content { padding-bottom: var(--space-3); font-size: var(--fs-sm); color: var(--text-secondary); line-height: 1.6; }
 
+/* --- FINAL EMOTIONAL CTA WITH EMERALD ACCENT --- */
 .final-cta-section { padding: var(--space-12) 0; }
+
 .cta-inner-content {
   background: var(--bg-surface-0);
-  border: 1px solid var(--border-default);
+  border: 1px solid rgba(16, 185, 129, 0.25);
   border-radius: var(--radius-xl);
   padding: var(--space-8) var(--space-4);
   text-align: center;
   box-shadow: var(--shadow-lg);
+  position: relative;
+  overflow: hidden;
 }
 
 .cta-headline { font-size: var(--fs-h2); font-weight: 800; margin-bottom: var(--space-1); }
 .cta-subtext { font-size: var(--fs-body-lg); color: var(--text-secondary); margin-bottom: var(--space-4); }
-.cta-actions-row { display: flex; align-items: center; justify-content: center; gap: var(--space-2); }
 
 .cta-actions-row {
   display: flex;
@@ -996,60 +1027,6 @@ code { font-family: var(--font-mono); color: var(--text-primary); }
   user-select: none;
 }
 
-/* ============================================================================
-   4. RESPONSIVE BREAKPOINTS
-   ============================================================================ */
-
-/* Tablet (Under 1024px) */
-@media (max-width: 1024px) {
-  .footer-main-grid {
-    grid-template-columns: 2fr repeat(2, 1fr);
-    gap: var(--space-4) var(--space-3);
-  }
-
-  .footer-brand-col {
-    grid-column: span 3;
-    margin-bottom: var(--space-2);
-  }
-
-  .footer-brand-desc {
-    max-width: 500px;
-  }
-}
-
-/* Mobile (Under 640px) */
-@media (max-width: 640px) {
-  .site-footer {
-    padding: var(--space-6) 0 var(--space-4) 0;
-  }
-
-  .footer-main-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-4) var(--space-2);
-  }
-
-  .footer-brand-col {
-    grid-column: span 2;
-  }
-
-  .footer-brand-desc {
-    font-size: var(--fs-xs);
-  }
-
-  .footer-bottom-bar {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--space-2);
-  }
-
-  .footer-tagline-text {
-    text-align: left;
-  }
-
-  .footer-bottom-right {
-    margin-top: var(--space-1);
-  }
-}
 /* ==========================================================================
    12. SMOOTH SCROLL REVEALS (DATA-REVEAL STATE ENGINE)
    ========================================================================== */
@@ -1070,187 +1047,16 @@ code { font-family: var(--font-mono); color: var(--text-primary); }
 }
 
 /* ==========================================================================
-   13. MOBILE-FIRST RESPONSIVENESS (360px, 375px, 390px, 414px, 768px, 1024px)
+   13. RESPONSIVE BREAKPOINTS (MOBILE, TABLET & IPAD)
    ========================================================================== */
 @media (max-width: 1024px) {
-  .hero-grid { grid-template-columns: 1fr; }
-  .problem-narrative-grid, .personas-grid { grid-template-columns: repeat(2, 1fr); }
-  .timeline-grid { grid-template-columns: repeat(2, 1fr); }
-  .security-pillars-grid { grid-template-columns: 1fr; }
-}
-
-@media (max-width: 768px) {
-  .hud-nav { display: none; }
-  .hud-mobile-toggle { display: flex; }
-  .problem-narrative-grid, .personas-grid, .comparison-grid { grid-template-columns: 1fr; }
-  .timeline-grid { grid-template-columns: 1fr; }
-  .footer-grid { grid-template-columns: 1fr; gap: var(--space-4); }
-  .parties-row { flex-direction: column; }
-  .party-arrow { transform: rotate(90deg); }
-}
-
-@media (max-width: 414px) {
-  .container { padding: 0 1rem; }
-  .hero-actions { width: 100%; flex-direction: column; }
-  .hero-actions .btn { width: 100%; }
-  .cta-actions-row { flex-direction: column; width: 100%; }
-  .cta-actions-row .btn { width: 100%; }
-  .hero-headline { font-size: 1.85rem; }
-}
-
-@media (max-width: 360px) {
-  .container { padding: 0 0.75rem; }
-  .btn { padding: 0.625rem 1rem; font-size: 0.8125rem; }
-  .metric-num { font-size: 1rem; }
-}
-
-/* Footer Social Links Alignment */
-.footer-social-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--text-secondary);
-  transition: color var(--transition-fast);
-}
-
-.footer-social-link:hover {
-  color: var(--text-primary);
-}
-
-.footer-social-link svg {
-  flex-shrink: 0;
-  transition: transform var(--transition-fast);
-}
-
-.footer-social-link:hover svg {
-  transform: translateY(-1px);
-}
-
-/* ============================================================================
-   TRUST BOUNDARY CARD RESPONSIVE MOBILE FIX (< 768px)
-   ============================================================================ */
-.trust-boundary-card {
-  box-sizing: border-box !important;
-  max-width: 100% !important;
-  word-break: break-word !important;
-}
-
-@media (max-width: 768px) {
-  .trust-boundary-card {
-    margin-top: 2rem !important;
-    padding: 1.25rem 1rem !important; /* Prevents 32px desktop padding from squishing mobile text */
-    border-radius: 12px !important;
-  }
-
-  .trust-boundary-card h3 {
-    font-size: 1rem !important;
-  }
-
-  .trust-boundary-card p {
-    font-size: 0.875rem !important;
-    line-height: 1.55 !important;
-  }
-}
-
-/* ============================================================================
-   BAXIS PROTOCOL — TABLET & IPAD RESPONSIVE OVERHAUL (768px - 1024px)
-   Fixes iPad Mini, iPad Air, iPad Pro & Android Tablets
-   ============================================================================ */
-
-@media (max-width: 1024px) {
-  /* 1. Global Container Padding */
-  .container, 
-  .hud-container,
-  .footer-container {
-    padding-left: 1.5rem !important;
-    padding-right: 1.5rem !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-  }
-
-  /* 2. Hero Section Stacking on iPad */
-  .hero-section {
-    padding-top: 5rem !important;
-    padding-bottom: 3.5rem !important;
-  }
-
-  .hero-grid {
-    grid-template-columns: 1fr !important;
-    gap: 3rem !important;
-  }
-
-  .hero-left {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    text-align: center !important;
-    margin: 0 auto !important;
-    max-width: 720px !important;
-  }
-
-  .hero-headline {
-    font-size: clamp(2.25rem, 4.5vw, 3.25rem) !important;
-  }
-
-  .hero-subhead {
-    margin-left: auto !important;
-    margin-right: auto !important;
-  }
-
-  .hero-actions {
-    justify-content: center !important;
-    width: 100% !important;
-  }
-
-  .hero-metrics-strip {
-    justify-content: center !important;
-    width: 100% !important;
-  }
-
-  .hero-right {
-    width: 100% !important;
-    max-width: 580px !important;
-    margin: 0 auto !important;
-  }
-
-  .hero-workflow-card {
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-  }
-
-  /* 3. Problem Narrative Grid (Scenario 1, 2, 3) */
-  .problem-narrative-grid {
-    grid-template-columns: 1fr !important;
-    gap: 1.5rem !important;
-  }
-
-  /* 4. Timeline Grid (How It Works 4 Steps) */
-  .timeline-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 1.5rem !important;
-  }
-
-  /* 5. Comparison Grid */
-  .comparison-grid {
-    grid-template-columns: 1fr !important;
-    gap: 1.5rem !important;
-  }
-
-  /* 6. Security Pillars Grid */
-  .security-pillars-grid {
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)) !important;
-    gap: 1.25rem !important;
-  }
-
-  /* 7. Personas Grid */
-  .personas-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 1.25rem !important;
-  }
-
-  /* 8. Footer Main Grid on iPad */
+  .hero-grid { grid-template-columns: 1fr !important; gap: 3rem !important; }
+  .problem-narrative-grid { grid-template-columns: 1fr !important; gap: 1.5rem !important; }
+  .timeline-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 1.5rem !important; }
+  .comparison-grid { grid-template-columns: 1fr !important; gap: 1.5rem !important; }
+  .security-pillars-grid { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)) !important; gap: 1.25rem !important; }
+  .personas-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 1.25rem !important; }
+  
   .footer-main-grid {
     grid-template-columns: 2fr repeat(2, 1fr) !important;
     gap: 2.5rem 1.5rem !important;
@@ -1266,12 +1072,12 @@ code { font-family: var(--font-mono); color: var(--text-primary); }
   }
 }
 
-/* Mobile & Portrait iPad (Under 768px) */
 @media (max-width: 768px) {
-  .timeline-grid,
-  .personas-grid {
-    grid-template-columns: 1fr !important;
-  }
+  .hud-nav { display: none !important; }
+  .hud-mobile-toggle { display: flex !important; }
+  .timeline-grid, .personas-grid { grid-template-columns: 1fr !important; }
+  .parties-row { flex-direction: column !important; }
+  .party-arrow { transform: rotate(90deg) !important; }
 
   .footer-main-grid {
     grid-template-columns: 1fr 1fr !important;
@@ -1291,10 +1097,24 @@ code { font-family: var(--font-mono); color: var(--text-primary); }
     text-align: left !important;
   }
 
-  /* Trust Boundary Card Fix */
   .trust-boundary-card {
     margin-top: 2rem !important;
     padding: 1.25rem 1rem !important;
     border-radius: 12px !important;
   }
+}
+
+@media (max-width: 414px) {
+  .container { padding: 0 1rem; }
+  .hero-actions { width: 100%; flex-direction: column; }
+  .hero-actions .btn { width: 100%; }
+  .cta-actions-row { flex-direction: column; width: 100%; }
+  .cta-actions-row .btn { width: 100%; }
+  .hero-headline { font-size: 1.85rem; }
+}
+
+@media (max-width: 360px) {
+  .container { padding: 0 0.75rem; }
+  .btn { padding: 0.625rem 1rem; font-size: 0.8125rem; }
+  .metric-num { font-size: 1rem; }
 }

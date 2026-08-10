@@ -7,6 +7,7 @@
  * - Floating HUD Navigation & Scroll Shrink
  * - Product-First Hero Escrow State Animator (Matte Monochrome)
  * - Accessible FAQ Accordion & Metric Counters
+ * - Smart Auth Routing (Zero-Flash Redirect Protection)
  */
 
 // 1. Signal to CSS that JavaScript is active
@@ -434,7 +435,50 @@ document.documentElement.classList.add('js-enabled');
   }
 
   /* ==========================================================================
-     7. APPLICATION INITIALIZATION
+     7. SMART AUTHENTICATION LINK ROUTER
+     ========================================================================== */
+  class SmartAuthRouter {
+    constructor() {
+      this.init();
+    }
+
+    getSupabase() {
+      if (window.baxisSupabase && window.baxisSupabase.auth) return window.baxisSupabase;
+      if (window.supabaseClient && window.supabaseClient.auth) return window.supabaseClient;
+      if (window.supabase && window.supabase.auth) return window.supabase;
+      return null;
+    }
+
+    async init() {
+      const supabase = this.getSupabase();
+      if (!supabase) return;
+
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+
+        // If user is ALREADY authenticated, upgrade CTA links to open workspace directly
+        if (session && session.user) {
+          this.updateAuthLinksToWorkspace();
+        }
+      } catch (err) {
+        console.warn('[SmartAuthRouter] Session lookup:', err);
+      }
+    }
+
+    updateAuthLinksToWorkspace() {
+      document.querySelectorAll('a[href="auth.html"]').forEach((link) => {
+        const btnText = link.textContent.trim().toLowerCase();
+        if (btnText.includes('create')) {
+          link.href = 'create.html';
+        } else {
+          link.href = 'dashboard.html';
+        }
+      });
+    }
+  }
+
+  /* ==========================================================================
+     8. APPLICATION INITIALIZATION
      ========================================================================== */
   document.addEventListener('DOMContentLoaded', () => {
     new HUDNavigation();
@@ -442,6 +486,7 @@ document.documentElement.classList.add('js-enabled');
     new EscrowWorkflowAnimator();
     new FAQAccordion();
     new NumberCounters();
+    new SmartAuthRouter();
 
     // Trigger initial scroll event to calculate positions
     window.dispatchEvent(new Event('scroll'));
