@@ -20,7 +20,7 @@
 
   <style>
     /* ============================================================================
-       BAXIS PROTOCOL — CONTACT PAGE EMBEDDED STYLESHEET (VERCEL / LINEAR TIER)
+       BAXIS PROTOCOL — CONTACT PAGE EMBEDDED STYLESHEET 
        Canvas (#090909) | Surface (#111111) | Card (#161616) | Hairline (0.08)
        ============================================================================ */
 
@@ -91,7 +91,7 @@
       padding: 0 1.5rem;
     }
 
-    /* NAVIGATION HEADER */
+    /* NAVIGATION HEADER WITH EXACT PROPORTIONAL LOGO SIZING */
     .site-header {
       position: sticky;
       top: 0;
@@ -113,8 +113,9 @@
     }
 
     .header-logo-img {
-      height: 26px;
+      height: 28px;
       width: auto;
+      object-fit: contain;
       display: block;
     }
 
@@ -475,7 +476,7 @@
       line-height: 1.6;
     }
 
-    /* FOOTER */
+    /* FOOTER LOGO SIZING MATCHED EXACTLY */
     .site-footer {
       border-top: 1px solid var(--border-subtle);
       padding: 4.5rem 0 3rem 0;
@@ -537,6 +538,13 @@
       gap: 1rem;
     }
 
+    .footer-logo-img {
+      height: 28px;
+      width: auto;
+      object-fit: contain;
+      display: block;
+    }
+
     @media (max-width: 768px) {
       .hero-section { padding: 4.5rem 0 3rem 0; }
       .section-block { padding: 3.5rem 0; }
@@ -554,7 +562,7 @@
     <div class="container header-inner">
       <div class="header-brand">
         <a href="index.html" aria-label="Baxis Homepage">
-          <img src="images/baxis-logo.jpg" alt="Baxis Protocol Logo" class="header-logo-img" width="100" height="26">
+          <img src="images/baxis-logo.jpg" alt="Baxis Protocol Logo" class="header-logo-img" width="112" height="28">
         </a>
       </div>
 
@@ -568,7 +576,7 @@
       </nav>
 
       <div>
-        <a href="dashboard.html" class="btn btn-primary" style="padding: 0.625rem 1.25rem; font-size: 0.875rem;">
+        <a href="auth.html" class="btn btn-primary" style="padding: 0.625rem 1.25rem; font-size: 0.875rem;">
           <span>Launch App</span>
         </a>
       </div>
@@ -820,7 +828,7 @@
       <p class="closing-subtitle">
         Start creating secure, non-custodial escrow agreements today.
       </p>
-      <a href="create.html" class="btn btn-primary" style="padding: 0.875rem 2rem;">
+      <a href="auth.html" class="btn btn-primary" style="padding: 0.875rem 2rem;">
         <span>Create an Escrow Vault</span>
       </a>
     </section>
@@ -833,7 +841,7 @@
       <div class="footer-grid">
         <div class="footer-brand">
           <a href="index.html" aria-label="Baxis Homepage">
-            <img src="images/baxis-logo.jpg" alt="Baxis Protocol Logo" width="100" height="26">
+            <img src="images/baxis-logo.jpg" alt="Baxis Protocol Logo" class="footer-logo-img" width="112" height="28" loading="lazy">
           </a>
           <p>
             Building the trust layer for internet commerce. Non-custodial, programmable escrow security for global digital agreements.
@@ -843,8 +851,8 @@
         <div>
           <span class="footer-col-title">Product</span>
           <ul class="footer-links">
-            <li><a href="dashboard.html">Launch App</a></li>
-            <li><a href="create.html">Create Escrow</a></li>
+            <li><a href="auth.html">Launch App</a></li>
+            <li><a href="auth.html">Create Escrow</a></li>
             <li><a href="docs.html">Documentation</a></li>
           </ul>
         </div>

@@ -20,7 +20,7 @@
 
   <style>
     /* ============================================================================
-       BAXIS PROTOCOL — BRAND ASSETS STYLESHEET (STRIPE/FRAMER BRAND TIER)
+       BAXIS PROTOCOL — BRAND ASSETS STYLESHEET
        Canvas (#090909) | Surface (#111111) | Card (#161616) | Hairline (0.08)
        ============================================================================ */
 
@@ -95,7 +95,7 @@
       padding: 0 1.5rem;
     }
 
-    /* 2. NAVIGATION HEADER */
+    /* 2. NAVIGATION HEADER WITH EXACT PROPORTIONAL LOGO SIZING */
     .site-header {
       position: sticky;
       top: 0;
@@ -123,8 +123,9 @@
     }
 
     .header-logo-img {
-      height: 26px;
+      height: 28px;
       width: auto;
+      object-fit: contain;
       display: block;
     }
 
@@ -353,6 +354,7 @@
     .logo-preview-img {
       max-height: 36px;
       width: auto;
+      object-fit: contain;
       display: block;
     }
 
@@ -396,6 +398,7 @@
       justify-content: center;
       gap: 6px;
       transition: all var(--transition-fast);
+      cursor: pointer;
     }
 
     .btn-download-sm:hover {
@@ -559,7 +562,7 @@
       border: 1px solid var(--border-subtle);
     }
 
-    /* FOOTER */
+    /* FOOTER LOGO SIZING MATCHED EXACTLY */
     .site-footer {
       border-top: 1px solid var(--border-subtle);
       padding: 4.5rem 0 3rem 0;
@@ -621,6 +624,13 @@
       gap: 1rem;
     }
 
+    .footer-logo-img {
+      height: 28px;
+      width: auto;
+      object-fit: contain;
+      display: block;
+    }
+
     @media (max-width: 900px) {
       .footer-grid { grid-template-columns: 1fr 1fr; }
       .header-nav { display: none; }
@@ -640,21 +650,21 @@
     <div class="container header-inner">
       <div class="header-brand">
         <a href="index.html" aria-label="Baxis Homepage">
-          <img src="images/baxis-logo.jpg" alt="Baxis Protocol Logo" class="header-logo-img" width="100" height="26">
+          <img src="images/baxis-logo.jpg" alt="Baxis Protocol Logo" class="header-logo-img" width="112" height="28">
         </a>
       </div>
 
       <nav aria-label="Primary Navigation">
         <ul class="header-nav">
           <li><a href="index.html#how-it-works" class="nav-link">How It Works</a></li>
-          <li><a href="documentation.html" class="nav-link">Documentation</a></li>
+          <li><a href="docs.html" class="nav-link">Documentation</a></li>
           <li><a href="about.html" class="nav-link">About</a></li>
-          <li><a href="brand-assets.html" class="nav-link active">Brand</a></li>
+          <li><a href="brand.html" class="nav-link active">Brand</a></li>
         </ul>
       </nav>
 
       <div>
-        <a href="dashboard.html" class="btn-header-app">
+        <a href="auth.html" class="btn-header-app">
           <span>Launch App</span>
         </a>
       </div>
@@ -675,10 +685,11 @@
       </p>
 
       <div class="hero-cta-group">
-        <button class="btn btn-primary" id="btn-download-bundle" onclick="alert('Downloading Baxis Official Media Kit (.ZIP bundle including SVG, PNG, and brand specs)...');">
+        <!-- CLEAN SINGLE DOWNLOAD LINK (ZIP FILE) -->
+        <a href="images/baxis-media-kit.zip" download="baxis-media-kit.zip" class="btn btn-primary" id="btn-download-bundle">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           <span>Download All Assets (.ZIP)</span>
-        </button>
+        </a>
         <a href="#logo-downloads" class="btn btn-secondary">
           <span>Browse Logotypes</span>
         </a>
@@ -707,8 +718,8 @@
             <span class="asset-sub">For dark obsidian backgrounds (#090909, #111111)</span>
           </div>
           <div class="asset-actions">
-            <button class="btn-download-sm" onclick="alert('Downloading Primary Dark Vector SVG...');">Download SVG</button>
-            <button class="btn-download-sm" onclick="alert('Downloading Primary Dark High-Res PNG...');">Download PNG</button>
+            <button class="btn-download-sm" id="btn-download-dark-svg">Download SVG</button>
+            <button class="btn-download-sm" id="btn-download-dark-png">Download PNG</button>
           </div>
         </div>
 
@@ -722,8 +733,8 @@
             <span class="asset-sub">For white or light neutral background contexts</span>
           </div>
           <div class="asset-actions">
-            <button class="btn-download-sm" onclick="alert('Downloading Primary Light Vector SVG...');">Download SVG</button>
-            <button class="btn-download-sm" onclick="alert('Downloading Primary Light High-Res PNG...');">Download PNG</button>
+            <button class="btn-download-sm" id="btn-download-light-svg">Download SVG</button>
+            <button class="btn-download-sm" id="btn-download-light-png">Download PNG</button>
           </div>
         </div>
       </div>
@@ -739,7 +750,7 @@
 
       <div class="color-swatch-grid">
         <!-- SWATCH 1 -->
-        <div class="swatch-card" onclick="navigator.clipboard.writeText('#090909'); alert('Copied #090909 (Obsidian Canvas) to clipboard!');">
+        <div class="swatch-card" data-hex="#090909" data-name="Obsidian Canvas">
           <div class="swatch-color-box" style="background-color: #090909;"></div>
           <div class="swatch-meta">
             <span class="swatch-name">Obsidian Canvas</span>
@@ -748,7 +759,7 @@
         </div>
 
         <!-- SWATCH 2 -->
-        <div class="swatch-card" onclick="navigator.clipboard.writeText('#111111'); alert('Copied #111111 (Surface Level 0) to clipboard!');">
+        <div class="swatch-card" data-hex="#111111" data-name="Surface Level 0">
           <div class="swatch-color-box" style="background-color: #111111;"></div>
           <div class="swatch-meta">
             <span class="swatch-name">Surface Level 0</span>
@@ -757,7 +768,7 @@
         </div>
 
         <!-- SWATCH 3 -->
-        <div class="swatch-card" onclick="navigator.clipboard.writeText('#161616'); alert('Copied #161616 (Surface Level 1) to clipboard!');">
+        <div class="swatch-card" data-hex="#161616" data-name="Surface Level 1">
           <div class="swatch-color-box" style="background-color: #161616;"></div>
           <div class="swatch-meta">
             <span class="swatch-name">Surface Level 1</span>
@@ -766,7 +777,7 @@
         </div>
 
         <!-- SWATCH 4 -->
-        <div class="swatch-card" onclick="navigator.clipboard.writeText('#FFFFFF'); alert('Copied #FFFFFF (Text Primary) to clipboard!');">
+        <div class="swatch-card" data-hex="#FFFFFF" data-name="Text Primary">
           <div class="swatch-color-box" style="background-color: #FFFFFF;"></div>
           <div class="swatch-meta">
             <span class="swatch-name">Crisp White</span>
@@ -775,7 +786,7 @@
         </div>
 
         <!-- SWATCH 5 -->
-        <div class="swatch-card" onclick="navigator.clipboard.writeText('#10B981'); alert('Copied #10B981 (State Success) to clipboard!');">
+        <div class="swatch-card" data-hex="#10B981" data-name="State Success">
           <div class="swatch-color-box" style="background-color: #10B981;"></div>
           <div class="swatch-meta">
             <span class="swatch-name">State Success</span>
@@ -784,7 +795,7 @@
         </div>
 
         <!-- SWATCH 6 -->
-        <div class="swatch-card" onclick="navigator.clipboard.writeText('#EF4444'); alert('Copied #EF4444 (State Dispute) to clipboard!');">
+        <div class="swatch-card" data-hex="#EF4444" data-name="State Dispute">
           <div class="swatch-color-box" style="background-color: #EF4444;"></div>
           <div class="swatch-meta">
             <span class="swatch-name">State Dispute</span>
@@ -900,33 +911,31 @@
         <h2 class="section-title">Application Screenshots & Press Kit</h2>
       </div>
 
-<div class="grid-2">
-  
-  <!-- Screenshot 1: Dashboard -->
-  <div class="screenshot-card">
-    <div class="screenshot-preview-placeholder" style="padding: 0; overflow: hidden;">
-      <img src="images/dashboard-preview.png" alt="Baxis Workspace Dashboard UI" style="width: 100%; height: 100%; object-fit: cover;">
-    </div>
-    <div class="screenshot-info">
-      <h3 class="asset-title">Workspace Dashboard</h3>
-      <p class="asset-sub" style="margin-bottom: 1rem;">High-res screenshot of active escrow vault balances and metrics.</p>
-      <a href="images/dashboard-preview.png" download class="btn-download-sm">Download UI Screenshot</a>
-    </div>
-  </div>
+      <div class="grid-2">
+        <!-- Screenshot 1: Dashboard -->
+        <div class="screenshot-card">
+          <div class="screenshot-preview-placeholder" style="padding: 0; overflow: hidden;">
+            <img src="images/dashboard-preview.png" alt="Baxis Workspace Dashboard UI" style="width: 100%; height: 100%; object-fit: cover;">
+          </div>
+          <div class="screenshot-info">
+            <h3 class="asset-title">Workspace Dashboard</h3>
+            <p class="asset-sub" style="margin-bottom: 1rem;">High-res screenshot of active escrow vault balances and metrics.</p>
+            <a href="images/dashboard-preview.png" download="baxis_dashboard_preview.png" class="btn-download-sm">Download UI Screenshot</a>
+          </div>
+        </div>
 
-  <!-- Screenshot 2: Vault Details -->
-  <div class="screenshot-card">
-    <div class="screenshot-preview-placeholder" style="padding: 0; overflow: hidden;">
-      <img src="images/vault-preview.png" alt="Baxis Escrow Vault UI" style="width: 100%; height: 100%; object-fit: cover;">
-    </div>
-    <div class="screenshot-info">
-      <h3 class="asset-title">Escrow Contract Hub</h3>
-      <p class="asset-sub" style="margin-bottom: 1rem;">High-res screenshot of smart contract deliverable submissions and inspection timelocks.</p>
-      <a href="images/vault-preview.png" download class="btn-download-sm">Download UI Screenshot</a>
-    </div>
-  </div>
-
-</div>
+        <!-- Screenshot 2: Vault Details -->
+        <div class="screenshot-card">
+          <div class="screenshot-preview-placeholder" style="padding: 0; overflow: hidden;">
+            <img src="images/vault-preview.png" alt="Baxis Escrow Vault UI" style="width: 100%; height: 100%; object-fit: cover;">
+          </div>
+          <div class="screenshot-info">
+            <h3 class="asset-title">Escrow Contract Hub</h3>
+            <p class="asset-sub" style="margin-bottom: 1rem;">High-res screenshot of smart contract deliverable submissions and inspection timelocks.</p>
+            <a href="images/vault-preview.png" download="baxis_vault_preview.png" class="btn-download-sm">Download UI Screenshot</a>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- 8. PRESS KIT & INQUIRIES -->
@@ -944,7 +953,7 @@
         <h3 class="asset-title" style="font-size: 1.25rem; margin-bottom: 0.5rem;">Baxis Protocol Press Kit</h3>
         <p class="asset-sub" style="margin-bottom: 1.5rem;">Includes executive founder bio, protocol fact sheet, SVG logotypes, and product screenshots.</p>
         <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-          <a href="mailto:press@baxis.io" class="btn btn-primary" style="padding: 0.75rem 1.5rem;">
+          <a href="contact.html" class="btn btn-primary" style="padding: 0.75rem 1.5rem;">
             <span>Contact Press Team</span>
           </a>
         </div>
@@ -959,7 +968,7 @@
       <div class="footer-grid">
         <div class="footer-brand">
           <a href="index.html" aria-label="Baxis Homepage">
-            <img src="images/baxis-logo.jpg" alt="Baxis Protocol Logo" width="100" height="26">
+            <img src="images/baxis-logo.jpg" alt="Baxis Protocol Logo" class="footer-logo-img" width="112" height="28" loading="lazy">
           </a>
           <p>
             Building the trust layer for internet commerce. Non-custodial, programmable escrow security for global digital agreements.
@@ -969,9 +978,9 @@
         <div>
           <span class="footer-col-title">Product</span>
           <ul class="footer-links">
-            <li><a href="dashboard.html">Launch App</a></li>
-            <li><a href="create.html">Create Escrow</a></li>
-            <li><a href="documentation.html">Documentation</a></li>
+            <li><a href="auth.html">Launch App</a></li>
+            <li><a href="auth.html">Create Escrow</a></li>
+            <li><a href="docs.html">Documentation</a></li>
           </ul>
         </div>
 
@@ -980,7 +989,7 @@
           <ul class="footer-links">
             <li><a href="about.html">About Baxis</a></li>
             <li><a href="contact.html">Contact Us</a></li>
-            <li><a href="brand-assets.html">Brand Assets</a></li>
+            <li><a href="brand.html">Brand Assets</a></li>
           </ul>
         </div>
 
@@ -1000,6 +1009,75 @@
       </div>
     </div>
   </footer>
+
+  <!-- REAL BRAND ASSET DOWNLOAD & COPY ENGINE -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      
+      // Vector SVG Generators
+      function generateSvg(isDark = true) {
+        const bg = isDark ? '#090909' : '#FFFFFF';
+        const fg = isDark ? '#FFFFFF' : '#090909';
+        return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 100" width="400" height="100">
+          <rect width="400" height="100" fill="${bg}"/>
+          <text x="30" y="66" font-family="Inter, system-ui, sans-serif" font-weight="800" font-size="48" fill="${fg}" letter-spacing="-2">BAXIS</text>
+          <circle cx="215" cy="54" r="7" fill="#10B981"/>
+        </svg>`;
+      }
+
+      function triggerDownload(content, fileName, contentType) {
+        const blob = new Blob([content], { type: contentType });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+
+      // Download Dark SVG
+      document.getElementById('btn-download-dark-svg')?.addEventListener('click', () => {
+        triggerDownload(generateSvg(true), 'baxis_logo_dark.svg', 'image/svg+xml');
+      });
+
+      // Download Light SVG
+      document.getElementById('btn-download-light-svg')?.addEventListener('click', () => {
+        triggerDownload(generateSvg(false), 'baxis_logo_light.svg', 'image/svg+xml');
+      });
+
+      // Download Dark PNG
+      document.getElementById('btn-download-dark-png')?.addEventListener('click', () => {
+        const a = document.createElement('a');
+        a.href = 'images/baxis-logo.jpg';
+        a.download = 'baxis_logo_primary.jpg';
+        a.click();
+      });
+
+      // Download Light PNG
+      document.getElementById('btn-download-light-png')?.addEventListener('click', () => {
+        const a = document.createElement('a');
+        a.href = 'images/baxis-logo.jpg';
+        a.download = 'baxis_logo_light.jpg';
+        a.click();
+      });
+
+      // Color Swatch Clipboard Copy
+      document.querySelectorAll('.swatch-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const hex = card.getAttribute('data-hex');
+          const name = card.getAttribute('data-name');
+          if (hex && navigator.clipboard) {
+            navigator.clipboard.writeText(hex).then(() => {
+              alert(`Copied ${hex} (${name}) to clipboard!`);
+            });
+          }
+        });
+      });
+
+    });
+  </script>
 
 </body>
 </html>

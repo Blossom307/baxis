@@ -16,11 +16,11 @@
   <!-- Typography: Inter + JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600" rel="stylesheet">
 
   <style>
     /* ============================================================================
-       BAXIS PROTOCOL — TERMS OF SERVICE STYLESHEET (VERCEL/STRIPE TIER)
+       BAXIS PROTOCOL — TERMS OF SERVICE STYLESHEET 
        Canvas (#090909) | Surface (#111111) | Card (#161616) | Hairline (0.08)
        ============================================================================ */
 
@@ -89,7 +89,7 @@
       padding: 0 1.5rem;
     }
 
-    /* 2. NAVIGATION HEADER */
+    /* 2. NAVIGATION HEADER WITH EXACT PROPORTIONAL LOGO SIZING */
     .site-header {
       position: sticky;
       top: 0;
@@ -117,8 +117,9 @@
     }
 
     .header-logo-img {
-      height: 26px;
+      height: 28px;
       width: auto;
+      object-fit: contain;
       display: block;
     }
 
@@ -422,7 +423,7 @@
       flex-shrink: 0;
     }
 
-    /* 5. FOOTER STYLING */
+    /* FOOTER LOGO SIZING MATCHED EXACTLY */
     .site-footer {
       border-top: 1px solid var(--border-subtle);
       padding: 4.5rem 0 3rem 0;
@@ -484,6 +485,13 @@
       gap: 1rem;
     }
 
+    .footer-logo-img {
+      height: 28px;
+      width: auto;
+      object-fit: contain;
+      display: block;
+    }
+
     @media (max-width: 900px) {
       .doc-wrapper {
         grid-template-columns: 1fr;
@@ -517,7 +525,7 @@
     <div class="container header-inner">
       <div class="header-brand">
         <a href="index.html" aria-label="Baxis Homepage">
-          <img src="images/baxis-logo.jpg" alt="Baxis Protocol Logo" class="header-logo-img" width="100" height="26">
+          <img src="images/baxis-logo.jpg" alt="Baxis Protocol Logo" class="header-logo-img" width="112" height="28">
         </a>
       </div>
 
@@ -531,7 +539,7 @@
       </nav>
 
       <div>
-        <a href="dashboard.html" class="btn-header-app">
+        <a href="auth.html" class="btn-header-app">
           <span>Launch App</span>
         </a>
       </div>
@@ -552,7 +560,7 @@
       </p>
 
       <div class="doc-hero-meta">
-        <span>Effective Date: July 28, 2026</span>
+        <span>Effective Date: August 2026</span>
         <span>•</span>
         <span>Version 1.0</span>
       </div>
@@ -770,7 +778,7 @@
           <div class="doc-card">
             <strong>Legal & Compliance Desk</strong><br>
             Email: <code>olusegunblossom307@gmail.com</code><br>
-            Official Website: <code>https://baxis.io</code>
+            Official Website: <code>https://baxis.netlify.app</code>
           </div>
         </section>
 
@@ -784,7 +792,7 @@
       <div class="footer-grid">
         <div class="footer-brand">
           <a href="index.html" aria-label="Baxis Homepage">
-            <img src="images/baxis-logo.jpg" alt="Baxis Protocol Logo" width="100" height="26">
+            <img src="images/baxis-logo.jpg" alt="Baxis Protocol Logo" class="footer-logo-img" width="112" height="28" loading="lazy">
           </a>
           <p>
             Building the trust layer for internet commerce. Non-custodial, programmable escrow security for global digital agreements.
@@ -794,8 +802,8 @@
         <div>
           <span class="footer-col-title">Product</span>
           <ul class="footer-links">
-            <li><a href="dashboard.html">Launch App</a></li>
-            <li><a href="create.html">Create Escrow</a></li>
+            <li><a href="auth.html">Launch App</a></li>
+            <li><a href="auth.html">Create Escrow</a></li>
             <li><a href="docs.html">Documentation</a></li>
           </ul>
         </div>

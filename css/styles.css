@@ -20,39 +20,39 @@
   --space-12:  6rem;     /* 96px */
 
   /* --- Matte Obsidian Canvas & Surface Hierarchy --- */
-  --bg-app:          #090909; /* Deep Matte Obsidian Canvas */
-  --bg-surface-0:    #111111; /* Level 0 Surface Cards */
-  --bg-surface-1:    #171717; /* Level 1 Elevated Containers */
-  --bg-surface-2:    #222222; /* Level 2 Hover & Active States */
-  --bg-surface-hover:#2A2A2A;
+  --bg-app:           #090909; /* Deep Matte Obsidian Canvas */
+  --bg-surface-0:     #111111; /* Level 0 Surface Cards */
+  --bg-surface-1:     #171717; /* Level 1 Elevated Containers */
+  --bg-surface-2:     #222222; /* Level 2 Hover & Active States */
+  --bg-surface-hover: #2A2A2A;
 
   /* Typography Colors */
-  --text-primary:   #FFFFFF; 
-  --text-secondary: #A0A0A0; 
-  --text-muted:     #6B6B6B; 
-  --text-inverse:   #090909;
+  --text-primary:    #FFFFFF; 
+  --text-secondary:  #A0A0A0; 
+  --text-muted:      #6B6B6B; 
+  --text-inverse:    #090909;
 
   /* Crisp 1px Borders */
-  --border-subtle:  #1F1F1F;
-  --border-default: #2A2A2A;
-  --border-hover:   #404040;
+  --border-subtle:   #1F1F1F;
+  --border-default:  #2A2A2A;
+  --border-hover:    #404040;
 
-  /* Semantic State Colors (STRICTLY FOR STATUS, NEVER BRANDING) */
-  --state-success:        #10B981; /* Locked Vaults, Verified, Releases */
+  /* Semantic State Colors */
+  --state-success:        #10B981;
   --state-success-subtle: rgba(16, 185, 129, 0.10);
   --border-success:       rgba(16, 185, 129, 0.30);
 
-  --state-warning:        #F59E0B; /* Inspection Period, In Review */
+  --state-warning:        #F59E0B;
   --state-warning-subtle: rgba(245, 158, 11, 0.10);
 
-  --state-error:          #EF4444; /* Disputes, Risk Warnings, Errors */
+  --state-error:          #EF4444;
   --state-error-subtle:   rgba(239, 68, 68, 0.10);
   --border-danger:        rgba(239, 68, 68, 0.30);
 
-  --state-info:           #3B82F6; /* Network Chain Identifiers */
+  --state-info:           #3B82F6;
   --state-info-subtle:    rgba(59, 130, 246, 0.10);
 
-  /* Deep Black Elevation Shadows (Zero Colored Light Glows) */
+  /* Deep Black Elevation Shadows */
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.5);
   --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 0 1px var(--border-subtle);
   --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.85), 0 0 0 1px var(--border-default);
@@ -61,13 +61,13 @@
   --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono: "JetBrains Mono", monospace;
 
-  --fs-hero:     clamp(2rem, 3.8vw, 3.25rem);
-  --fs-h2:       clamp(1.5rem, 2.2vw + 0.8rem, 2.25rem);
-  --fs-h3:       clamp(1.125rem, 1.2vw + 0.7rem, 1.375rem);
-  --fs-body-lg:  clamp(1rem, 0.5vw + 0.85rem, 1.125rem);
-  --fs-body:     1rem;
-  --fs-sm:       0.875rem;
-  --fs-xs:       0.75rem;
+  --fs-hero:    clamp(2rem, 3.8vw, 3.25rem);
+  --fs-h2:      clamp(1.5rem, 2.2vw + 0.8rem, 2.25rem);
+  --fs-h3:      clamp(1.125rem, 1.2vw + 0.7rem, 1.375rem);
+  --fs-body-lg: clamp(1rem, 0.5vw + 0.85rem, 1.125rem);
+  --fs-body:    1rem;
+  --fs-sm:      0.875rem;
+  --fs-xs:      0.75rem;
 
   /* Radius Scale */
   --radius-sm:   6px;
@@ -182,7 +182,7 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 .text-center { text-align: center; }
 
 /* ==========================================================================
-   4. BUTTONS & BADGES (SHAPE, CONTRAST & PRESS PHYSICS)
+   4. BUTTONS & BADGES
    ========================================================================== */
 .btn {
   display: inline-flex;
@@ -190,7 +190,7 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   justify-content: center;
   gap: var(--space-1);
   padding: 0.625rem 1.25rem;
-  min-height: 48px; /* Touch target accessibility */
+  min-height: 48px;
   border-radius: var(--radius-full);
   font-weight: 600;
   font-size: var(--fs-sm);
@@ -236,7 +236,6 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 .btn-arrow { transition: transform var(--transition-fast); }
 .btn:hover .btn-arrow { transform: translateX(4px); }
 
-/* --- EYEBROW BADGE WITH OPTIMIZED BREATHING ROOM --- */
 .badge-pill {
   display: inline-flex;
   align-items: center;
@@ -472,7 +471,7 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   border-radius: var(--radius-full);
 }
 
-/* SEMANTIC STATUS CLASSES (STRICTLY FOR STATE, NOT BRANDING) */
+/* Semantic Status Classes */
 .status-success { background: var(--state-success-subtle); color: var(--state-success); border: 1px solid var(--border-success); }
 .status-warning { background: var(--state-warning-subtle); color: var(--state-warning); }
 .status-error   { background: var(--state-error-subtle); color: var(--state-error); border: 1px solid var(--border-danger); }
@@ -615,7 +614,6 @@ code { font-family: var(--font-mono); color: var(--text-primary); }
   transition: transform var(--transition-normal), border-color var(--transition-normal);
 }
 
-/* --- TINTED BORDER CONTRAST ACCENTS --- */
 .narrative-card.border-danger {
   border: 1px solid var(--border-danger, rgba(239, 68, 68, 0.30));
 }
@@ -636,22 +634,69 @@ code { font-family: var(--font-mono); color: var(--text-primary); }
 /* ==========================================================================
    9. HOW IT WORKS & WHY BAXIS COMPARISON
    ========================================================================== */
-.how-section { padding: var(--space-12) 0; background: var(--bg-surface-0); border-top: 1px solid var(--border-subtle); }
-.timeline-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-3); }
+.how-section { 
+  padding: var(--space-12) 0; 
+  background: var(--bg-surface-0); 
+  border-top: 1px solid var(--border-subtle); 
+}
+
+.timeline-grid { 
+  display: grid; 
+  grid-template-columns: repeat(4, 1fr); 
+  gap: var(--space-3); 
+}
 
 .timeline-card {
   background: var(--bg-surface-1);
   border: 1px solid var(--border-subtle);
   padding: var(--space-3);
   border-radius: var(--radius-lg);
-  transition: transform var(--transition-normal);
+  transition: transform var(--transition-normal), border-color var(--transition-normal);
+  display: flex;
+  flex-direction: column;
 }
 
-.timeline-card:hover { transform: translateY(-2px); border-color: var(--border-hover); }
+.timeline-card:hover { 
+  transform: translateY(-2px); 
+  border-color: var(--border-hover); 
+}
 
-.step-number { font-family: var(--font-mono); font-size: var(--fs-h2); font-weight: 800; color: var(--text-primary); display: block; margin-bottom: var(--space-1); }
-.step-title { font-size: var(--fs-body); font-weight: 700; margin-bottom: var(--space-1); }
-.step-desc { font-size: var(--fs-sm); color: var(--text-secondary); }
+.step-icon-box {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-md);
+  background: var(--bg-surface-0);
+  border: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--space-2);
+  color: var(--text-primary);
+  flex-shrink: 0;
+}
+
+.step-number { 
+  font-family: var(--font-mono); 
+  font-size: var(--fs-h2); 
+  font-weight: 800; 
+  color: var(--text-primary); 
+  display: block; 
+  margin-bottom: var(--space-1); 
+  line-height: 1;
+}
+
+.step-title { 
+  font-size: var(--fs-body); 
+  font-weight: 700; 
+  margin-bottom: var(--space-1); 
+  color: var(--text-primary);
+}
+
+.step-desc { 
+  font-size: var(--fs-sm); 
+  color: var(--text-secondary); 
+  line-height: 1.5;
+}
 
 .comparison-section { padding: var(--space-12) 0; }
 .comparison-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-4); }
@@ -767,10 +812,8 @@ code { font-family: var(--font-mono); color: var(--text-primary); }
 }
 
 /* ============================================================================
-   BAXIS PROTOCOL — PRODUCTION FOOTER STYLESHEET 
+   11. PRODUCTION FOOTER STYLESHEET 
    ============================================================================ */
-
-/* --- FOOTER MAIN CONTAINER --- */
 .site-footer {
   background-color: var(--bg-app);
   border-top: 1px solid var(--border-subtle);
@@ -788,7 +831,6 @@ code { font-family: var(--font-mono); color: var(--text-primary); }
   padding: 0 var(--space-3);
 }
 
-/* --- 1. MULTI-COLUMN GRID LAYOUT --- */
 .footer-main-grid {
   display: grid;
   grid-template-columns: 2.2fr repeat(4, 1fr);
@@ -796,7 +838,6 @@ code { font-family: var(--font-mono); color: var(--text-primary); }
   align-items: start;
 }
 
-/* COLUMN 1: BRAND & MISSION */
 .footer-brand-col {
   display: flex;
   flex-direction: column;
@@ -809,15 +850,8 @@ code { font-family: var(--font-mono); color: var(--text-primary); }
   transition: opacity var(--transition-fast);
 }
 
-.footer-logo-link:hover {
-  opacity: 0.85;
-}
-
-.footer-logo-img {
-  display: block;
-  height: 28px;
-  width: auto;
-}
+.footer-logo-link:hover { opacity: 0.85; }
+.footer-logo-img { display: block; height: 28px; width: auto; }
 
 .footer-brand-desc {
   font-size: var(--fs-sm);
@@ -828,7 +862,6 @@ code { font-family: var(--font-mono); color: var(--text-primary); }
   max-width: 320px;
 }
 
-/* Operational System Status Pill */
 .footer-status-pill {
   display: inline-flex;
   align-items: center;
@@ -853,12 +886,8 @@ code { font-family: var(--font-mono); color: var(--text-primary); }
   position: relative;
 }
 
-.status-text {
-  font-weight: 500;
-  letter-spacing: 0.02em;
-}
+.status-text { font-weight: 500; letter-spacing: 0.02em; }
 
-/* Social Icon Button Row */
 .footer-social-row {
   display: flex;
   align-items: center;
@@ -892,11 +921,7 @@ code { font-family: var(--font-mono); color: var(--text-primary); }
   outline-offset: 2px;
 }
 
-/* NAVIGATION COLUMNS (Product, Company, Legal, Developers) */
-.footer-nav-col {
-  display: flex;
-  flex-direction: column;
-}
+.footer-nav-col { display: flex; flex-direction: column; }
 
 .footer-col-title {
   font-family: var(--font-mono);
@@ -940,7 +965,6 @@ code { font-family: var(--font-mono); color: var(--text-primary); }
   border-radius: var(--radius-sm);
 }
 
-/* Category Status Badges (Hiring, Soon) */
 .footer-badge {
   font-family: var(--font-mono);
   font-size: 10px;
@@ -961,7 +985,6 @@ code { font-family: var(--font-mono); color: var(--text-primary); }
   border-color: var(--border-subtle);
 }
 
-/* --- 2. DIVIDER LINE --- */
 .footer-divider {
   height: 1px;
   width: 100%;
@@ -969,7 +992,6 @@ code { font-family: var(--font-mono); color: var(--text-primary); }
   margin: var(--space-6) 0 var(--space-4) 0;
 }
 
-/* --- 3. BOTTOM UTILITY BAR --- */
 .footer-bottom-bar {
   display: flex;
   align-items: center;
@@ -980,15 +1002,8 @@ code { font-family: var(--font-mono); color: var(--text-primary); }
   color: var(--text-muted);
 }
 
-.footer-bottom-left {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1-5);
-}
-
-.footer-copy-text {
-  color: var(--text-muted);
-}
+.footer-bottom-left { display: flex; align-items: center; gap: var(--space-1-5); }
+.footer-copy-text { color: var(--text-muted); }
 
 .footer-build-tag {
   font-family: var(--font-mono);
@@ -1000,17 +1015,9 @@ code { font-family: var(--font-mono); color: var(--text-primary); }
   color: var(--text-muted);
 }
 
-.footer-tagline-text {
-  color: var(--text-secondary);
-  margin: 0;
-  text-align: center;
-}
+.footer-tagline-text { color: var(--text-secondary); margin: 0; text-align: center; }
 
-.footer-bottom-right {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1-5);
-}
+.footer-bottom-right { display: flex; align-items: center; gap: var(--space-1-5); }
 
 .footer-sublink {
   color: var(--text-muted);
@@ -1018,17 +1025,11 @@ code { font-family: var(--font-mono); color: var(--text-primary); }
   transition: color var(--transition-fast);
 }
 
-.footer-sublink:hover {
-  color: var(--text-primary);
-}
-
-.footer-sublink-dot {
-  color: var(--border-default);
-  user-select: none;
-}
+.footer-sublink:hover { color: var(--text-primary); }
+.footer-sublink-dot { color: var(--border-default); user-select: none; }
 
 /* ==========================================================================
-   12. SMOOTH SCROLL REVEALS (DATA-REVEAL STATE ENGINE)
+   12. SMOOTH SCROLL REVEALS
    ========================================================================== */
 [data-reveal] {
   opacity: 1;
@@ -1047,7 +1048,7 @@ code { font-family: var(--font-mono); color: var(--text-primary); }
 }
 
 /* ==========================================================================
-   13. RESPONSIVE BREAKPOINTS (MOBILE, TABLET & IPAD)
+   13. RESPONSIVE BREAKPOINTS (DESKTOP, TABLET, IPAD & MOBILE)
    ========================================================================== */
 @media (max-width: 1024px) {
   .hero-grid { grid-template-columns: 1fr !important; gap: 3rem !important; }
@@ -1056,7 +1057,7 @@ code { font-family: var(--font-mono); color: var(--text-primary); }
   .comparison-grid { grid-template-columns: 1fr !important; gap: 1.5rem !important; }
   .security-pillars-grid { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)) !important; gap: 1.25rem !important; }
   .personas-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 1.25rem !important; }
-  
+
   .footer-main-grid {
     grid-template-columns: 2fr repeat(2, 1fr) !important;
     gap: 2.5rem 1.5rem !important;
@@ -1067,9 +1068,7 @@ code { font-family: var(--font-mono); color: var(--text-primary); }
     margin-bottom: 1rem !important;
   }
 
-  .footer-brand-desc {
-    max-width: 500px !important;
-  }
+  .footer-brand-desc { max-width: 500px !important; }
 }
 
 @media (max-width: 768px) {
@@ -1079,13 +1078,8 @@ code { font-family: var(--font-mono); color: var(--text-primary); }
   .parties-row { flex-direction: column !important; }
   .party-arrow { transform: rotate(90deg) !important; }
 
-  .footer-main-grid {
-    grid-template-columns: 1fr 1fr !important;
-  }
-
-  .footer-brand-col {
-    grid-column: span 2 !important;
-  }
+  .footer-main-grid { grid-template-columns: 1fr 1fr !important; }
+  .footer-brand-col { grid-column: span 2 !important; }
 
   .footer-bottom-bar {
     flex-direction: column !important;
@@ -1093,15 +1087,7 @@ code { font-family: var(--font-mono); color: var(--text-primary); }
     gap: 1rem !important;
   }
 
-  .footer-tagline-text {
-    text-align: left !important;
-  }
-
-  .trust-boundary-card {
-    margin-top: 2rem !important;
-    padding: 1.25rem 1rem !important;
-    border-radius: 12px !important;
-  }
+  .footer-tagline-text { text-align: left !important; }
 }
 
 @media (max-width: 414px) {

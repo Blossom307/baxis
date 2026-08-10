@@ -16,11 +16,11 @@
   <!-- Typography: Inter + JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600" rel="stylesheet">
 
   <style>
     /* ============================================================================
-       BAXIS PROTOCOL — SECURITY ARCHITECTURE STYLESHEET (STRIPE/VERCEL QUALITY)
+       BAXIS PROTOCOL — SECURITY ARCHITECTURE STYLESHEET 
        Canvas (#090909) | Surface (#111111) | Card (#161616) | Hairline (0.08)
        ============================================================================ */
 
@@ -89,7 +89,7 @@
       padding: 0 1.5rem;
     }
 
-    /* 2. NAVIGATION HEADER */
+    /* 2. NAVIGATION HEADER WITH EXACT PROPORTIONAL LOGO SIZING */
     .site-header {
       position: sticky;
       top: 0;
@@ -117,8 +117,9 @@
     }
 
     .header-logo-img {
-      height: 26px;
+      height: 28px;
       width: auto;
+      object-fit: contain;
       display: block;
     }
 
@@ -422,7 +423,7 @@
       flex-shrink: 0;
     }
 
-    /* 5. FOOTER STYLING */
+    /* FOOTER LOGO SIZING MATCHED EXACTLY */
     .site-footer {
       border-top: 1px solid var(--border-subtle);
       padding: 4.5rem 0 3rem 0;
@@ -484,6 +485,13 @@
       gap: 1rem;
     }
 
+    .footer-logo-img {
+      height: 28px;
+      width: auto;
+      object-fit: contain;
+      display: block;
+    }
+
     @media (max-width: 900px) {
       .doc-wrapper {
         grid-template-columns: 1fr;
@@ -517,7 +525,7 @@
     <div class="container header-inner">
       <div class="header-brand">
         <a href="index.html" aria-label="Baxis Homepage">
-          <img src="images/baxis-logo.jpg" alt="Baxis Protocol Logo" class="header-logo-img" width="100" height="26">
+          <img src="images/baxis-logo.jpg" alt="Baxis Protocol Logo" class="header-logo-img" width="112" height="28">
         </a>
       </div>
 
@@ -531,7 +539,7 @@
       </nav>
 
       <div>
-        <a href="dashboard.html" class="btn-header-app">
+        <a href="auth.html" class="btn-header-app">
           <span>Launch App</span>
         </a>
       </div>
@@ -552,9 +560,9 @@
       </p>
 
       <div class="doc-hero-meta">
-        <span>Status: Public MVP</span>
+        <span>Status: Public Beta</span>
         <span>•</span>
-        <span>Last Review: July 2026</span>
+        <span>Last Review: August 2026</span>
       </div>
     </div>
   </header>
@@ -622,7 +630,7 @@
             3. Smart Contract Security
           </h2>
           <p>
-            The core <code>BaxisEscrow.sol</code> contract is authored in Solidity v0.8.24 and incorporates battle-tested OpenZeppelin security modules:
+            The core <code>BaxisEscrow.sol</code> contract is authored in Solidity v0.8.28 and incorporates battle-tested OpenZeppelin security modules:
           </p>
           
           <div class="doc-grid-2">
@@ -694,7 +702,7 @@
             7. User Account Security Best Practices
           </h2>
           <ul>
-            <li><strong>Verify Smart Contract Addresses:</strong> Always confirm you are interacting with the official Baxis contract address on Base scan.</li>
+            <li><strong>Verify Smart Contract Addresses:</strong> Always confirm you are interacting with the official Baxis contract address on BaseScan (`0xebc5942d0053B1acEfF18B01086272667209Df5b`).</li>
             <li><strong>Review Inspection Timelocks:</strong> Verify the auto-release timelock duration before depositing funds into a vault.</li>
             <li><strong>Document Deliverables On-Chain:</strong> Upload project files and proof links directly inside the Baxis workspace to maintain an accurate evidence trail.</li>
           </ul>
@@ -707,7 +715,7 @@
             8. Responsible Vulnerability Disclosure
           </h2>
           <p>
-            We welcome vulnerability reports from security researchers. If you discover a vulnerability, please report it privately to <code>security@baxis.io</code> with reproduction steps. Reports are acknowledged within 12 hours.
+            We welcome vulnerability reports from security researchers. If you discover a vulnerability, please report it privately to <code>security@baxis.io</code> or <code>olusegunblossom307@gmail.com</code> with reproduction steps. Reports are acknowledged within 12 hours.
           </p>
         </section>
 
@@ -718,12 +726,12 @@
             9. Independent Smart Contract Audit Transparency
           </h2>
           <div class="doc-callout info">
-            <div class="doc-callout-title">Honest MVP Audit Disclosure</div>
+            <div class="doc-callout-title">Honest Beta Audit Disclosure</div>
             <p>
-              Baxis is currently operating in public MVP phase. <strong>No independent third-party audit has been completed yet.</strong>
+              Baxis is currently operating in public beta phase on Base Mainnet. <strong>An independent third-party audit is currently in progress rather than complete.</strong>
             </p>
             <p>
-              The current codebase has undergone extensive internal static analysis and testing. Full independent security audits with top-tier Web3 audit firms will be commissioned prior to broader production adoption and mainnet expansion.
+              The current codebase has undergone extensive internal static analysis and testing. Full independent security audits with top-tier Web3 audit firms will be commissioned prior to broader production adoption and multi-chain expansion.
             </p>
           </div>
         </section>
@@ -736,9 +744,9 @@
           </h2>
           <div class="doc-card">
             <ul>
-              <li><strong>Completed:</strong> OpenZeppelin contract implementation, Supabase RLS policies, private evidence vault storage.</li>
-              <li><strong>In Progress:</strong> Automated static code analysis monitoring & anomaly detection.</li>
-              <li><strong>Planned:</strong> Formal third-party smart contract security audit & public bug bounty launch.</li>
+              <li><strong>Completed:</strong> OpenZeppelin v5 contract implementation, Base Mainnet deployment, Supabase RLS policies, private evidence vault storage.</li>
+              <li><strong>In Progress:</strong> Third-party security audit & automated static code analysis monitoring.</li>
+              <li><strong>Planned:</strong> Formal public bug bounty launch & tiered panel arbitration network.</li>
             </ul>
           </div>
         </section>
@@ -753,7 +761,7 @@
       <div class="footer-grid">
         <div class="footer-brand">
           <a href="index.html" aria-label="Baxis Homepage">
-            <img src="images/baxis-logo.jpg" alt="Baxis Protocol Logo" width="100" height="26">
+            <img src="images/baxis-logo.jpg" alt="Baxis Protocol Logo" class="footer-logo-img" width="112" height="28" loading="lazy">
           </a>
           <p>
             Building the trust layer for internet commerce. Non-custodial, programmable escrow security for global digital agreements.
@@ -763,8 +771,8 @@
         <div>
           <span class="footer-col-title">Product</span>
           <ul class="footer-links">
-            <li><a href="dashboard.html">Launch App</a></li>
-            <li><a href="create.html">Create Escrow</a></li>
+            <li><a href="auth.html">Launch App</a></li>
+            <li><a href="auth.html">Create Escrow</a></li>
             <li><a href="docs.html">Documentation</a></li>
           </ul>
         </div>

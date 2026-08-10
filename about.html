@@ -20,7 +20,7 @@
 
   <style>
     /* ============================================================================
-       BAXIS PROTOCOL — ABOUT PAGE STYLESHEET (VERCEL / LINEAR QUALITY)
+       BAXIS PROTOCOL — ABOUT PAGE STYLESHEET 
        Obsidian Canvas (#090909) | Surface (#111111) | Hairline Border (0.08)
        ============================================================================ */
 
@@ -91,7 +91,7 @@
       padding: 0 1.5rem;
     }
 
-    /* 2. NAVIGATION HEADER */
+    /* 2. NAVIGATION HEADER WITH EXACT PROPORTIONAL LOGO SIZING */
     .site-header {
       position: sticky;
       top: 0;
@@ -119,8 +119,9 @@
     }
 
     .header-logo-img {
-      height: 26px;
+      height: 28px;
       width: auto;
+      object-fit: contain;
       display: block;
     }
 
@@ -442,7 +443,7 @@
       line-height: 1.6;
     }
 
-    /* FOOTER STYLING */
+    /* FOOTER LOGO SIZING MATCHED EXACTLY */
     .site-footer {
       border-top: 1px solid var(--border-subtle);
       padding: 4.5rem 0 3rem 0;
@@ -504,6 +505,13 @@
       gap: 1rem;
     }
 
+    .footer-logo-img {
+      height: 28px;
+      width: auto;
+      object-fit: contain;
+      display: block;
+    }
+
     @media (max-width: 900px) {
       .footer-grid { grid-template-columns: 1fr 1fr; }
       .header-nav { display: none; }
@@ -524,7 +532,7 @@
     <div class="container header-inner">
       <div class="header-brand">
         <a href="index.html" aria-label="Baxis Homepage">
-          <img src="images/baxis-logo.jpg" alt="Baxis Protocol Logo" class="header-logo-img" width="100" height="26">
+          <img src="images/baxis-logo.jpg" alt="Baxis Protocol Logo" class="header-logo-img" width="112" height="28">
         </a>
       </div>
 
@@ -538,7 +546,7 @@
       </nav>
 
       <div class="header-actions">
-        <a href="dashboard.html" class="btn btn-primary" style="padding: 0.625rem 1.25rem; font-size: 0.875rem;">
+        <a href="auth.html" class="btn btn-primary" style="padding: 0.625rem 1.25rem; font-size: 0.875rem;">
           <span>Launch App</span>
         </a>
       </div>
@@ -559,7 +567,7 @@
       </p>
 
       <div class="hero-cta-group">
-        <a href="dashboard.html" class="btn btn-primary">
+        <a href="auth.html" class="btn btn-primary">
           <span>Launch Workspace</span>
         </a>
         <a href="docs.html" class="btn btn-secondary">
@@ -750,7 +758,7 @@
         <div class="surface-card">
           <h3 class="card-heading">Transparent Settlements</h3>
           <p class="card-body">
-            Contract balances and token movements are publicly verifiable on Base scan, eliminating accounting ambiguity.
+            Contract balances and token movements are publicly verifiable on BaseScan, eliminating accounting ambiguity.
           </p>
         </div>
 
@@ -787,7 +795,7 @@
       <div class="grid-3">
         <!-- COMPLETED -->
         <div class="roadmap-card">
-          <span class="roadmap-pill pill-completed">Completed MVP</span>
+          <span class="roadmap-pill pill-completed">Completed Beta MVP</span>
           <ul class="roadmap-items">
             <li><span class="bullet-check">✓</span> Smart Contract Escrow Vaults</li>
             <li><span class="bullet-check">✓</span> Supabase Auth & RLS Security</li>
@@ -829,7 +837,7 @@
       <p class="closing-subtitle">
         Experience non-custodial payment security for your next digital agreement.
       </p>
-      <a href="dashboard.html" class="btn btn-primary">
+      <a href="auth.html" class="btn btn-primary">
         <span>Launch Baxis Workspace</span>
       </a>
     </section>
@@ -842,7 +850,7 @@
       <div class="footer-grid">
         <div class="footer-brand">
           <a href="index.html" aria-label="Baxis Homepage">
-            <img src="images/baxis-logo.jpg" alt="Baxis Protocol Logo" width="100" height="26">
+            <img src="images/baxis-logo.jpg" alt="Baxis Protocol Logo" class="footer-logo-img" width="112" height="28" loading="lazy">
           </a>
           <p>
             Building the trust layer for internet commerce. Non-custodial, programmable escrow security for global digital agreements.
@@ -852,8 +860,8 @@
         <div>
           <span class="footer-col-title">Product</span>
           <ul class="footer-links">
-            <li><a href="dashboard.html">Launch App</a></li>
-            <li><a href="create.html">Create Escrow</a></li>
+            <li><a href="auth.html">Launch App</a></li>
+            <li><a href="auth.html">Create Escrow</a></li>
             <li><a href="docs.html">Documentation</a></li>
           </ul>
         </div>
