@@ -9,33 +9,22 @@ document.documentElement.classList.add('js-enabled');
   'use strict';
 
   const System = {
-    debounce(fn, delay = 100) {
+    debounce(fn, delay = 60) {
       let timer;
       return function (...args) {
         clearTimeout(timer);
         timer = setTimeout(() => fn.apply(this, args), delay);
       };
-    },
-
-    announce(message) {
-      let announcer = document.getElementById('a11y-announcer');
-      if (!announcer) {
-        announcer = document.createElement('div');
-        announcer.id = 'a11y-announcer';
-        announcer.setAttribute('aria-live', 'polite');
-        announcer.className = 'sr-only';
-        announcer.style.cssText = 'position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;';
-        document.body.appendChild(announcer);
-      }
-      announcer.textContent = message;
     }
   };
 
   /* ==========================================================================
-     1. LIVE DM PREVIEW MANAGER
+     1. LIVE PREVIEW & FINANCIAL LEDGER ENGINE
      ========================================================================== */
   class DealBuilderLivePreview {
     constructor() {
+      // Form Inputs
+      this.roleRadios = document.querySelectorAll('input[name="creator-role"]');
       this.titleInput = document.getElementById('deal-title');
       this.counterpartyInput = document.getElementById('counterparty-id');
       this.amountInput = document.getElementById('deal-amount');
@@ -43,6 +32,18 @@ document.documentElement.classList.add('js-enabled');
       this.networkSelect = document.getElementById('deal-network');
       this.timelockSelect = document.getElementById('auto-release-timelock');
 
+      // Labels & Hints that adapt to Role
+      this.lblCounterparty = document.getElementById('lbl-counterparty-id');
+      this.hintCounterparty = document.getElementById('hint-counterparty-id');
+      this.btnGenerateText = document.getElementById('btn-generate-text');
+
+      // Financial Ledger Elements
+      this.ledgerSubtotal = document.getElementById('ledger-subtotal');
+      this.ledgerFee = document.getElementById('ledger-fee');
+      this.ledgerTotal = document.getElementById('ledger-total');
+      this.ledgerFreelancerPayout = document.getElementById('ledger-freelancer-payout');
+
+      // DM Share Unfurl Preview Elements
       this.previewTitle = document.getElementById('preview-title');
       this.previewAmount = document.getElementById('preview-amount');
       this.previewNetwork = document.getElementById('preview-network');
@@ -54,46 +55,97 @@ document.documentElement.classList.add('js-enabled');
     }
 
     init() {
-      const updateHandler = () => this.updatePreview();
+      const updateHandler = () => this.updateAll();
 
-      if (this.titleInput) this.titleInput.addEventListener('input', System.debounce(updateHandler, 50));
-      if (this.counterpartyInput) this.counterpartyInput.addEventListener('input', System.debounce(updateHandler, 50));
-      if (this.amountInput) this.amountInput.addEventListener('input', System.debounce(updateHandler, 50));
+      this.roleRadios.forEach(radio => {
+        radio.addEventListener('change', () => {
+          this.handleRoleChange();
+          this.updateAll();
+        });
+      });
+
+      if (this.titleInput) this.titleInput.addEventListener('input', System.debounce(updateHandler, 40));
+      if (this.counterpartyInput) this.counterpartyInput.addEventListener('input', System.debounce(updateHandler, 40));
+      if (this.amountInput) this.amountInput.addEventListener('input', System.debounce(updateHandler, 40));
       if (this.tokenSelect) this.tokenSelect.addEventListener('change', updateHandler);
       if (this.networkSelect) this.networkSelect.addEventListener('change', updateHandler);
       if (this.timelockSelect) this.timelockSelect.addEventListener('change', updateHandler);
 
-      this.updatePreview();
+      this.handleRoleChange();
+      this.updateAll();
+    }
+
+    getCurrentRole() {
+      const checked = document.querySelector('input[name="creator-role"]:checked');
+      return checked ? checked.value : 'client';
+    }
+
+    handleRoleChange() {
+      const isClient = this.getCurrentRole() === 'client';
+
+      if (this.lblCounterparty) {
+        this.lblCounterparty.innerHTML = isClient 
+          ? 'Freelancer Payout Wallet Address <span class="req">*</span>' 
+          : 'Client Wallet Address <span class="field-optional">(Optional)</span>';
+      }
+
+      if (this.hintCounterparty) {
+        this.hintCounterparty.textContent = isClient
+          ? 'The wallet address that will receive the unlocked payout upon approved delivery.'
+          : 'Leave blank if sending via DM. The client will connect their wallet to fund the escrow.';
+      }
+
+      if (this.btnGenerateText) {
+        this.btnGenerateText.textContent = isClient
+          ? 'Create Agreement & Prepare Escrow'
+          : 'Generate Payment Request Link';
+      }
     }
 
     formatCurrency(val, token) {
-      if (!val || isNaN(val) || parseFloat(val) <= 0) return `$0.00 ${token}`;
-      return `$${parseFloat(val).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${token}`;
+      const num = parseFloat(val);
+      if (!val || isNaN(num) || num <= 0) return `$0.00 ${token}`;
+      return `$${num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${token}`;
     }
 
-    updatePreview() {
-      const title = this.titleInput?.value.trim() || 'Brand Identity & Website Design';
+    updateAll() {
+      const role = this.getCurrentRole();
+      const title = this.titleInput?.value.trim() || 'Brand Identity & Full UI Design System';
       const counterparty = this.counterpartyInput?.value.trim() || '';
-      const rawAmount = this.amountInput?.value;
+      const rawAmount = parseFloat(this.amountInput?.value) || 0;
       const token = this.tokenSelect?.value || 'USDC';
       const network = this.networkSelect?.value || 'Base';
       const timelock = this.timelockSelect?.value || '48';
 
-      // Format 42-character 0x addresses for smooth preview
+      // 3% Baxis Protection Fee calculation
+      const fee = rawAmount > 0 ? rawAmount * 0.03 : 0;
+      const totalDeposit = rawAmount + fee;
+
+      // Update Financial Ledger
+      if (this.ledgerSubtotal) this.ledgerSubtotal.textContent = this.formatCurrency(rawAmount, token);
+      if (this.ledgerFee) this.ledgerFee.textContent = this.formatCurrency(fee, token);
+      if (this.ledgerTotal) this.ledgerTotal.textContent = this.formatCurrency(totalDeposit, token);
+      if (this.ledgerFreelancerPayout) this.ledgerFreelancerPayout.textContent = this.formatCurrency(rawAmount, token);
+
+      // Format Counterparty display
       let displayCounterparty = counterparty;
       if (counterparty && counterparty.startsWith('0x') && counterparty.length === 42) {
         displayCounterparty = `${counterparty.substring(0, 6)}...${counterparty.substring(38)}`;
       }
 
+      // Update Live DM Share Card
       if (this.previewTitle) this.previewTitle.textContent = title;
       if (this.previewAmount) this.previewAmount.textContent = this.formatCurrency(rawAmount, token);
       if (this.previewNetwork) this.previewNetwork.textContent = network;
 
-      if (this.previewClientName) this.previewClientName.textContent = 'You (Client)';
-      if (this.previewTalentName) this.previewTalentName.textContent = displayCounterparty || 'Freelancer pending';
-
-      if (this.previewStatusText) {
-        this.previewStatusText.textContent = `Ready to Lock Funds • ${timelock}h Auto-Release`;
+      if (role === 'client') {
+        if (this.previewClientName) this.previewClientName.textContent = 'You (Client)';
+        if (this.previewTalentName) this.previewTalentName.textContent = displayCounterparty || 'Pending Freelancer';
+        if (this.previewStatusText) this.previewStatusText.textContent = `Awaiting Deposit • ${timelock}h Review Window`;
+      } else {
+        if (this.previewClientName) this.previewClientName.textContent = displayCounterparty || 'Pending Client';
+        if (this.previewTalentName) this.previewTalentName.textContent = 'You (Freelancer)';
+        if (this.previewStatusText) this.previewStatusText.textContent = `Payment Request • ${timelock}h Review Window`;
       }
     }
   }
@@ -103,30 +155,39 @@ document.documentElement.classList.add('js-enabled');
      ========================================================================== */
   class FormValidator {
     static validateTitle(title) {
-      return title && title.trim().length >= 3 
-        ? { isValid: true, error: '' } 
+      return title && title.trim().length >= 3
+        ? { isValid: true, error: '' }
         : { isValid: false, error: 'Agreement title must be at least 3 characters.' };
     }
 
-    static validateCounterparty(id) {
-      if (!id || !id.trim()) {
-        return { isValid: false, error: 'Freelancer 0x EVM wallet address is required.' };
+    static validateCounterparty(id, isClientRole) {
+      // Optional for Freelancers
+      if (!isClientRole && (!id || !id.trim())) {
+        return { isValid: true, error: '' };
       }
-      const isEvmAddress = /^0x[a-fA-F0-9]{40}$/.test(id.trim());
-      return isEvmAddress 
-        ? { isValid: true, error: '' } 
-        : { isValid: false, error: 'Enter a valid 0x EVM Wallet Address (e.g. 0x71C...3A9).' };
+
+      if (!id || !id.trim()) {
+        return { isValid: false, error: 'Freelancer wallet address is required.' };
+      }
+
+      const clean = id.trim();
+      const isEvmAddress = /^0x[a-fA-F0-9]{40}$/.test(clean);
+      const isEns = /\.eth$/i.test(clean);
+
+      return isEvmAddress || isEns
+        ? { isValid: true, error: '' }
+        : { isValid: false, error: 'Enter a valid 0x address (0x...) or ENS name (.eth).' };
     }
 
     static validateAmount(amount) {
-      return amount && !isNaN(amount) && parseFloat(amount) > 0 
-        ? { isValid: true, error: '' } 
+      return amount && !isNaN(amount) && parseFloat(amount) > 0
+        ? { isValid: true, error: '' }
         : { isValid: false, error: 'Enter a valid payment amount.' };
     }
   }
 
   /* ==========================================================================
-     3. MAIN APP & REAL SUPABASE INSERTION
+     3. MAIN APP & SUPABASE INTEGRATION
      ========================================================================== */
   class DealBuilderApp {
     constructor() {
@@ -138,7 +199,21 @@ document.documentElement.classList.add('js-enabled');
     }
 
     init() {
+      this.bindSidebarMobileToggle();
       this.bindFormSubmission();
+    }
+
+    bindSidebarMobileToggle() {
+      const toggleBtn = document.getElementById('btn-mobile-sidebar-toggle');
+      const backdrop = document.getElementById('sidebar-backdrop');
+      const layout = document.getElementById('dashboard-layout');
+
+      if (toggleBtn && layout) {
+        toggleBtn.addEventListener('click', () => layout.classList.toggle('mobile-menu-open'));
+      }
+      if (backdrop && layout) {
+        backdrop.addEventListener('click', () => layout.classList.remove('mobile-menu-open'));
+      }
     }
 
     getSupabase() {
@@ -177,26 +252,30 @@ document.documentElement.classList.add('js-enabled');
 
         const supabase = this.getSupabase();
         if (!supabase) {
-          alert('Error: Supabase JS library not loaded. Make sure script tags are in create.html!');
+          alert('Database connection unavailable. Please check your network connection.');
           return;
         }
 
-        const titleVal = document.getElementById('deal-title') ? document.getElementById('deal-title').value : '';
-        const descVal = document.getElementById('deal-description') ? document.getElementById('deal-description').value : '';
-        const counterpartyVal = document.getElementById('counterparty-id') ? document.getElementById('counterparty-id').value : '';
-        const amountVal = document.getElementById('deal-amount') ? document.getElementById('deal-amount').value : '';
-        const tokenVal = document.getElementById('deal-token') ? document.getElementById('deal-token').value : 'USDC';
-        const networkVal = document.getElementById('deal-network') ? document.getElementById('deal-network').value : 'Base';
-        const timelockVal = document.getElementById('auto-release-timelock') ? document.getElementById('auto-release-timelock').value : '48';
+        const roleChecked = document.querySelector('input[name="creator-role"]:checked');
+        const creatorRole = roleChecked ? roleChecked.value : 'client';
+        const isClient = creatorRole === 'client';
 
-        // Clear previous errors
+        const titleVal = document.getElementById('deal-title')?.value || '';
+        const descVal = document.getElementById('deal-description')?.value || '';
+        const counterpartyVal = document.getElementById('counterparty-id')?.value || '';
+        const amountVal = document.getElementById('deal-amount')?.value || '';
+        const tokenVal = document.getElementById('deal-token')?.value || 'USDC';
+        const networkVal = document.getElementById('deal-network')?.value || 'Base';
+        const timelockVal = document.getElementById('auto-release-timelock')?.value || '48';
+
+        // Reset errors
         this.clearFieldError('deal-title');
         this.clearFieldError('counterparty-id');
         this.clearFieldError('deal-amount');
 
-        // Form Validation
+        // Validation
         const titleRes = FormValidator.validateTitle(titleVal);
-        const cpRes = FormValidator.validateCounterparty(counterpartyVal);
+        const cpRes = FormValidator.validateCounterparty(counterpartyVal, isClient);
         const amountRes = FormValidator.validateAmount(amountVal);
 
         if (!titleRes.isValid) this.showFieldError('deal-title', titleRes.error);
@@ -216,14 +295,14 @@ document.documentElement.classList.add('js-enabled');
             title: titleVal.trim(),
             description: descVal.trim(),
             counterparty_identifier: counterpartyVal.trim(),
-            creator_role: 'client',
+            creator_role: creatorRole,
             amount: parseFloat(amountVal),
             currency: tokenVal,
             network: networkVal,
             auto_release_hours: parseInt(timelockVal, 10),
             creator_id: currentUserId,
-            client_id: currentUserId,
-            freelancer_id: null,
+            client_id: isClient ? currentUserId : null,
+            freelancer_id: !isClient ? currentUserId : null,
             status: 'awaiting_deposit'
           };
 
@@ -234,39 +313,42 @@ document.documentElement.classList.add('js-enabled');
             .single();
 
           if (error) {
-            console.error('Supabase Error:', error);
+            console.error('Supabase Insert Error:', error);
             throw error;
           }
 
-          const newEscrowCode = data.id;
+          const newEscrowId = data.id;
 
-          // Log activity event
+          // Activity audit log
           await supabase.from('activity_logs').insert([{
-            escrow_id: newEscrowCode,
+            escrow_id: newEscrowId,
             actor_id: currentUserId,
             event_type: 'created',
-            description: `Escrow Agreement ${newEscrowCode} created for $${amountVal} ${tokenVal}`
+            description: `Escrow Agreement ${newEscrowId} created (${creatorRole}) for $${amountVal} ${tokenVal}`
           }]);
 
-          // Redirect to Escrow Details page
-          window.location.href = `escrow-details.html?id=${newEscrowCode}`;
+          window.location.href = `escrow-details.html?id=${newEscrowId}`;
 
         } catch (error) {
           this.setButtonLoading(false);
-          alert('Database Save Failed: ' + (error.message || 'Error writing to PostgreSQL'));
+          alert('Failed to create escrow agreement: ' + (error.message || 'Database error'));
         }
       });
     }
 
     setButtonLoading(isLoading) {
       if (!this.submitBtn) return;
-      const text = this.submitBtn.querySelector('span') || this.submitBtn;
+      const textSpan = document.getElementById('btn-generate-text') || this.submitBtn.querySelector('span');
+      const spinner = this.submitBtn.querySelector('.btn-spinner');
+
       if (isLoading) {
         this.submitBtn.disabled = true;
-        text.textContent = 'Saving Agreement to Database...';
+        if (textSpan) textSpan.textContent = 'Creating Agreement...';
+        if (spinner) spinner.hidden = false;
       } else {
         this.submitBtn.disabled = false;
-        text.textContent = 'Generate Escrow Agreement Link';
+        if (spinner) spinner.hidden = true;
+        this.preview.handleRoleChange();
       }
     }
   }
@@ -274,5 +356,4 @@ document.documentElement.classList.add('js-enabled');
   document.addEventListener('DOMContentLoaded', () => {
     new DealBuilderApp();
   });
-
 })();
