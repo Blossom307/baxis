@@ -110,7 +110,7 @@ document.documentElement.classList.add('js-enabled');
 
     updateAll() {
       const role = this.getCurrentRole();
-      const title = this.titleInput?.value.trim() || 'Brand Identity & Full UI Design System';
+      const title = this.titleInput?.value.trim() || 'Agreement Title';
       const counterparty = this.counterpartyInput?.value.trim() || '';
       const rawAmount = parseFloat(this.amountInput?.value) || 0;
       const token = this.tokenSelect?.value || 'USDC';
