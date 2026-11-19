@@ -2,8 +2,8 @@
 // Watches the BaxisEscrow contract on Base and sends Telegram alerts for
 // admin actions, disputes, and deal activity.
 
-require("dotenv").config();
-const { ethers } = require("ethers");
+import "dotenv/config";
+import { ethers } from "ethers";
 
 const CONTRACT = "0xebc5942d0053B1acEfF18B01086272667209Df5b";
 const EXPLORER = "https://basescan.org";
