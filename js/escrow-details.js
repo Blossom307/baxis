@@ -968,29 +968,29 @@ document.documentElement.classList.add('js-enabled');
             files: selectedFiles
           });
 
-          if (window.ethereum && window.baxisWallet && window.appInstance) {
-            try {
-              const signer = await window.baxisWallet.connectWallet();
-              if (signer) {
-                const bytes32GigId = typeof getGigIdBytes32 === 'function' ? getGigIdBytes32(currentEscrow.gigId) : ethers.id(currentEscrow.gigId);
-                const evidenceHash = ethers.id(dispute.id);
-                const contractInterface = new ethers.Interface(BAXIS_CONTRACT_ABI);
-                const calldata = contractInterface.encodeFunctionData('raiseDispute', [bytes32GigId, evidenceHash]);
-                const userAddr = await signer.getAddress();
+         if (!window.ethereum || !window.baxisWallet) {
+             throw new Error('Connect your wallet to raise a dispute on-chain.');
+        }
 
-                await window.ethereum.request({
-                  method: 'eth_sendTransaction',
-                  params: [{
-                    from: userAddr,
-                    to: BAXIS_CONTRACT_ADDRESS,
-                    data: calldata
-                  }]
-                });
-              }
-            } catch (web3Err) {
-              console.warn('Web3 on-chain raiseDispute skipped/failed:', web3Err);
-            }
-          }
+          const signer = await window.baxisWallet.connectWallet();
+          if (!signer) throw new Error('Wallet connection was cancelled.');
+
+          const bytes32GigId = typeof getGigIdBytes32 === 'function' ? getGigIdBytes32(currentEscrow.gigId) : ethers.id(currentEscrow.gigId);
+          const evidenceHash = ethers.id(dispute.id);
+          const contractInterface = new ethers.Interface(BAXIS_CONTRACT_ABI);
+          const calldata = contractInterface.encodeFunctionData('raiseDispute', [bytes32GigId, evidenceHash]);
+          const userAddr = await signer.getAddress();
+
+          const txHash = await window.ethereum.request({
+            method: 'eth_sendTransaction',
+            params: [{ from: userAddr, to: BAXIS_CONTRACT_ADDRESS, data: calldata }]
+        });
+
+          const provider = new ethers.BrowserProvider(window.ethereum);
+          const receipt = await provider.waitForTransaction(txHash);
+          if (!receipt || receipt.status !== 1) {
+             throw new Error('The on-chain dispute transaction failed.');
+           }
 
           if (window.appInstance) {
             const supabase = window.appInstance.getSupabase();
