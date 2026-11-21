@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const disputeService = window.disputeService;
 
   // 1. GATEKEEPER CHECK: Ensure user is Admin
+  // (UI only: the real protection is Supabase RLS + the contract's arbitrator check)
   const isAdmin = await adminService.verifyAdminAccess();
   if (!isAdmin) {
     alert('Unauthorized access. Redirecting to user dashboard.');
@@ -28,18 +29,37 @@ document.addEventListener('DOMContentLoaded', async () => {
   const inputClient = document.getElementById('input-client-refund');
   const inputNotes = document.getElementById('input-resolution-notes');
 
-    // Security: escape user-written text before it goes into innerHTML
+  // State (declared before anything that uses it)
+  let activeDispute = null;
+  let currentContractAmount = 0; // Set from the contract when a dispute is opened (no guessed fallback)
+  let tableRequestId = 0; // Ignores stale table responses when filter tabs are clicked quickly
+
+  // Icons (inline SVG, they inherit the surrounding text color)
+  const ICON_FILE = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
+  const ICON_ARROW = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>';
+
+  // Security: escape user-written text before it goes into innerHTML
   const escapeHtml = (value) => String(value ?? '')
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
   // Security: only allow https links
   const safeUrl = (url) => {
+    if (!url) return '#';
     try {
       const parsed = new URL(url, window.location.origin);
       return parsed.protocol === 'https:' ? parsed.href : '#';
     } catch { return '#'; }
   };
+
+  // Formats an amount with at least 2 decimals but keeps up to 6 (USDC precision): 10 -> "10.00", 0.125 -> "0.125"
+  const fmtAmount = (n) => {
+    const s = Number(n).toFixed(6).replace(/0+$/, '');
+    return s.endsWith('.') ? `${s}00` : s.replace(/\.(\d)$/, (_, d) => `.${d}0`);
+  };
+
+  // Rounds to 6 decimals (1 USDC base unit) so typed values match what the contract can represent
+  const round6 = (n) => Math.round(n * 1e6) / 1e6;
 
   // --- PRESET SETTLEMENT BUTTON HANDLERS ---
   const btnPresetClient = document.getElementById('btn-preset-client');
@@ -49,21 +69,24 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (btnPresetClient) {
     btnPresetClient.addEventListener('click', () => {
       inputFreelancer.value = '0.00';
-      inputClient.value = currentContractAmount.toFixed(2);
+      inputClient.value = fmtAmount(currentContractAmount);
     });
   }
 
   if (btnPresetSplit) {
     btnPresetSplit.addEventListener('click', () => {
-      const half = (currentContractAmount / 2).toFixed(2);
-      inputFreelancer.value = half;
-      inputClient.value = half;
+      // Split in USDC base units so the two halves always add up exactly
+      // (same rounding as the contract's timeout split)
+      const totalUnits = Math.round(currentContractAmount * 1e6);
+      const freelancerUnits = Math.floor(totalUnits / 2);
+      inputFreelancer.value = fmtAmount(freelancerUnits / 1e6);
+      inputClient.value = fmtAmount((totalUnits - freelancerUnits) / 1e6);
     });
   }
 
   if (btnPresetFreelancer) {
     btnPresetFreelancer.addEventListener('click', () => {
-      inputFreelancer.value = currentContractAmount.toFixed(2);
+      inputFreelancer.value = fmtAmount(currentContractAmount);
       inputClient.value = '0.00';
     });
   }
@@ -73,7 +96,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     inputFreelancer.addEventListener('input', () => {
       const freelancerVal = parseFloat(inputFreelancer.value) || 0;
       const clientRefund = Math.max(0, currentContractAmount - freelancerVal);
-      inputClient.value = clientRefund.toFixed(2);
+      inputClient.value = fmtAmount(clientRefund);
     });
   }
 
@@ -81,12 +104,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     inputClient.addEventListener('input', () => {
       const clientVal = parseFloat(inputClient.value) || 0;
       const freelancerPayout = Math.max(0, currentContractAmount - clientVal);
-      inputFreelancer.value = freelancerPayout.toFixed(2);
+      inputFreelancer.value = fmtAmount(freelancerPayout);
     });
   }
-
-  let activeDispute = null;
-  let currentContractAmount = 0; // Set from the contract when a dispute is opened (no guessed fallback)
 
   // Load Initial Metrics & Table
   await loadMetrics();
@@ -94,10 +114,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Filter Tabs
   document.querySelectorAll('.filter-tab').forEach(tab => {
-   tab.addEventListener('click', () => {
-  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
-  tab.classList.add('active');
-  loadDisputeTable(tab.dataset.filter);
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      loadDisputeTable(tab.dataset.filter);
     });
   });
 
@@ -113,9 +133,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   async function loadDisputeTable(filter = 'ALL') {
+    const requestId = ++tableRequestId;
+
     try {
       tableBody.innerHTML = '<tr><td colspan="5" class="table-loading-text" style="text-align:center; padding: 2rem;">Loading disputes queue...</td></tr>';
       const disputes = await disputeService.getAllDisputes(filter);
+
+      // A newer request was started while this one was loading, so drop this result
+      if (requestId !== tableRequestId) return;
 
       if (!disputes || disputes.length === 0) {
         tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:2.5rem; color:var(--text-muted);">No disputes found in queue.</td></tr>';
@@ -126,11 +151,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       disputes.forEach(dispute => {
         const row = document.createElement('tr');
         const createdDate = new Date(dispute.created_at).toLocaleDateString();
+        const isActive = dispute.status === 'OPEN' || dispute.status === 'UNDER_REVIEW';
 
-               // Security: every user-written value is escaped
+        // Security: every user-written value is escaped
         row.innerHTML = `
           <td><code>${escapeHtml(String(dispute.escrow_gig_id).substring(0, 10))}...</code></td>
-          <td><span class="status-pill ${dispute.status === 'OPEN' ? 'rust' : 'green'}">${escapeHtml(dispute.status)}</span></td>
+          <td><span class="status-pill ${isActive ? 'rust' : 'green'}">${escapeHtml(dispute.status)}</span></td>
           <td>${escapeHtml(String(dispute.reason || '').substring(0, 35))}...</td>
           <td>${createdDate}</td>
           <td>
@@ -143,13 +169,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       // Attach Review Click Listeners
       tableBody.querySelectorAll('.btn-review').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-          const gigId = e.target.dataset.id;
-          await openArbitrationModal(gigId);
+        btn.addEventListener('click', async () => {
+          const gigId = btn.dataset.id;
+          try {
+            await openArbitrationModal(gigId);
+          } catch (err) {
+            console.error('Could not open dispute:', err);
+            alert('Could not open this dispute. Please try again.');
+          }
         });
       });
 
     } catch (err) {
+      if (requestId !== tableRequestId) return;
       console.error('Failed to load table:', err);
       tableBody.innerHTML = '<tr><td colspan="5" style="color:var(--state-error); text-align:center; padding:2rem;">Error loading disputes.</td></tr>';
     }
@@ -164,9 +196,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('modal-dispute-reason').textContent = activeDispute.reason;
     document.getElementById('modal-dispute-status').textContent = activeDispute.status;
 
-        // Read the real amount and dispute state from the contract (source of truth).
+    // Read the real amount and dispute state from the contract (source of truth).
     // If this fails we stop instead of guessing an amount.
-    if (!window.ethereum) { activeDispute = null; return alert('A wallet is required to read the escrow from the contract.'); }
+    if (!window.ethereum) {
+      activeDispute = null;
+      return alert('A wallet is required to read the escrow from the contract.');
+    }
+
     try {
       const readProvider = new ethers.BrowserProvider(window.ethereum);
       const readNetwork = await readProvider.getNetwork();
@@ -174,6 +210,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         activeDispute = null;
         return alert('Wrong network. Switch your wallet to Base mainnet and try again.');
       }
+
       const readAbi = [
         'function escrows(bytes32) view returns (address client, address freelancer, address token, uint256 amount, bytes32 agreementHash, uint64 createdAt, uint64 submittedAt, uint64 inspectionWindow, uint64 disputedAt, uint64 completedAt, uint8 status)'
       ];
@@ -197,7 +234,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       return alert('Could not read this escrow from the contract. Nothing was changed.');
     }
 
-    document.getElementById('modal-escrow-amount').textContent = `$${currentContractAmount.toFixed(2)} USDC`;
+    document.getElementById('modal-escrow-amount').textContent = `$${fmtAmount(currentContractAmount)} USDC`;
 
     // Render Evidence Files
     const evidenceContainer = document.getElementById('modal-evidence-list');
@@ -209,7 +246,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         a.href = safeUrl(file.signedUrl); // Security: https links only
         a.target = '_blank';
         a.rel = 'noopener noreferrer';
-        a.innerHTML = `<span>📄 ${escapeHtml(file.file_name)}</span> <span>Download File ➔</span>`;
+        a.innerHTML = `
+          <span style="display:inline-flex; align-items:center; gap:8px;">${ICON_FILE}${escapeHtml(file.file_name)}</span>
+          <span style="display:inline-flex; align-items:center; gap:6px;">Download File ${ICON_ARROW}</span>
+        `;
         evidenceContainer.appendChild(a);
       });
     } else {
@@ -217,17 +257,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Default Split Inputs
-    inputFreelancer.value = (currentContractAmount).toFixed(2);
+    inputFreelancer.value = fmtAmount(currentContractAmount);
     inputClient.value = '0.00';
 
     modalBackdrop.classList.add('active');
   }
 
-  
-
   function closeModal() {
     modalBackdrop.classList.remove('active');
     activeDispute = null;
+    currentContractAmount = 0;
+    if (inputNotes) inputNotes.value = ''; // Don't carry old notes into the next dispute
   }
 
   if (btnCloseModal) btnCloseModal.addEventListener('click', closeModal);
@@ -235,26 +275,33 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // EXECUTE ON-CHAIN SETTLEMENT
   if (btnExecute) {
+    const btnText = btnExecute.querySelector('.btn-text') || btnExecute;
+
     btnExecute.addEventListener('click', async () => {
       if (!activeDispute) return;
 
-      const freelancerPayout = parseFloat(inputFreelancer.value) || 0;
-      const clientRefund = parseFloat(inputClient.value) || 0;
+      // Keep our own copies: the modal can be closed while the transaction is still pending
+      const dispute = activeDispute;
+      const escrowAmount = currentContractAmount;
+
+      // Round to 1 USDC base unit so typed values match what the contract can represent
+      const freelancerPayout = round6(parseFloat(inputFreelancer.value) || 0);
+      const clientRefund = round6(parseFloat(inputClient.value) || 0);
       const notes = inputNotes ? inputNotes.value.trim() : '';
 
       if (!window.ethereum) return alert('MetaMask wallet required to execute on-chain resolution.');
 
-            // Validation: the split must add up to the escrow amount (tiny tolerance for rounding)
+      // Validation: the split must add up to the escrow amount
+      // (half a base unit of tolerance covers floating-point noise only)
       if (freelancerPayout < 0 || clientRefund < 0 ||
-          Math.abs((freelancerPayout + clientRefund) - currentContractAmount) > 0.000001) {
-        return alert(`The payout and refund must add up to the escrow amount ($${currentContractAmount.toFixed(2)} USDC).`);
+          Math.abs((freelancerPayout + clientRefund) - escrowAmount) > 0.0000005) {
+        return alert(`The payout and refund must add up to the escrow amount ($${fmtAmount(escrowAmount)} USDC).`);
       }
 
       // Safety: settlement is final, so ask for confirmation first
-      if (!confirm(`Settle this dispute on-chain?\n\nFreelancer: $${freelancerPayout.toFixed(2)} USDC\nClient refund: $${clientRefund.toFixed(2)} USDC\n\nThis cannot be undone.`)) return;
+      if (!confirm(`Settle this dispute on-chain?\n\nFreelancer: $${fmtAmount(freelancerPayout)} USDC\nClient refund: $${fmtAmount(clientRefund)} USDC\n\nThis cannot be undone.`)) return;
 
       try {
-        const btnText = btnExecute.querySelector('.btn-text') || btnExecute;
         btnExecute.disabled = true;
         btnText.textContent = 'Confirming On-Chain Tx...';
 
@@ -274,20 +321,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         const contractInterface = new ethers.Interface(resolveAbi);
 
         // Convert gigId to 32-byte hex string
-        const bytes32GigId = (typeof getGigIdBytes32 === 'function') 
-          ? getGigIdBytes32(activeDispute.escrow_gig_id) 
-          : (activeDispute.escrow_gig_id.startsWith('0x') ? activeDispute.escrow_gig_id : ethers.id(activeDispute.escrow_gig_id));
+        const bytes32GigId = (typeof getGigIdBytes32 === 'function')
+          ? getGigIdBytes32(dispute.escrow_gig_id)
+          : (dispute.escrow_gig_id.startsWith('0x') ? dispute.escrow_gig_id : ethers.id(dispute.escrow_gig_id));
 
-           // toFixed(6) avoids floating-point tails (e.g. 0.30000000000000004) that make parseUnits throw
+        // toFixed(6) avoids floating-point tails (e.g. 0.30000000000000004) that make parseUnits throw
         const parsedFreelancerAmount = ethers.parseUnits(freelancerPayout.toFixed(6), 6); // 6 decimals for USDC
 
         // Encode calldata
         const calldata = contractInterface.encodeFunctionData('resolveDispute', [bytes32GigId, parsedFreelancerAmount]);
 
-            // Dry run: the contract rejects wrong wallet / wrong state / bad amount BEFORE we send (no gas spent)
+        // Dry run: the contract rejects wrong wallet / wrong state / bad amount BEFORE we send (no gas spent)
         try {
           await provider.call({ from: userAddr, to: BAXIS_CONTRACT_ADDRESS, data: calldata });
         } catch (simErr) {
+          console.warn('Dry run failed:', simErr);
           throw new Error('The contract would reject this settlement. Check that this wallet is the owner or an arbitrator and that the escrow is disputed on-chain.');
         }
 
@@ -300,7 +348,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           }]
         });
 
-          // Only record the resolution after the chain confirms it
+        // Only record the resolution after the chain confirms it
         btnText.textContent = 'Waiting for confirmation...';
         const receipt = await provider.waitForTransaction(txHash);
         if (!receipt || receipt.status !== 1) {
@@ -308,43 +356,41 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         // Record Resolution in Supabase DB & Audit Log
-try {
-  await adminService.recordResolution({
-    disputeId: activeDispute.id,
-    freelancerPayout,
-    clientRefund,
-    notes,
-    txHash
-  });
-} catch (dbErr) {
-  console.error('Blockchain settlement confirmed, but database recording failed:', dbErr);
+        try {
+          await adminService.recordResolution({
+            disputeId: dispute.id,
+            freelancerPayout,
+            clientRefund,
+            notes,
+            txHash
+          });
+        } catch (dbErr) {
+          console.error('Blockchain settlement confirmed, but database recording failed:', dbErr);
 
-  alert(
-    `IMPORTANT: The blockchain settlement was confirmed, but database recording failed.\n\n` +
-    `Transaction: ${txHash}\n\n` +
-    `Do NOT execute this settlement again. Database reconciliation is required.\n\n` +
-    `Error: ${dbErr.message}`
-  );
+          alert(
+            `IMPORTANT: The blockchain settlement was confirmed, but database recording failed.\n\n` +
+            `Transaction: ${txHash}\n\n` +
+            `Do NOT execute this settlement again. Database reconciliation is required.\n\n` +
+            `Error: ${dbErr.message}`
+          );
 
-  closeModal();
-  await loadMetrics();
-  await loadDisputeTable('ALL');
-  return;
-}
+          closeModal();
+          await loadMetrics();
+          await loadDisputeTable('ALL');
+          return;
+        }
 
-alert(`Settlement Executed Successfully!\nTX Hash: ${txHash}`);
+        alert(`Settlement Executed Successfully!\nTX Hash: ${txHash}`);
 
-closeModal();
-await loadMetrics();
-await loadDisputeTable('ALL');
-       
+        closeModal();
+        await loadMetrics();
+        await loadDisputeTable('ALL');
 
       } catch (err) {
         console.error('Settlement failed:', err);
         alert('Settlement failed: ' + (err.reason || err.message));
       } finally {
         btnExecute.disabled = false;
-        const btnText = btnExecute.querySelector('.btn-text') || btnExecute;
         btnText.textContent = 'Execute On-Chain Settlement';
       }
     });

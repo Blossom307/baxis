@@ -1,4 +1,3 @@
-
 /**
  * ============================================================================
  * Baxis Protocol — Admin Service
@@ -7,6 +6,11 @@
  */
 
 class AdminService {
+  // Shared constants (static so they cannot clash with globals from other scripts)
+  static ADMIN_ROLES = ['admin', 'arbitrator'];
+  static OPEN_STATUSES = ['OPEN', 'UNDER_REVIEW'];
+  static TX_HASH_PATTERN = /^0x[a-fA-F0-9]{64}$/;
+
   constructor() {
     this.disputeService = window.disputeService;
   }
@@ -20,30 +24,37 @@ class AdminService {
   }
 
   /**
+   * Returns the current auth session (or null). Throws if the session lookup itself fails.
+   */
+  async getSession() {
+    const {
+      data: { session },
+      error
+    } = await this.getClient().auth.getSession();
+
+    if (error) throw error;
+    return session;
+  }
+
+  /**
    * Check if current authenticated user has Admin/Arbitrator role.
+   * Note: this is a UI check only. Real enforcement must come from Supabase RLS
+   * and from the contract's own arbitrator/owner check.
    */
   async verifyAdminAccess() {
     try {
-      const supabase = this.getClient();
+      const session = await this.getSession();
+      if (!session) return false;
 
-      const {
-        data: { session },
-        error: sessionError
-      } = await supabase.auth.getSession();
-
-      if (sessionError || !session) return false;
-
-      const { data: roleRow, error } = await supabase
+      const { data: roleRow, error } = await this.getClient()
         .from('user_roles')
         .select('role')
         .eq('user_id', session.user.id)
-        .in('role', ['admin', 'arbitrator'])
+        .in('role', AdminService.ADMIN_ROLES)
         .limit(1)
         .maybeSingle();
 
-      if (error || !roleRow) return false;
-
-      return true;
+      return !error && !!roleRow;
 
     } catch (err) {
       console.error('Admin access verification failed:', err);
@@ -58,31 +69,23 @@ class AdminService {
   async getMetrics() {
     const supabase = this.getClient();
 
-    const [totalResult, activeResult, resolvedResult] = await Promise.all([
-      supabase
-        .from('disputes')
-        .select('id', { count: 'exact', head: true }),
+    // Runs one count-only query, optionally narrowed by a filter
+    const countWhere = async (applyFilter = (query) => query) => {
+      const { count, error } = await applyFilter(
+        supabase.from('disputes').select('id', { count: 'exact', head: true })
+      );
 
-      supabase
-        .from('disputes')
-        .select('id', { count: 'exact', head: true })
-        .in('status', ['OPEN', 'UNDER_REVIEW']),
+      if (error) throw error;
+      return count ?? 0;
+    };
 
-      supabase
-        .from('disputes')
-        .select('id', { count: 'exact', head: true })
-        .like('status', 'RESOLVED%')
+    const [total, active, resolved] = await Promise.all([
+      countWhere(),
+      countWhere((query) => query.in('status', AdminService.OPEN_STATUSES)),
+      countWhere((query) => query.like('status', 'RESOLVED%'))
     ]);
 
-    if (totalResult.error) throw totalResult.error;
-    if (activeResult.error) throw activeResult.error;
-    if (resolvedResult.error) throw resolvedResult.error;
-
-    return {
-      total: totalResult.count ?? 0,
-      active: activeResult.count ?? 0,
-      resolved: resolvedResult.count ?? 0
-    };
+    return { total, active, resolved };
   }
 
   /**
@@ -98,13 +101,7 @@ class AdminService {
   }) {
     const supabase = this.getClient();
 
-    const {
-      data: { session },
-      error: sessionError
-    } = await supabase.auth.getSession();
-
-    if (sessionError) throw sessionError;
-
+    const session = await this.getSession();
     if (!session) {
       throw new Error('Admin auth session required.');
     }
@@ -114,10 +111,7 @@ class AdminService {
       throw new Error('A valid dispute ID is required.');
     }
 
-    if (
-      typeof txHash !== 'string' ||
-      !/^0x[a-fA-F0-9]{64}$/.test(txHash)
-    ) {
+    if (typeof txHash !== 'string' || !AdminService.TX_HASH_PATTERN.test(txHash)) {
       throw new Error('A valid transaction hash is required.');
     }
 
@@ -145,7 +139,7 @@ class AdminService {
           ? 'RESOLVED_FREELANCER'
           : 'RESOLVED_CLIENT';
 
-    // 1. Update dispute record.
+    // 1. Update dispute record (only if it is still open, so a resolved dispute is never overwritten).
     const { data: dispute, error: updateError } = await supabase
       .from('disputes')
       .update({
@@ -158,12 +152,20 @@ class AdminService {
         resolved_at: new Date().toISOString()
       })
       .eq('id', disputeId)
-      .in('status', ['OPEN', 'UNDER_REVIEW'])
+      .in('status', AdminService.OPEN_STATUSES)
       .select()
-      .single();
+      .maybeSingle();
 
     if (updateError) {
       throw updateError;
+    }
+
+    // No row matched: the dispute does not exist, is already resolved, or is hidden by RLS.
+    if (!dispute) {
+      throw new Error(
+        'No open dispute matched this ID (it may already be resolved, or you may lack permission). ' +
+        'The on-chain settlement is already confirmed, so reconcile this dispute manually.'
+      );
     }
 
     // 2. Insert audit log.
