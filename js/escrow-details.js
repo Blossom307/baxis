@@ -8,6 +8,24 @@ document.documentElement.classList.add('js-enabled');
 (function () {
   'use strict';
 
+    function escapeHtml(value) {
+    return String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function safeUrl(url) {
+    try {
+      const parsed = new URL(url, window.location.origin);
+      return parsed.protocol === 'https:' ? parsed.href : '#';
+    } catch {
+      return '#';
+    }
+  }
+
   const System = {
     announce(message) {
       let announcer = document.getElementById('a11y-announcer');
@@ -86,8 +104,8 @@ document.documentElement.classList.add('js-enabled');
       toast.innerHTML = `
         <span style="display: flex; align-items: center; margin-top: 2px;">${icons[type] || icons.info}</span>
         <div style="flex: 1;">
-          <div style="font-weight: 600; margin-bottom: 2px;">${title}</div>
-          <div style="font-size: 12px; color: #9CA3AF; word-break: break-all;">${message}</div>
+          <div style="font-weight: 600; margin-bottom: 2px;">${escapeHtml(title)}</div>
+          <div style="font-size: 12px; color: #9CA3AF; word-break: break-all;">${escapeHtml(message)}</div>
         </div>
       `;
 
@@ -408,9 +426,9 @@ document.documentElement.classList.add('js-enabled');
 
         box.innerHTML = `
           <span class="deliverable-type-tag">Uploaded Deliverable</span>
-          <h3 class="deliverable-heading">${item.title}</h3>
-          <p class="deliverable-text">${item.description || 'Uploaded proof asset.'}</p>
-          <a href="${item.proof_url}" target="_blank" rel="noopener" class="deliverable-link" style="display: inline-flex; align-items: center; gap: 6px;">
+          <h3 class="deliverable-heading">${escapeHtml(item.title)}</h3>
+          <p class="deliverable-text">${escapeHtml(item.description || 'Uploaded proof asset.')}</p>
+          <a href="${escapeHtml(safeUrl(item.proof_url))}" target="_blank" rel="noopener" ...
             <span>Download Asset / View File</span>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
           </a>
@@ -537,7 +555,7 @@ document.documentElement.classList.add('js-enabled');
             dropzoneContent.innerHTML = `
               <span class="file-selected-badge" style="display: inline-flex; align-items: center; gap: 6px;">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                ${file.name} (${fileSizeKB} KB)
+                ${escapeHtml(file.name)} (${fileSizeKB} KB)
               </span>
             `;
           }
@@ -576,7 +594,7 @@ document.documentElement.classList.add('js-enabled');
             escrow_id: this.escrowId,
             title: title,
             proof_url: urlData.publicUrl,
-            description: `File: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`
+            description: `File:${escapeHtml(file.name)} (${(file.size / 1024 / 1024).toFixed(2)} MB)`
           }]);
 
           await supabase.from('escrows').update({
@@ -1065,7 +1083,7 @@ document.documentElement.classList.add('js-enabled');
 
         if (hubDesc) {
           const payoutInfo = (dispute.freelancer_payout_amount !== undefined && dispute.client_refund_amount !== undefined)
-            ? `Settlement: $${dispute.freelancer_payout_amount} USDC Freelancer / $${dispute.client_refund_amount} USDC Client. `
+            ? `Settlement: $${escapeHtml(dispute.freelancer_payout_amount)} USDC Freelancer / $${escapeHtml(dispute.client_refund_amount)} USDC Client. `
             : '';
           hubDesc.innerHTML = `<strong style="color: #10B981;">Dispute Resolved by Baxis Arbitrator.</strong> ${payoutInfo}Notes: "${dispute.resolution_notes || 'Case closed.'}"`;
         }

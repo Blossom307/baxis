@@ -1,3 +1,4 @@
+
 /**
  * ============================================================================
  * Baxis Protocol — Admin Service
@@ -11,92 +12,184 @@ class AdminService {
   }
 
   getClient() {
+    if (!this.disputeService) {
+      throw new Error('Dispute service is not initialized.');
+    }
+
     return this.disputeService.getClient();
   }
 
   /**
-   * Check if current authenticated user has Admin/Arbitrator role
+   * Check if current authenticated user has Admin/Arbitrator role.
    */
   async verifyAdminAccess() {
-    const supabase = this.getClient();
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return false;
+    try {
+      const supabase = this.getClient();
 
-    const { data: roleRow, error } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', session.user.id)
-      .in('role', ['admin', 'arbitrator'])
-      .maybeSingle();
+      const {
+        data: { session },
+        error: sessionError
+      } = await supabase.auth.getSession();
 
-    if (error || !roleRow) return false;
-    return true;
+      if (sessionError || !session) return false;
+
+      const { data: roleRow, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', session.user.id)
+        .in('role', ['admin', 'arbitrator'])
+        .limit(1)
+        .maybeSingle();
+
+      if (error || !roleRow) return false;
+
+      return true;
+
+    } catch (err) {
+      console.error('Admin access verification failed:', err);
+      return false;
+    }
   }
 
   /**
-   * Fetch dispute metrics for top dashboard cards
+   * Fetch dispute metrics for dashboard cards.
+   * Uses database counts instead of downloading every dispute.
    */
   async getMetrics() {
     const supabase = this.getClient();
-    
-    const { data: disputes, error } = await supabase
-      .from('disputes')
-      .select('id, status');
 
-    if (error) throw error;
+    const [totalResult, activeResult, resolvedResult] = await Promise.all([
+      supabase
+        .from('disputes')
+        .select('id', { count: 'exact', head: true }),
 
-    const active = disputes.filter(d => d.status === 'OPEN' || d.status === 'UNDER_REVIEW').length;
-    const resolved = disputes.filter(d => d.status.startsWith('RESOLVED')).length;
+      supabase
+        .from('disputes')
+        .select('id', { count: 'exact', head: true })
+        .in('status', ['OPEN', 'UNDER_REVIEW']),
+
+      supabase
+        .from('disputes')
+        .select('id', { count: 'exact', head: true })
+        .like('status', 'RESOLVED%')
+    ]);
+
+    if (totalResult.error) throw totalResult.error;
+    if (activeResult.error) throw activeResult.error;
+    if (resolvedResult.error) throw resolvedResult.error;
 
     return {
-      total: disputes.length,
-      active,
-      resolved
+      total: totalResult.count ?? 0,
+      active: activeResult.count ?? 0,
+      resolved: resolvedResult.count ?? 0
     };
   }
 
   /**
-   * Record dispute resolution in DB & write audit log
+   * Record dispute resolution in DB and write audit log.
+   * Requires a confirmed on-chain transaction hash.
    */
-  async recordResolution({ disputeId, freelancerPayout, clientRefund, notes, txHash }) {
+  async recordResolution({
+    disputeId,
+    freelancerPayout,
+    clientRefund,
+    notes,
+    txHash
+  }) {
     const supabase = this.getClient();
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) throw new Error('Admin auth session required.');
 
-    const status = (freelancerPayout > 0 && clientRefund > 0) ? 'RESOLVED_SPLIT' : 
-                   (freelancerPayout > 0 ? 'RESOLVED_FREELANCER' : 'RESOLVED_CLIENT');
+    const {
+      data: { session },
+      error: sessionError
+    } = await supabase.auth.getSession();
 
-    // 1. Update Dispute Record
-    const { data: dispute, error } = await supabase
+    if (sessionError) throw sessionError;
+
+    if (!session) {
+      throw new Error('Admin auth session required.');
+    }
+
+    // Validate required identifiers.
+    if (!disputeId) {
+      throw new Error('A valid dispute ID is required.');
+    }
+
+    if (
+      typeof txHash !== 'string' ||
+      !/^0x[a-fA-F0-9]{64}$/.test(txHash)
+    ) {
+      throw new Error('A valid transaction hash is required.');
+    }
+
+    // Validate settlement amounts.
+    const freelancerAmount = Number(freelancerPayout);
+    const clientAmount = Number(clientRefund);
+
+    if (
+      !Number.isFinite(freelancerAmount) ||
+      !Number.isFinite(clientAmount) ||
+      freelancerAmount < 0 ||
+      clientAmount < 0
+    ) {
+      throw new Error('Invalid settlement amounts.');
+    }
+
+    if (freelancerAmount + clientAmount <= 0) {
+      throw new Error('At least one settlement amount must be greater than zero.');
+    }
+
+    const status =
+      freelancerAmount > 0 && clientAmount > 0
+        ? 'RESOLVED_SPLIT'
+        : freelancerAmount > 0
+          ? 'RESOLVED_FREELANCER'
+          : 'RESOLVED_CLIENT';
+
+    // 1. Update dispute record.
+    const { data: dispute, error: updateError } = await supabase
       .from('disputes')
       .update({
-        status: status,
-        freelancer_payout_amount: freelancerPayout,
-        client_refund_amount: clientRefund,
-        resolution_notes: notes,
+        status,
+        freelancer_payout_amount: freelancerAmount,
+        client_refund_amount: clientAmount,
+        resolution_notes: notes || null,
         resolution_tx_hash: txHash,
         resolved_by: session.user.id,
         resolved_at: new Date().toISOString()
       })
       .eq('id', disputeId)
+      .in('status', ['OPEN', 'UNDER_REVIEW'])
       .select()
       .single();
 
-    if (error) throw error;
+    if (updateError) {
+      throw updateError;
+    }
 
-    // 2. Insert Audit Log
-    await supabase.from('audit_logs').insert({
-      admin_id: session.user.id,
-      action: 'DISPUTE_RESOLVED',
-      target_entity: 'dispute',
-      target_id: disputeId,
-      metadata: {
-        freelancerPayout,
-        clientRefund,
-        txHash,
-        notes
-      }
-    });
+    // 2. Insert audit log.
+    const { error: auditError } = await supabase
+      .from('audit_logs')
+      .insert({
+        admin_id: session.user.id,
+        action: 'DISPUTE_RESOLVED',
+        target_entity: 'dispute',
+        target_id: disputeId,
+        metadata: {
+          freelancerPayout: freelancerAmount,
+          clientRefund: clientAmount,
+          txHash,
+          notes: notes || null
+        }
+      });
+
+    if (auditError) {
+      console.error('Audit log insertion failed:', auditError);
+
+      throw new Error(
+        'The dispute was updated, but the audit log could not be saved. ' +
+        'Contact an administrator before attempting another settlement.'
+      );
+    }
 
     return dispute;
   }
