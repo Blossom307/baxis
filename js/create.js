@@ -9,7 +9,7 @@ document.documentElement.classList.add('js-enabled');
   'use strict';
 
   const System = {
-    debounce(fn, delay = 60) {
+    debounce(fn, delay = 50) {
       let timer;
       return function (...args) {
         clearTimeout(timer);
@@ -32,18 +32,18 @@ document.documentElement.classList.add('js-enabled');
       this.networkSelect = document.getElementById('deal-network');
       this.timelockSelect = document.getElementById('auto-release-timelock');
 
-      // Labels & Hints that adapt to Role
+      // Adaptive Dynamic Labels & Hints
       this.lblCounterparty = document.getElementById('lbl-counterparty-id');
       this.hintCounterparty = document.getElementById('hint-counterparty-id');
       this.btnGenerateText = document.getElementById('btn-generate-text');
 
-      // Financial Ledger Elements
+      // Financial Ledger Breakdown Elements
       this.ledgerSubtotal = document.getElementById('ledger-subtotal');
       this.ledgerFee = document.getElementById('ledger-fee');
       this.ledgerTotal = document.getElementById('ledger-total');
       this.ledgerFreelancerPayout = document.getElementById('ledger-freelancer-payout');
 
-      // DM Share Unfurl Preview Elements
+      // DM Share Card Elements
       this.previewTitle = document.getElementById('preview-title');
       this.previewAmount = document.getElementById('preview-amount');
       this.previewNetwork = document.getElementById('preview-network');
@@ -110,6 +110,8 @@ document.documentElement.classList.add('js-enabled');
 
     updateAll() {
       const role = this.getCurrentRole();
+      
+      // Fixed: Defaults cleanly to "Agreement Title" instead of the hardcoded brand identity text
       const title = this.titleInput?.value.trim() || 'Agreement Title';
       const counterparty = this.counterpartyInput?.value.trim() || '';
       const rawAmount = parseFloat(this.amountInput?.value) || 0;
@@ -121,19 +123,19 @@ document.documentElement.classList.add('js-enabled');
       const fee = rawAmount > 0 ? rawAmount * 0.03 : 0;
       const totalDeposit = rawAmount + fee;
 
-      // Update Financial Ledger
+      // Update Settlement Ledger
       if (this.ledgerSubtotal) this.ledgerSubtotal.textContent = this.formatCurrency(rawAmount, token);
       if (this.ledgerFee) this.ledgerFee.textContent = this.formatCurrency(fee, token);
       if (this.ledgerTotal) this.ledgerTotal.textContent = this.formatCurrency(totalDeposit, token);
       if (this.ledgerFreelancerPayout) this.ledgerFreelancerPayout.textContent = this.formatCurrency(rawAmount, token);
 
-      // Format Counterparty display
+      // Shorten 0x address for visual cleanliness
       let displayCounterparty = counterparty;
       if (counterparty && counterparty.startsWith('0x') && counterparty.length === 42) {
         displayCounterparty = `${counterparty.substring(0, 6)}...${counterparty.substring(38)}`;
       }
 
-      // Update Live DM Share Card
+      // Update Live DM Share Preview Card
       if (this.previewTitle) this.previewTitle.textContent = title;
       if (this.previewAmount) this.previewAmount.textContent = this.formatCurrency(rawAmount, token);
       if (this.previewNetwork) this.previewNetwork.textContent = network;
@@ -161,13 +163,13 @@ document.documentElement.classList.add('js-enabled');
     }
 
     static validateCounterparty(id, isClientRole) {
-      // Optional for Freelancers
+      // Optional for Freelancers creating open payment links
       if (!isClientRole && (!id || !id.trim())) {
         return { isValid: true, error: '' };
       }
 
       if (!id || !id.trim()) {
-        return { isValid: false, error: 'Freelancer wallet address is required.' };
+        return { isValid: false, error: 'Wallet address is required.' };
       }
 
       const clean = id.trim();
@@ -176,7 +178,7 @@ document.documentElement.classList.add('js-enabled');
 
       return isEvmAddress || isEns
         ? { isValid: true, error: '' }
-        : { isValid: false, error: 'Enter a valid 0x address (0x...) or ENS name (.eth).' };
+        : { isValid: false, error: 'Enter a valid 0x address (0x...) or ENS (.eth).' };
     }
 
     static validateAmount(amount) {
@@ -268,7 +270,7 @@ document.documentElement.classList.add('js-enabled');
         const networkVal = document.getElementById('deal-network')?.value || 'Base';
         const timelockVal = document.getElementById('auto-release-timelock')?.value || '48';
 
-        // Reset errors
+        // Clear previous errors
         this.clearFieldError('deal-title');
         this.clearFieldError('counterparty-id');
         this.clearFieldError('deal-amount');
@@ -319,7 +321,7 @@ document.documentElement.classList.add('js-enabled');
 
           const newEscrowId = data.id;
 
-          // Activity audit log
+          // Activity Audit Log
           await supabase.from('activity_logs').insert([{
             escrow_id: newEscrowId,
             actor_id: currentUserId,
@@ -327,6 +329,7 @@ document.documentElement.classList.add('js-enabled');
             description: `Escrow Agreement ${newEscrowId} created (${creatorRole}) for $${amountVal} ${tokenVal}`
           }]);
 
+          // Redirect to details page
           window.location.href = `escrow-details.html?id=${newEscrowId}`;
 
         } catch (error) {
