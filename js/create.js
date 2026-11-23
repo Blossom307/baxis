@@ -84,8 +84,8 @@ document.documentElement.classList.add('js-enabled');
       const isClient = this.getCurrentRole() === 'client';
 
       if (this.lblCounterparty) {
-        this.lblCounterparty.innerHTML = isClient 
-          ? 'Freelancer Payout Wallet Address <span class="req">*</span>' 
+        this.lblCounterparty.innerHTML = isClient
+          ? 'Freelancer Payout Wallet Address <span class="req">*</span>'
           : 'Client Wallet Address <span class="field-optional">(Optional)</span>';
       }
 
