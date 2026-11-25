@@ -14,6 +14,7 @@
       this.currentUser = null;
       this.currentProfile = null;
       this.isInitialized = false;
+      this.redirectStorageKey = 'baxis_post_login_redirect';
 
       // Public routes (identifiers without .html or slashes)
       this.publicIdentifiers = [
@@ -51,20 +52,81 @@
       return null;
     }
 
+    getCleanPageName() {
+      let path = window.location.pathname.toLowerCase().split('?')[0];
+      path = path.replace(/\/$/, '');
+      const rawPageName = path.substring(path.lastIndexOf('/') + 1);
+      return rawPageName.replace('.html', '');
+    }
+
+    normalizeUrl(rawUrl) {
+      try {
+        const u = new URL(rawUrl, window.location.origin);
+        const cleanPath = u.pathname.toLowerCase().replace(/\/$/, '').replace('.html', '');
+        return `${u.origin}${cleanPath}${u.search}`;
+      } catch {
+        return rawUrl;
+      }
+    }
+
+    savePendingRedirect() {
+      try {
+        const currentUrl = window.location.href;
+        if (!currentUrl.startsWith(window.location.origin)) return;
+
+        localStorage.setItem(this.redirectStorageKey, JSON.stringify({
+          url: currentUrl,
+          expiresAt: Date.now() + 30 * 60 * 1000 // Valid for 30 minutes
+        }));
+      } catch (e) {
+        // Ignore storage restrictions
+      }
+    }
+
+    getPendingRedirect() {
+      try {
+        const raw = localStorage.getItem(this.redirectStorageKey);
+        if (!raw) return null;
+
+        const parsed = JSON.parse(raw);
+        if (!parsed || !parsed.url || !parsed.expiresAt || Date.now() > parsed.expiresAt) {
+          localStorage.removeItem(this.redirectStorageKey);
+          return null;
+        }
+
+        if (!parsed.url.startsWith(window.location.origin)) {
+          localStorage.removeItem(this.redirectStorageKey);
+          return null;
+        }
+
+        if (this.normalizeUrl(parsed.url) === this.normalizeUrl(window.location.href)) {
+          localStorage.removeItem(this.redirectStorageKey);
+          return null;
+        }
+
+        return parsed.url;
+      } catch (e) {
+        localStorage.removeItem(this.redirectStorageKey);
+        return null;
+      }
+    }
+
+    clearPendingRedirect() {
+      try {
+        localStorage.removeItem(this.redirectStorageKey);
+      } catch (e) {
+        // Ignore storage restrictions
+      }
+    }
+
     /**
      * Determines whether the current window path requires authentication.
      * Robust against Netlify clean URLs (/auth), trailing slashes (/auth/), and .html files (/auth.html)
      */
     isProtectedPage() {
-      // 1. Clean path (remove query params, trailing slashes, and .html)
-      let path = window.location.pathname.toLowerCase().split('?')[0];
-      path = path.replace(/\/$/, ''); // Remove trailing slash if present
+      const cleanPageName = this.getCleanPageName();
 
-      // 2. Extract page identifier
-      const rawPageName = path.substring(path.lastIndexOf('/') + 1);
-      const cleanPageName = rawPageName.replace('.html', '');
-
-      // 3. Allow public Trust Card links ONLY when ?id= is present
+      // Allow public Trust Card links ONLY when ?id= is present
       if (cleanPageName === 'profile') {
         const params = new URLSearchParams(window.location.search);
         if (params.get('id') && params.get('id').trim().length > 0) {
@@ -72,12 +134,10 @@
         }
       }
 
-      // 4. Check against public identifiers
       const isPublic = this.publicIdentifiers.includes(cleanPageName);
-
       return !isPublic;
     }
-    
+
     applyAntiFlash() {
       if (this.isProtectedPage() && document.documentElement) {
         document.documentElement.style.opacity = '0';
@@ -111,10 +171,23 @@
 
         if (session && session.user) {
           await this.loadUserContext(session.user);
-          
-          // Check if user is in password recovery mode
-          const isResetMode = window.location.search.includes('mode=reset') || 
+
+          const isResetMode = window.location.search.includes('mode=reset') ||
                               window.location.hash.includes('type=recovery');
+
+          const cleanPageName = this.getCleanPageName();
+          const pendingUrl = !isResetMode ? this.getPendingRedirect() : null;
+
+          // If logged in and arriving on auth/login or dashboard with a saved contract link, jump straight to it
+          if (pendingUrl && (cleanPageName === 'auth' || cleanPageName === 'login' || cleanPageName === 'signup' || cleanPageName === 'dashboard')) {
+            window.location.replace(pendingUrl);
+            return;
+          }
+
+          // Clear saved redirect once we've arrived on the target protected page
+          if (this.isProtectedPage() && cleanPageName !== 'dashboard') {
+            this.clearPendingRedirect();
+          }
 
           // If already logged in and visiting auth/login, redirect to dashboard (UNLESS RESETTING PASSWORD)
           const currentPath = window.location.pathname.toLowerCase();
@@ -176,6 +249,19 @@
           if (session && session.user) {
             await this.loadUserContext(session.user);
             this.dispatchReadyEvent();
+
+            if (event === 'SIGNED_IN') {
+              const isResetMode = window.location.search.includes('mode=reset') ||
+                                  window.location.hash.includes('type=recovery');
+              const cleanPageName = this.getCleanPageName();
+
+              if (!isResetMode && (cleanPageName === '' || cleanPageName === 'index' || cleanPageName === 'auth' || cleanPageName === 'login' || cleanPageName === 'signup')) {
+                const pendingUrl = this.getPendingRedirect();
+                if (pendingUrl) {
+                  window.location.replace(pendingUrl);
+                }
+              }
+            }
           }
         } else if (event === 'SIGNED_OUT') {
           this.clearContext();
@@ -198,6 +284,9 @@
       this.revealUI();
 
       if (this.isProtectedPage()) {
+        if (reason !== 'Session expired.') {
+          this.savePendingRedirect();
+        }
         console.info(`[BaxisSecurity] Redirecting to index.html (${reason || 'Unauthorized'})`);
         window.location.href = 'index.html';
       }
