@@ -64,12 +64,20 @@
       const rawPageName = path.substring(path.lastIndexOf('/') + 1);
       const cleanPageName = rawPageName.replace('.html', '');
 
-      // 3. Check against public identifiers
+      // 3. Allow public Trust Card links ONLY when ?id= is present
+      if (cleanPageName === 'profile') {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('id') && params.get('id').trim().length > 0) {
+          return false;
+        }
+      }
+
+      // 4. Check against public identifiers
       const isPublic = this.publicIdentifiers.includes(cleanPageName);
 
       return !isPublic;
     }
-
+    
     applyAntiFlash() {
       if (this.isProtectedPage() && document.documentElement) {
         document.documentElement.style.opacity = '0';

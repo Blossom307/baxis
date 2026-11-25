@@ -159,7 +159,6 @@ document.documentElement.classList.add('js-enabled');
       this.sidebar = new SidebarManager();
 
       this.shareProfileBtn = document.getElementById('btn-share-profile');
-      this.copyCardCodeBtn = document.getElementById('btn-copy-card-code');
       this.avatarInput = document.getElementById('avatar-file-input');
       this.editForm = document.getElementById('form-edit-profile');
       this.heroEditBtn = document.getElementById('btn-edit-profile-hero');
@@ -189,7 +188,9 @@ document.documentElement.classList.add('js-enabled');
     }
 
     async init() {
-      await this.resolveTargetUser();
+      const canContinue = await this.resolveTargetUser();
+      if (!canContinue) return;
+
       this.configurePermissionsUI();
       this.bindEditToggle();
       await this.loadTargetProfile();
@@ -198,6 +199,44 @@ document.documentElement.classList.add('js-enabled');
       this.bindProfileSave();
       this.bindClipboardActions();
     }
+
+    /**
+     * Determines whether we are loading the user's own profile OR a shared public profile
+     */
+    async resolveTargetUser() {
+      const supabase = this.getSupabase();
+
+      // 1. Check for ?id= in URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlUserId = urlParams.get('id')?.trim() || '';
+
+      // 2. Check for active login session
+      if (supabase) {
+        const { data } = await supabase.auth.getSession();
+        const session = data?.session;
+        if (session && session.user) {
+          this.currentLoggedInId = session.user.id;
+          this.userEmail = session.user.email || '';
+        }
+      }
+
+      if (urlUserId) {
+        // Someone clicked a shared link (e.g. profile.html?id=...)
+        this.targetProfileId = urlUserId;
+        this.isOwner = (this.currentLoggedInId === urlUserId);
+        return true;
+      } else if (this.currentLoggedInId) {
+        // Logged-in user viewing their own default profile
+        this.targetProfileId = this.currentLoggedInId;
+        this.isOwner = true;
+        return true;
+      } else {
+        // Not logged in and no user ID was provided in URL -> Redirect to home/login
+        window.location.href = 'index.html';
+        return false;
+      }
+    }
+
 
     /**
      * Determines whether we are loading the user's own profile OR a shared public profile
@@ -241,13 +280,44 @@ document.documentElement.classList.add('js-enabled');
       if (!this.isOwner) {
         if (this.heroEditBtn) this.heroEditBtn.style.display = 'none';
         if (this.editCard) this.editCard.style.display = 'none';
+
         if (this.avatarInput) {
           this.avatarInput.disabled = true;
-          const label = document.querySelector('label[for="avatar-file-input"]');
-          if (label) label.style.pointerEvents = 'none';
         }
+        const avatarLabel = document.querySelector('label[for="avatar-file-input"]');
+        if (avatarLabel) avatarLabel.style.display = 'none';
+
+        const addrEl = document.getElementById('profile-address-code');
+        if (addrEl) addrEl.textContent = 'Baxis Protocol • Public Trust Card';
+
+        const walletCard = document.getElementById('display-wallet-address')?.closest('.profile-card');
+        if (walletCard) walletCard.style.display = 'none';
+      }
+
+      // If visitor is NOT logged in at all, hide workspace-only nav & user footer
+      if (!this.currentLoggedInId) {
+        const sidebarNav = document.querySelector('.sidebar-nav');
+        if (sidebarNav) {
+          sidebarNav.innerHTML = `
+            <span class="sidebar-section-title">Baxis Protocol</span>
+            <ul class="nav-list">
+              <li class="nav-item">
+                <a href="index.html" class="nav-link">
+                  <span class="nav-label">Sign In / Get Started</span>
+                </a>
+              </li>
+            </ul>
+          `;
+        }
+
+        const sidebarFooter = document.querySelector('.sidebar-user-footer');
+        if (sidebarFooter) sidebarFooter.style.display = 'none';
+
+        const mobileHud = document.querySelector('.mobile-bottom-hud');
+        if (mobileHud) mobileHud.style.display = 'none';
       }
     }
+    
 
     bindEditToggle() {
       if (!this.heroEditBtn || !this.editCard || !this.isOwner) return;
@@ -659,8 +729,12 @@ document.documentElement.classList.add('js-enabled');
           'disputed': '<span class="status-pill rust">Disputed</span>'
         };
 
+       const titleCell = this.isOwner
+          ? `<a href="escrow-details.html?id=${deal.id}" style="font-weight: 600;">${deal.title || 'Escrow Agreement'}</a>`
+          : `<span style="font-weight: 600;">${deal.title || 'Escrow Agreement'}</span>`;
+
         tr.innerHTML = `
-          <td><a href="escrow-details.html?id=${deal.id}" style="font-weight: 600;">${deal.title || 'Escrow Agreement'}</a></td>
+          <td>${titleCell}</td>
           <td><span style="font-family: var(--font-mono); font-size: 12px; color: #A0A0A0;">${deal.counterparty_identifier || '0x...'}</span></td>
           <td><span class="amount-bold">${formattedAmount}</span></td>
           <td>${statusMap[deal.status] || deal.status}</td>
@@ -671,37 +745,28 @@ document.documentElement.classList.add('js-enabled');
     }
 
     bindClipboardActions() {
-      // 1. Share Profile Link (Generates permanent public URL with ?id=USER_ID)
-      if (this.shareProfileBtn) {
-        this.shareProfileBtn.addEventListener('click', () => {
-          const publicUrl = `${window.location.origin}${window.location.pathname}?id=${this.targetProfileId}`;
-          if (navigator.clipboard) {
-            navigator.clipboard.writeText(publicUrl).then(() => {
-              this.toast.show({
-                title: 'Trust Card Link Copied!',
-                message: 'Permanent public link copied to clipboard.',
-                type: 'success'
-              });
-            });
-          }
-        });
-      }
+      if (!this.shareProfileBtn) return;
 
-      // 2. Embed snippet linking directly to this member's card
-      if (this.copyCardCodeBtn) {
-        this.copyCardCodeBtn.addEventListener('click', () => {
-          const embedSnippet = `<a href="${window.location.origin}/profile.html?id=${this.targetProfileId}">Verified on Baxis Protocol</a>`;
-          if (navigator.clipboard) {
-            navigator.clipboard.writeText(embedSnippet).then(() => {
-              this.toast.show({
-                title: 'Embed Snippet Copied',
-                message: 'HTML snippet copied to clipboard.',
-                type: 'info'
-              });
+      this.shareProfileBtn.addEventListener('click', () => {
+        if (!this.targetProfileId) return;
+
+        const publicUrl = `${window.location.origin}${window.location.pathname}?id=${encodeURIComponent(this.targetProfileId)}`;
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(publicUrl).then(() => {
+            this.toast.show({
+              title: 'Trust Card Link Copied!',
+              message: 'Permanent public link copied to clipboard.',
+              type: 'success'
             });
-          }
-        });
-      }
+          }).catch(() => {
+            this.toast.show({
+              title: 'Copy Failed',
+              message: 'Please copy the URL from your browser address bar.',
+              type: 'rust'
+            });
+          });
+        }
+      });
     }
   }
 

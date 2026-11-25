@@ -720,21 +720,25 @@ document.documentElement.classList.add('js-enabled');
         this.setApproveBtnText('2/2: Confirm in Wallet...');
 
         // RESOLVE RECIPIENT / FREELANCER WALLET ADDRESS
-        let freelancerAddr = this.currentEscrow?.counterparty_identifier || '';
+        let freelancerAddr = '';
 
-        // If escrow was initiated by freelancer, retrieve their wallet from profile if counterparty_identifier is empty
-        if (this.currentEscrow?.creator_role === 'freelancer' && (!freelancerAddr || !ethers.isAddress(freelancerAddr))) {
+        if (this.currentEscrow?.creator_role === 'freelancer') {
+          // For freelancer-created payment links, ALWAYS pay the freelancer (creator), never counterparty_identifier (client)
           const supabase = this.getSupabase();
-          if (supabase && this.currentEscrow.creator_id) {
+          const freelancerProfileId = this.currentEscrow.freelancer_id || this.currentEscrow.creator_id;
+          if (supabase && freelancerProfileId) {
             const { data: creatorProfile } = await supabase
               .from('profiles')
               .select('wallet_address')
-              .eq('id', this.currentEscrow.creator_id)
+              .eq('id', freelancerProfileId)
               .maybeSingle();
             if (creatorProfile?.wallet_address && ethers.isAddress(creatorProfile.wallet_address)) {
               freelancerAddr = creatorProfile.wallet_address;
             }
           }
+        } else {
+          // For client-created escrows, counterparty_identifier IS the freelancer payout wallet
+          freelancerAddr = this.currentEscrow?.counterparty_identifier || '';
         }
 
         if (!freelancerAddr || !ethers.isAddress(freelancerAddr)) {

@@ -25,6 +25,29 @@
       return null;
     }
 
+    async syncWalletToProfile(address) {
+      if (!address) return;
+      const supabase = window.baxisSupabase || window.supabaseClient || (window.supabase?.auth ? window.supabase : null);
+      if (!supabase || !supabase.auth) return;
+
+      try {
+        const { data } = await supabase.auth.getSession();
+        const user = data?.session?.user;
+        if (!user) return;
+
+        await supabase
+          .from('profiles')
+          .upsert({
+            id: user.id,
+            email: user.email || '',
+            wallet_address: address,
+            updated_at: new Date().toISOString()
+          }, { onConflict: 'id' });
+      } catch (err) {
+        console.warn('[BaxisWallet] Profile wallet sync warning:', err);
+      }
+    }
+
     async init() {
       const ethereum = this.getInjectedProvider();
       if (ethereum) {
@@ -36,6 +59,7 @@
             if (accounts && accounts.length > 0) {
               this.userAddress = accounts[0];
               this.updateUIAddress(accounts[0]);
+              this.syncWalletToProfile(accounts[0]);
             } else {
               this.userAddress = null;
               this.updateUIAddress(null);
@@ -52,6 +76,7 @@
             this.signer = await this.provider.getSigner();
             this.userAddress = accounts[0];
             this.updateUIAddress(accounts[0]);
+            this.syncWalletToProfile(accounts[0]);
           } else {
             this.updateUIAddress(null);
           }
@@ -93,6 +118,7 @@
         this.userAddress = accounts[0];
 
         this.updateUIAddress(accounts[0]);
+        await this.syncWalletToProfile(accounts[0]);
         return this.signer;
 
       } catch (err) {

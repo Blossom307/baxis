@@ -110,8 +110,7 @@ document.documentElement.classList.add('js-enabled');
 
     updateAll() {
       const role = this.getCurrentRole();
-      
-      // Fixed: Defaults cleanly to "Agreement Title" instead of the hardcoded brand identity text
+
       const title = this.titleInput?.value.trim() || 'Agreement Title';
       const counterparty = this.counterpartyInput?.value.trim() || '';
       const rawAmount = parseFloat(this.amountInput?.value) || 0;
@@ -289,9 +288,60 @@ document.documentElement.classList.add('js-enabled');
         this.setButtonLoading(true);
 
         try {
-          let currentUserId = null;
-          const { data: { session } } = await supabase.auth.getSession();
-          if (session) currentUserId = session.user.id;
+          const { data: sessionData } = await supabase.auth.getSession();
+          const session = sessionData?.session;
+          const currentUserId = session?.user?.id || null;
+
+          if (!currentUserId) {
+            throw new Error('Please sign in to create an escrow agreement.');
+          }
+
+          // Guard: When freelancer generates a payment link, ensure their payout wallet is saved in profiles
+          if (!isClient) {
+            const { data: freelancerProfile } = await supabase
+              .from('profiles')
+              .select('wallet_address')
+              .eq('id', currentUserId)
+              .maybeSingle();
+
+            let payoutWallet = freelancerProfile?.wallet_address || '';
+            const isValidWallet = /^0x[a-fA-F0-9]{40}$/.test(payoutWallet);
+
+            if (!isValidWallet) {
+              if (window.baxisWallet && typeof window.baxisWallet.connectWallet === 'function') {
+                const signer = await window.baxisWallet.connectWallet();
+                if (signer) {
+                  payoutWallet = await signer.getAddress();
+                }
+              } else if (window.ethereum) {
+                try {
+                  const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                  if (accounts && accounts.length > 0) {
+                    payoutWallet = accounts[0];
+                  }
+                } catch (walletErr) {
+                  throw new Error('Please connect your payout wallet first so your client knows where to send payment.');
+                }
+              }
+
+              if (!/^0x[a-fA-F0-9]{40}$/.test(payoutWallet)) {
+                throw new Error('Payout wallet required. Please connect your wallet on the Dashboard before generating a payment request link.');
+              }
+
+              const { error: walletSaveError } = await supabase
+                .from('profiles')
+                .upsert({
+                  id: currentUserId,
+                  email: session?.user?.email || '',
+                  wallet_address: payoutWallet,
+                  updated_at: new Date().toISOString()
+                }, { onConflict: 'id' });
+
+              if (walletSaveError) {
+                throw new Error('Could not save your payout wallet address. Please try again.');
+              }
+            }
+          }
 
           const escrowPayload = {
             title: titleVal.trim(),
@@ -321,49 +371,55 @@ document.documentElement.classList.add('js-enabled');
 
           const newEscrowId = data.id;
 
-          // Activity Audit Log
-          await supabase.from('activity_logs').insert([{
-            escrow_id: newEscrowId,
-            actor_id: currentUserId,
-            event_type: 'created',
-            description: `Escrow Agreement ${newEscrowId} created (${creatorRole}) for $${amountVal} ${tokenVal}`
-          }]);
+          // Activity Audit Log (non-blocking)
+          try {
+            await supabase.from('activity_logs').insert([{
+              escrow_id: newEscrowId,
+              actor_id: currentUserId,
+              event_type: 'created',
+              description: `Escrow Agreement ${newEscrowId} created (${creatorRole}) for $${amountVal} ${tokenVal}`
+            }]);
+          } catch (logErr) {
+            console.warn('Activity log warning:', logErr);
+          }
 
           const escrowUrl = `${window.location.origin}/escrow-details.html?id=${encodeURIComponent(newEscrowId)}`;
 
-           if (creatorRole === 'freelancer') {
-           const linkBox = document.getElementById('link-generated-box');
-           const linkInput = document.getElementById('generated-url-input');
-           const copyBtn = document.getElementById('btn-copy-generated-url');
+          if (creatorRole === 'freelancer') {
+            const linkBox = document.getElementById('link-generated-box');
+            const linkInput = document.getElementById('generated-url-input');
+            const copyBtn = document.getElementById('btn-copy-generated-url');
 
-           if (!linkBox || !linkInput || !copyBtn) {
-            throw new Error('Payment request link elements not found.');
+            if (!linkBox || !linkInput || !copyBtn) {
+              throw new Error('Payment request link elements not found.');
             }
 
-          linkInput.value = escrowUrl;
-          linkBox.hidden = false;
+            linkInput.value = escrowUrl;
+            linkBox.hidden = false;
 
-          copyBtn.onclick = async () => {
-           try {
-           await navigator.clipboard.writeText(escrowUrl);
-           copyBtn.textContent = 'Copied!';
-           setTimeout(() => {
-           copyBtn.textContent = 'Copy Link';
-          }, 2000);
-         } catch (error) {
-            linkInput.focus();
-            linkInput.select();
-            const copied = document.execCommand('copy');
-            copyBtn.textContent = copied ? 'Copied!' : 'Copy Failed';
-           }
-         };
+            copyBtn.onclick = async () => {
+              try {
+                await navigator.clipboard.writeText(escrowUrl);
+                copyBtn.textContent = 'Copied!';
+                setTimeout(() => {
+                  copyBtn.textContent = 'Copy Link';
+                }, 2000);
+              } catch (copyErr) {
+                linkInput.focus();
+                linkInput.select();
+                const copied = document.execCommand('copy');
+                copyBtn.textContent = copied ? 'Copied!' : 'Copy Failed';
+                setTimeout(() => {
+                  copyBtn.textContent = 'Copy Link';
+                }, 2000);
+              }
+            };
 
-       linkBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
-       this.setButtonLoading(false);
-
-      } else {
-         window.location.href = escrowUrl;
-         }
+            linkBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            this.setButtonLoading(false);
+          } else {
+            window.location.href = escrowUrl;
+          }
 
         } catch (error) {
           this.setButtonLoading(false);
