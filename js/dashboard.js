@@ -287,9 +287,32 @@ document.documentElement.classList.add('js-enabled');
           return;
         }
 
-        const user = session.user;
-        const displayName = user.user_metadata?.full_name || user.email.split('@')[0];
-        const initials = displayName.substring(0, 2).toUpperCase();
+       const user = session.user;
+
+// Fetch the user's latest profile name from Supabase
+const { data: profile, error: profileError } = await supabase
+  .from('profiles')
+  .select('display_name')
+  .eq('id', user.id)
+  .maybeSingle();
+
+if (profileError) {
+  console.warn('Could not load profile name:', profileError);
+}
+
+const displayName =
+  profile?.display_name?.trim() ||
+  user.user_metadata?.full_name ||
+  user.email?.split('@')[0] ||
+  'User';
+
+const initials = displayName
+  .trim()
+  .split(/\s+/)
+  .map(part => part[0])
+  .join('')
+  .substring(0, 2)
+  .toUpperCase();
 
         const welcomeHeading = document.getElementById('welcome-heading');
         if (welcomeHeading) welcomeHeading.textContent = `Welcome back, ${displayName}`;
