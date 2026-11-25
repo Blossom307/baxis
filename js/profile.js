@@ -1,6 +1,6 @@
 /**
  * BAXIS PROTOCOL — PROFILE & REPUTATION ENGINE (`profile.js`)
- * Single Hero Edit Trigger, Base64 Avatars & Realtime Profile Sync
+ * Public Trust Cards, Dynamic Ownership Detection & Verified Escrow Ledger
  */
 
 document.documentElement.classList.add('js-enabled');
@@ -9,9 +9,6 @@ document.documentElement.classList.add('js-enabled');
   'use strict';
 
   const System = {
-    /**
-     * Smart Initials Generator: "Dan Smith" -> "DS", "Alex" -> "AL"
-     */
     getInitials(name) {
       if (!name || !name.trim()) return 'BX';
       const parts = name.trim().split(/\s+/);
@@ -154,20 +151,26 @@ document.documentElement.classList.add('js-enabled');
   }
 
   /* ==========================================================================
-     3. PROFILE & REPUTATION APP
+     3. PROFILE & REPUTATION ENGINE
      ========================================================================== */
   class ProfileApp {
     constructor() {
       this.toast = new ToastManager();
       this.sidebar = new SidebarManager();
+
       this.shareProfileBtn = document.getElementById('btn-share-profile');
       this.copyCardCodeBtn = document.getElementById('btn-copy-card-code');
       this.avatarInput = document.getElementById('avatar-file-input');
       this.editForm = document.getElementById('form-edit-profile');
+      this.heroEditBtn = document.getElementById('btn-edit-profile-hero');
+      this.editCard = document.getElementById('profile-edit-card');
 
-      this.currentUserId = null;
+      this.targetProfileId = null;
+      this.currentLoggedInId = null;
+      this.isOwner = false;
       this.userEmail = '';
       this.currentAvatarUrl = null;
+
       this.init();
     }
 
@@ -186,8 +189,10 @@ document.documentElement.classList.add('js-enabled');
     }
 
     async init() {
+      await this.resolveTargetUser();
+      this.configurePermissionsUI();
       this.bindEditToggle();
-      await this.loadUserProfile();
+      await this.loadTargetProfile();
       await this.checkConnectedWallet();
       this.bindAvatarUpload();
       this.bindProfileSave();
@@ -195,32 +200,77 @@ document.documentElement.classList.add('js-enabled');
     }
 
     /**
-     * SINGLE HERO EDIT PANEL TOGGLE
+     * Determines whether we are loading the user's own profile OR a shared public profile
      */
-    bindEditToggle() {
-      const heroBtn = document.getElementById('btn-edit-profile-hero');
-      const card = document.getElementById('profile-edit-card');
-      if (!heroBtn || !card) return;
+    async resolveTargetUser() {
+      const supabase = this.getSupabase();
+      
+      // 1. Check for ?id= in URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlUserId = urlParams.get('id');
 
-      heroBtn.addEventListener('click', (e) => {
+      // 2. Check for active login session
+      let sessionUser = null;
+      if (supabase) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          sessionUser = session.user;
+          this.currentLoggedInId = session.user.id;
+          this.userEmail = session.user.email || '';
+        }
+      }
+
+      if (urlUserId) {
+        // Someone clicked a shared link (e.g. profile.html?id=...)
+        this.targetProfileId = urlUserId;
+        this.isOwner = (this.currentLoggedInId === urlUserId);
+      } else if (this.currentLoggedInId) {
+        // Logged-in user viewing their own default profile
+        this.targetProfileId = this.currentLoggedInId;
+        this.isOwner = true;
+      } else {
+        // Not logged in and no user ID was provided in URL -> Redirect to home/login
+        window.location.href = 'index.html';
+      }
+    }
+
+    /**
+     * Hides edit controls if viewing someone else's public Trust Card
+     */
+    configurePermissionsUI() {
+      if (!this.isOwner) {
+        if (this.heroEditBtn) this.heroEditBtn.style.display = 'none';
+        if (this.editCard) this.editCard.style.display = 'none';
+        if (this.avatarInput) {
+          this.avatarInput.disabled = true;
+          const label = document.querySelector('label[for="avatar-file-input"]');
+          if (label) label.style.pointerEvents = 'none';
+        }
+      }
+    }
+
+    bindEditToggle() {
+      if (!this.heroEditBtn || !this.editCard || !this.isOwner) return;
+
+      this.heroEditBtn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
 
-        const isHidden = card.hasAttribute('hidden') || card.style.display === 'none' || getComputedStyle(card).display === 'none';
+        const isHidden = this.editCard.hasAttribute('hidden') || this.editCard.style.display === 'none';
 
         if (isHidden) {
-          card.removeAttribute('hidden');
-          card.style.display = 'block';
-          card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          this.editCard.removeAttribute('hidden');
+          this.editCard.style.display = 'block';
+          this.editCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         } else {
-          card.setAttribute('hidden', 'true');
-          card.style.display = 'none';
+          this.editCard.setAttribute('hidden', 'true');
+          this.editCard.style.display = 'none';
         }
       });
     }
 
     async checkConnectedWallet() {
-      if (window.ethereum) {
+      if (window.ethereum && this.isOwner) {
         try {
           const accounts = await window.ethereum.request({ method: 'eth_accounts' });
           if (accounts && accounts.length > 0) {
@@ -240,55 +290,47 @@ document.documentElement.classList.add('js-enabled');
             }
           }
         } catch (err) {
-          console.warn('Wallet address check:', err);
+          console.warn('Wallet check error:', err);
         }
       }
     }
 
-    async loadUserProfile() {
+    async loadTargetProfile() {
       const supabase = this.getSupabase();
-      if (!supabase) return;
+      if (!supabase || !this.targetProfileId) return;
 
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
-          window.location.href = 'index.html';
-          return;
-        }
-
-        this.currentUserId = session.user.id;
-        this.userEmail = session.user.email || '';
-
+        // Query target profile by ID (Works for public guests without login!)
         const { data: profile } = await supabase
           .from('profiles')
           .select('*')
-          .eq('id', this.currentUserId)
+          .eq('id', this.targetProfileId)
           .maybeSingle();
 
-        // Local Storage Permanent Cache Fallback
-        const cachedAvatar = localStorage.getItem(`baxis_avatar_${this.currentUserId}`);
-
+        // Cached avatar fallback if owner
+        const cachedAvatar = this.isOwner ? localStorage.getItem(`baxis_avatar_${this.targetProfileId}`) : null;
         this.currentAvatarUrl = profile?.avatar_url || cachedAvatar || null;
 
         const activeProfile = profile || {
-          id: this.currentUserId,
-          email: this.userEmail,
-          display_name: this.userEmail ? this.userEmail.split('@')[0] : 'User Account',
+          id: this.targetProfileId,
+          email: '',
+          display_name: 'Member Account',
+          job_title: 'Digital Contract Member',
           bio: 'Digital Contract Member on Baxis Protocol.',
           avatar_url: this.currentAvatarUrl
         };
 
-        if (this.currentAvatarUrl) {
-          activeProfile.avatar_url = this.currentAvatarUrl;
+        this.renderProfileUI(activeProfile);
+
+        if (this.isOwner) {
+          this.populateEditForm(activeProfile);
         }
 
-        this.renderProfileUI(activeProfile);
-        this.populateEditForm(activeProfile);
-
+        // Fetch verified escrow history for this user
         const { data: escrows } = await supabase
           .from('escrows')
           .select('*')
-          .or(`client_id.eq.${this.currentUserId},freelancer_id.eq.${this.currentUserId},creator_id.eq.${this.currentUserId}`);
+          .or(`client_id.eq.${this.targetProfileId},freelancer_id.eq.${this.targetProfileId},creator_id.eq.${this.targetProfileId}`);
 
         if (escrows) {
           this.renderStatsAndHistory(escrows);
@@ -300,10 +342,10 @@ document.documentElement.classList.add('js-enabled');
     }
 
     renderProfileUI(profile) {
-      const displayName = profile.display_name || (this.userEmail ? this.userEmail.split('@')[0] : 'User Account');
+      const displayName = profile.display_name || 'Member Account';
       const initials = System.getInitials(displayName);
 
-      // Display Name & Job Title
+      // Name & Job
       const nameEl = document.getElementById('profile-display-name');
       if (nameEl) nameEl.textContent = displayName;
 
@@ -313,18 +355,20 @@ document.documentElement.classList.add('js-enabled');
       const jobEl = document.getElementById('profile-job-title');
       if (jobEl) jobEl.textContent = profile.job_title || 'Digital Contract Member';
 
-      // Render Bio Summary
+      // Bio
       const bioEl = document.getElementById('profile-bio-display');
       if (bioEl) bioEl.textContent = profile.bio || 'Digital Contract Member on Baxis Protocol.';
 
-      // Sidebar Initials
-      const sbNameEl = document.getElementById('sidebar-user-name');
-      if (sbNameEl) sbNameEl.textContent = displayName;
+      // Sidebar (if logged in)
+      if (this.isOwner) {
+        const sbNameEl = document.getElementById('sidebar-user-name');
+        if (sbNameEl) sbNameEl.textContent = displayName;
 
-      const sbAvatarEl = document.getElementById('sidebar-user-avatar');
-      if (sbAvatarEl) sbAvatarEl.textContent = initials;
+        const sbAvatarEl = document.getElementById('sidebar-user-avatar');
+        if (sbAvatarEl) sbAvatarEl.textContent = initials;
+      }
 
-      // Render Avatars (With guaranteed Initials Fallback)
+      // Avatars
       const avatarUrl = profile.avatar_url || this.currentAvatarUrl;
       this.updateAvatarUI(avatarUrl, initials);
 
@@ -388,17 +432,29 @@ document.documentElement.classList.add('js-enabled');
 
       const cardSub = document.getElementById('card-handles-sub');
       if (cardSub) {
-        cardSub.textContent = `${profile.twitter_handle || profile.ens_name || '@user'} • Baxis Member`;
+        cardSub.textContent = `${profile.twitter_handle || profile.ens_name || '@member'} • Baxis Verified`;
       }
     }
 
     populateEditForm(profile) {
-      if (profile.display_name) document.getElementById('edit-display-name').value = profile.display_name;
-      if (profile.job_title) document.getElementById('edit-job-title').value = profile.job_title;
-      if (profile.bio && document.getElementById('edit-bio')) document.getElementById('edit-bio').value = profile.bio;
-      if (profile.ens_name) document.getElementById('edit-ens-name').value = profile.ens_name;
-      if (profile.twitter_handle) document.getElementById('edit-twitter').value = profile.twitter_handle;
-      if (profile.discord_handle) document.getElementById('edit-discord').value = profile.discord_handle;
+      if (profile.display_name && document.getElementById('edit-display-name')) {
+        document.getElementById('edit-display-name').value = profile.display_name;
+      }
+      if (profile.job_title && document.getElementById('edit-job-title')) {
+        document.getElementById('edit-job-title').value = profile.job_title;
+      }
+      if (profile.bio && document.getElementById('edit-bio')) {
+        document.getElementById('edit-bio').value = profile.bio;
+      }
+      if (profile.ens_name && document.getElementById('edit-ens-name')) {
+        document.getElementById('edit-ens-name').value = profile.ens_name;
+      }
+      if (profile.twitter_handle && document.getElementById('edit-twitter')) {
+        document.getElementById('edit-twitter').value = profile.twitter_handle;
+      }
+      if (profile.discord_handle && document.getElementById('edit-discord')) {
+        document.getElementById('edit-discord').value = profile.discord_handle;
+      }
     }
 
     updateAvatarUI(imageUrl, initials = 'BX') {
@@ -419,44 +475,38 @@ document.documentElement.classList.add('js-enabled');
       });
     }
 
-    /* ==========================================================================
-       PERMANENT AVATAR UPLOAD (BASE64 DATA STRINGS + LOCAL STORAGE + SUPABASE)
-       ========================================================================== */
     bindAvatarUpload() {
-      if (!this.avatarInput) return;
+      if (!this.avatarInput || !this.isOwner) return;
 
       this.avatarInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
-        if (!file || !this.currentUserId) return;
+        if (!file || !this.currentLoggedInId) return;
 
         const reader = new FileReader();
         reader.onload = async (event) => {
-          const base64DataUrl = event.target.result; // Permanent self-contained data string
+          const base64DataUrl = event.target.result;
 
-          // 1. Instant local storage & UI update
           this.currentAvatarUrl = base64DataUrl;
-          localStorage.setItem(`baxis_avatar_${this.currentUserId}`, base64DataUrl);
+          localStorage.setItem(`baxis_avatar_${this.currentLoggedInId}`, base64DataUrl);
           this.updateAvatarUI(base64DataUrl, 'BX');
 
           this.toast.show({
-            title: 'Avatar Saved!',
-            message: 'Your profile picture is permanently saved.',
+            title: 'Avatar Updated',
+            message: 'Your profile image has been saved.',
             type: 'success'
           });
 
-          // 2. Save in Supabase database
           try {
             const supabase = this.getSupabase();
             if (supabase) {
               await supabase.from('profiles').upsert({
-                id: this.currentUserId,
-                email: this.userEmail,
+                id: this.currentLoggedInId,
                 avatar_url: base64DataUrl,
                 updated_at: new Date().toISOString()
               }, { onConflict: 'id' });
             }
           } catch (err) {
-            console.warn('Supabase avatar save:', err);
+            console.warn('Avatar save error:', err);
           }
         };
 
@@ -464,23 +514,20 @@ document.documentElement.classList.add('js-enabled');
       });
     }
 
-    /* ==========================================================================
-       SAVE PROFILE SETTINGS FORM (PRESERVES AVATAR URL)
-       ========================================================================== */
     bindProfileSave() {
-      if (!this.editForm) return;
+      if (!this.editForm || !this.isOwner) return;
 
       this.editForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const supabase = this.getSupabase();
-        if (!supabase || !this.currentUserId) return;
+        if (!supabase || !this.currentLoggedInId) return;
 
-        const displayName = document.getElementById('edit-display-name').value.trim();
-        const jobTitle = document.getElementById('edit-job-title').value.trim();
-        const bio = document.getElementById('edit-bio') ? document.getElementById('edit-bio').value.trim() : '';
-        const ensName = document.getElementById('edit-ens-name').value.trim();
-        const twitter = document.getElementById('edit-twitter').value.trim();
-        const discord = document.getElementById('edit-discord').value.trim();
+        const displayName = document.getElementById('edit-display-name')?.value.trim() || '';
+        const jobTitle = document.getElementById('edit-job-title')?.value.trim() || '';
+        const bio = document.getElementById('edit-bio')?.value.trim() || '';
+        const ensName = document.getElementById('edit-ens-name')?.value.trim() || '';
+        const twitter = document.getElementById('edit-twitter')?.value.trim() || '';
+        const discord = document.getElementById('edit-discord')?.value.trim() || '';
 
         const saveBtn = document.getElementById('btn-save-profile');
         if (saveBtn) {
@@ -490,12 +537,12 @@ document.documentElement.classList.add('js-enabled');
         }
 
         try {
-          const activeAvatar = this.currentAvatarUrl || localStorage.getItem(`baxis_avatar_${this.currentUserId}`);
+          const activeAvatar = this.currentAvatarUrl || localStorage.getItem(`baxis_avatar_${this.currentLoggedInId}`);
 
           const { error } = await supabase
             .from('profiles')
             .upsert({
-              id: this.currentUserId,
+              id: this.currentLoggedInId,
               email: this.userEmail,
               display_name: displayName,
               job_title: jobTitle,
@@ -510,7 +557,7 @@ document.documentElement.classList.add('js-enabled');
           if (error) throw error;
 
           const updatedProfile = {
-            id: this.currentUserId,
+            id: this.currentLoggedInId,
             email: this.userEmail,
             display_name: displayName,
             job_title: jobTitle,
@@ -523,15 +570,14 @@ document.documentElement.classList.add('js-enabled');
 
           this.renderProfileUI(updatedProfile);
 
-          const editCard = document.getElementById('profile-edit-card');
-          if (editCard) {
-            editCard.setAttribute('hidden', 'true');
-            editCard.style.display = 'none'; // Auto-close panel on save
+          if (this.editCard) {
+            this.editCard.setAttribute('hidden', 'true');
+            this.editCard.style.display = 'none';
           }
 
           this.toast.show({
-            title: 'Profile Saved!',
-            message: 'Your profile details have been updated.',
+            title: 'Profile Updated',
+            message: 'Your profile changes are live.',
             type: 'success'
           });
 
@@ -562,11 +608,10 @@ document.documentElement.classList.add('js-enabled');
         }
       });
 
-      // DYNAMIC REPUTATION BADGE
       const trustBadgeEl = document.getElementById('profile-trust-badge');
       if (trustBadgeEl) {
         if (completedCount === 0) {
-          trustBadgeEl.textContent = 'New Member';
+          trustBadgeEl.textContent = 'Verified Member';
         } else {
           trustBadgeEl.textContent = `100% Success Rate • ${completedCount} Deals`;
         }
@@ -596,7 +641,7 @@ document.documentElement.classList.add('js-enabled');
         tableBody.innerHTML = `
           <tr>
             <td colspan="4" style="padding: 2rem; text-align: center; color: #A0A0A0;">
-              No verified escrow history yet.
+              No completed escrow transactions recorded yet.
             </td>
           </tr>
         `;
@@ -626,14 +671,15 @@ document.documentElement.classList.add('js-enabled');
     }
 
     bindClipboardActions() {
+      // 1. Share Profile Link (Generates permanent public URL with ?id=USER_ID)
       if (this.shareProfileBtn) {
         this.shareProfileBtn.addEventListener('click', () => {
-          const publicUrl = window.location.href;
+          const publicUrl = `${window.location.origin}${window.location.pathname}?id=${this.targetProfileId}`;
           if (navigator.clipboard) {
             navigator.clipboard.writeText(publicUrl).then(() => {
               this.toast.show({
-                title: 'Trust Card Link Copied',
-                message: 'Public profile URL copied to clipboard.',
+                title: 'Trust Card Link Copied!',
+                message: 'Permanent public link copied to clipboard.',
                 type: 'success'
               });
             });
@@ -641,14 +687,15 @@ document.documentElement.classList.add('js-enabled');
         });
       }
 
+      // 2. Embed snippet linking directly to this member's card
       if (this.copyCardCodeBtn) {
         this.copyCardCodeBtn.addEventListener('click', () => {
-          const embedSnippet = `<a href="${window.location.origin}/create.html">Hire via Baxis Escrow</a>`;
+          const embedSnippet = `<a href="${window.location.origin}/profile.html?id=${this.targetProfileId}">Verified on Baxis Protocol</a>`;
           if (navigator.clipboard) {
             navigator.clipboard.writeText(embedSnippet).then(() => {
               this.toast.show({
-                title: 'DM Embed Snippet Copied',
-                message: 'Code snippet copied to clipboard.',
+                title: 'Embed Snippet Copied',
+                message: 'HTML snippet copied to clipboard.',
                 type: 'info'
               });
             });
@@ -661,5 +708,4 @@ document.documentElement.classList.add('js-enabled');
   document.addEventListener('DOMContentLoaded', () => {
     new ProfileApp();
   });
-
 })();

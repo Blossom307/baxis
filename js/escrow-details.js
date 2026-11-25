@@ -8,7 +8,7 @@ document.documentElement.classList.add('js-enabled');
 (function () {
   'use strict';
 
-    function escapeHtml(value) {
+  function escapeHtml(value) {
     return String(value ?? '')
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
@@ -295,6 +295,7 @@ document.documentElement.classList.add('js-enabled');
 
           if (data) {
             this.currentEscrow = data;
+            this.syncBrowserUrl(targetId);
             this.renderEscrowDetails(data);
             return;
           }
@@ -310,17 +311,18 @@ document.documentElement.classList.add('js-enabled');
             .order('created_at', { ascending: false })
             .limit(1);
 
-            if (userDeals && userDeals.length > 0) {
-              targetId = userDeals[0].id;
-              this.escrowId = targetId;
+          if (userDeals && userDeals.length > 0) {
+            targetId = userDeals[0].id;
+            this.escrowId = targetId;
 
-              const { data } = await supabase.from('escrows').select('*').eq('id', targetId).maybeSingle();
-              if (data) {
-                this.currentEscrow = data;
-                this.renderEscrowDetails(data);
-                return;
-              }
+            const { data } = await supabase.from('escrows').select('*').eq('id', targetId).maybeSingle();
+            if (data) {
+              this.currentEscrow = data;
+              this.syncBrowserUrl(targetId);
+              this.renderEscrowDetails(data);
+              return;
             }
+          }
         }
 
         this.renderEmptyVaultState();
@@ -328,6 +330,16 @@ document.documentElement.classList.add('js-enabled');
       } catch (err) {
         console.error('Fetch escrow error:', err);
         this.renderEmptyVaultState();
+      }
+    }
+
+    syncBrowserUrl(id) {
+      if (window.history && window.history.replaceState && id) {
+        const currentUrl = new URL(window.location.href);
+        if (currentUrl.searchParams.get('id') !== id) {
+          currentUrl.searchParams.set('id', id);
+          window.history.replaceState(null, '', currentUrl.toString());
+        }
       }
     }
 
@@ -428,7 +440,7 @@ document.documentElement.classList.add('js-enabled');
           <span class="deliverable-type-tag">Uploaded Deliverable</span>
           <h3 class="deliverable-heading">${escapeHtml(item.title)}</h3>
           <p class="deliverable-text">${escapeHtml(item.description || 'Uploaded proof asset.')}</p>
-          <a href="${escapeHtml(safeUrl(item.proof_url))}" target="_blank" rel="noopener" ...
+          <a href="${escapeHtml(safeUrl(item.proof_url))}" target="_blank" rel="noopener noreferrer" class="deliverable-download-link" style="display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: #3B82F6; text-decoration: none; margin-top: 8px;">
             <span>Download Asset / View File</span>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
           </a>
@@ -443,8 +455,8 @@ document.documentElement.classList.add('js-enabled');
     renderEscrowDetails(escrow) {
       window.currentEscrowVault = {
         gigId: escrow.id,
-        clientId: escrow.client_id || escrow.creator_id,
-        freelancerId: escrow.freelancer_id || escrow.counterparty_identifier
+        clientId: escrow.client_id || (escrow.creator_role === 'client' ? escrow.creator_id : null),
+        freelancerId: escrow.freelancer_id || (escrow.creator_role === 'freelancer' ? escrow.creator_id : escrow.counterparty_identifier)
       };
 
       const mainContent = document.getElementById('details-main');
@@ -491,35 +503,44 @@ document.documentElement.classList.add('js-enabled');
       if (!clientId && escrow.creator_role === 'client') clientId = escrow.creator_id;
       if (!freelancerId && escrow.creator_role === 'freelancer') freelancerId = escrow.creator_id;
 
-      const isClient = this.currentUserId && (this.currentUserId === clientId);
-      const isFreelancer = this.currentUserId && !isClient;
+      // Current user is freelancer if their ID matches freelancerId
+      const isFreelancer = this.currentUserId && (this.currentUserId === freelancerId);
+
+      // Current user is client if they match clientId OR if clientId is unassigned and they are not the freelancer
+      const isClient = this.currentUserId ? (this.currentUserId === clientId || (!clientId && !isFreelancer)) : !isFreelancer;
 
       // HIDE FILE UPLOAD DROPZONE FOR CLIENTS (ONLY FREELANCER SEES FILE DROPZONE)
       const uploadCard = document.querySelector('.deliverable-upload-card');
       if (uploadCard) {
         if (isFreelancer && (escrow.status === 'funds_locked' || escrow.status === 'in_review')) {
-          uploadCard.style.display = 'block'; // Freelancer sees upload box!
+          uploadCard.style.display = 'block';
         } else {
-          uploadCard.style.display = 'none';  // Hidden for Client & Spectators!
+          uploadCard.style.display = 'none';
         }
       }
 
       if (this.approveBtn) {
         if (escrow.status === 'awaiting_deposit') {
-          if (isClient) {
+          if (!isFreelancer) {
+            // Client or guest opening payment link to deposit
             this.setApproveBtnText(`Deposit & Lock $${escrow.amount} ${escrow.currency}`);
+            this.approveBtn.disabled = false;
             this.approveBtn.style.display = 'inline-flex';
           } else {
+            // Freelancer waiting for client deposit
             this.setApproveBtnText('Awaiting Client Deposit');
             this.approveBtn.disabled = true;
+            this.approveBtn.style.display = 'inline-flex';
           }
         } else if (escrow.status === 'funds_locked' || escrow.status === 'in_review') {
           if (isClient) {
             this.setApproveBtnText(`Approve & Release $${escrow.amount} ${escrow.currency}`);
+            this.approveBtn.disabled = false;
             this.approveBtn.style.display = 'inline-flex';
           } else {
             this.setApproveBtnText('Funds Secured in Vault');
             this.approveBtn.disabled = true;
+            this.approveBtn.style.display = 'inline-flex';
             this.approveBtn.style.background = 'var(--state-success)';
           }
         } else if (escrow.status === 'released') {
@@ -531,6 +552,7 @@ document.documentElement.classList.add('js-enabled');
         } else if (escrow.status === 'refunded') {
           this.setApproveBtnText('Escrow Cancelled & Refunded');
           this.approveBtn.disabled = true;
+          this.approveBtn.style.display = 'inline-flex';
           if (this.disputeBtn) this.disputeBtn.style.display = 'none';
         }
       }
@@ -641,10 +663,15 @@ document.documentElement.classList.add('js-enabled');
         });
       }
 
+      // Explicit Share Link builder with guaranteed ?id= parameter
       if (this.shareBtn) {
         this.shareBtn.addEventListener('click', () => {
+          const targetId = this.escrowId || this.currentEscrow?.id;
+          if (!targetId) return;
+
+          const shareUrl = `${window.location.origin}${window.location.pathname}?id=${targetId}`;
           if (navigator.clipboard) {
-            navigator.clipboard.writeText(window.location.href).then(() => {
+            navigator.clipboard.writeText(shareUrl).then(() => {
               this.toast.show({ title: 'Contract Link Copied', message: 'Shareable escrow URL copied to clipboard.', type: 'info' });
             });
           }
@@ -692,19 +719,36 @@ document.documentElement.classList.add('js-enabled');
 
         this.setApproveBtnText('2/2: Confirm in Wallet...');
 
-        // STRICT REAL-MONEY EVM ADDRESS SAFEGUARD
-        const freelancerAddr = this.currentEscrow?.counterparty_identifier || '';
-        if (!freelancerAddr || !ethers.isAddress(freelancerAddr)) {
-          throw new Error('Invalid Freelancer Wallet Address. The counterparty must be a valid 0x EVM wallet address before funding.');
+        // RESOLVE RECIPIENT / FREELANCER WALLET ADDRESS
+        let freelancerAddr = this.currentEscrow?.counterparty_identifier || '';
+
+        // If escrow was initiated by freelancer, retrieve their wallet from profile if counterparty_identifier is empty
+        if (this.currentEscrow?.creator_role === 'freelancer' && (!freelancerAddr || !ethers.isAddress(freelancerAddr))) {
+          const supabase = this.getSupabase();
+          if (supabase && this.currentEscrow.creator_id) {
+            const { data: creatorProfile } = await supabase
+              .from('profiles')
+              .select('wallet_address')
+              .eq('id', this.currentEscrow.creator_id)
+              .maybeSingle();
+            if (creatorProfile?.wallet_address && ethers.isAddress(creatorProfile.wallet_address)) {
+              freelancerAddr = creatorProfile.wallet_address;
+            }
+          }
         }
+
+        if (!freelancerAddr || !ethers.isAddress(freelancerAddr)) {
+          throw new Error('Invalid Freelancer Wallet Address. A valid 0x recipient wallet address must be set before funding.');
+        }
+
         if (freelancerAddr.toLowerCase() === userAddr.toLowerCase()) {
-          throw new Error('You cannot create an escrow with yourself as the freelancer.');
+          throw new Error('You cannot fund an escrow with yourself as the freelancer.');
         }
 
         const rawHours = this.currentEscrow?.auto_release_hours || 48;
         const timelockSeconds = Math.max(rawHours * 3600, 86400);
 
-        // GENERATE AGREEMENT HASH (Cryptographic Proof of Title + Terms)
+        // Cryptographic terms fingerprint
         const agreementHash = ethers.id(this.currentEscrow.title + (this.currentEscrow.description || ''));
 
         const contractInterface = new ethers.Interface(BAXIS_CONTRACT_ABI);
@@ -726,7 +770,7 @@ document.documentElement.classList.add('js-enabled');
           }]
         });
 
-        // WAIT FOR REAL ON-CHAIN BLOCKCHAIN CONFIRMATION RECEIPT
+        // WAIT FOR ON-CHAIN CONFIRMATION
         this.setApproveBtnText('Waiting for Blockchain Confirmation...');
         const provider = new ethers.BrowserProvider(window.ethereum);
         const txReceipt = await provider.waitForTransaction(txHash);
@@ -739,11 +783,18 @@ document.documentElement.classList.add('js-enabled');
 
         const supabase = this.getSupabase();
         if (supabase) {
-          await supabase.from('escrows').update({
+          const updatePayload = {
             status: 'funds_locked',
             funded_at: new Date().toISOString(),
             deposit_tx_hash: txHash
-          }).eq('id', this.escrowId);
+          };
+
+          // If client_id was empty, assign depositing user
+          if (!this.currentEscrow.client_id && this.currentUserId) {
+            updatePayload.client_id = this.currentUserId;
+          }
+
+          await supabase.from('escrows').update(updatePayload).eq('id', this.escrowId);
         }
 
         if (this.currentEscrow) {
@@ -928,7 +979,7 @@ document.documentElement.classList.add('js-enabled');
         pill.innerHTML = `
           <span style="display: inline-flex; align-items: center; gap: 6px;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-            ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)
+            ${escapeHtml(file.name)} (${(file.size / 1024 / 1024).toFixed(2)} MB)
           </span>
           <button type="button" class="remove-file-btn" data-index="${index}" aria-label="Remove File">&times;</button>
         `;
@@ -986,9 +1037,9 @@ document.documentElement.classList.add('js-enabled');
             files: selectedFiles
           });
 
-         if (!window.ethereum || !window.baxisWallet) {
-             throw new Error('Connect your wallet to raise a dispute on-chain.');
-        }
+          if (!window.ethereum || !window.baxisWallet) {
+            throw new Error('Connect your wallet to raise a dispute on-chain.');
+          }
 
           const signer = await window.baxisWallet.connectWallet();
           if (!signer) throw new Error('Wallet connection was cancelled.');
@@ -1002,13 +1053,13 @@ document.documentElement.classList.add('js-enabled');
           const txHash = await window.ethereum.request({
             method: 'eth_sendTransaction',
             params: [{ from: userAddr, to: BAXIS_CONTRACT_ADDRESS, data: calldata }]
-        });
+          });
 
           const provider = new ethers.BrowserProvider(window.ethereum);
           const receipt = await provider.waitForTransaction(txHash);
           if (!receipt || receipt.status !== 1) {
-             throw new Error('The on-chain dispute transaction failed.');
-           }
+            throw new Error('The on-chain dispute transaction failed.');
+          }
 
           if (window.appInstance) {
             const supabase = window.appInstance.getSupabase();
@@ -1099,7 +1150,7 @@ document.documentElement.classList.add('js-enabled');
 
         if (btnApprove) {
           btnApprove.disabled = true;
-          btnApprove.style.display = 'none'; // HIDE RELEASE BUTTON DURING DISPUTE
+          btnApprove.style.display = 'none';
         }
 
         if (btnRaiseDispute) {
