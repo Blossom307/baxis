@@ -329,8 +329,41 @@ document.documentElement.classList.add('js-enabled');
             description: `Escrow Agreement ${newEscrowId} created (${creatorRole}) for $${amountVal} ${tokenVal}`
           }]);
 
-          // Redirect to details page
-          window.location.href = `escrow-details.html?id=${newEscrowId}`;
+          const escrowUrl = `${window.location.origin}/escrow-details.html?id=${encodeURIComponent(newEscrowId)}`;
+
+           if (creatorRole === 'freelancer') {
+           const linkBox = document.getElementById('link-generated-box');
+           const linkInput = document.getElementById('generated-url-input');
+           const copyBtn = document.getElementById('btn-copy-generated-url');
+
+           if (!linkBox || !linkInput || !copyBtn) {
+            throw new Error('Payment request link elements not found.');
+            }
+
+          linkInput.value = escrowUrl;
+          linkBox.hidden = false;
+
+          copyBtn.onclick = async () => {
+           try {
+           await navigator.clipboard.writeText(escrowUrl);
+           copyBtn.textContent = 'Copied!';
+           setTimeout(() => {
+           copyBtn.textContent = 'Copy Link';
+          }, 2000);
+         } catch (error) {
+            linkInput.focus();
+            linkInput.select();
+            const copied = document.execCommand('copy');
+            copyBtn.textContent = copied ? 'Copied!' : 'Copy Failed';
+           }
+         };
+
+       linkBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+       this.setButtonLoading(false);
+
+      } else {
+         window.location.href = escrowUrl;
+         }
 
         } catch (error) {
           this.setButtonLoading(false);
