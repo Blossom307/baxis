@@ -584,21 +584,8 @@ const initials = displayName
     }
 
     async fetchUserNotifications() {
-      const supabase = this.getSupabase();
-      if (!supabase) return;
-
-      try {
-        const { data, error } = await supabase
-          .from('notifications')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(10);
-
-        if (!error && data) {
-          this.dropdowns.renderNotifications(data);
-        }
-      } catch (err) {
-        console.error('Failed to fetch notifications:', err);
+      if (window.notificationService && typeof window.notificationService.loadNotifications === 'function') {
+        await window.notificationService.loadNotifications();
       }
     }
 
