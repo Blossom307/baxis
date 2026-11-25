@@ -237,42 +237,6 @@ document.documentElement.classList.add('js-enabled');
       }
     }
 
-
-    /**
-     * Determines whether we are loading the user's own profile OR a shared public profile
-     */
-    async resolveTargetUser() {
-      const supabase = this.getSupabase();
-      
-      // 1. Check for ?id= in URL
-      const urlParams = new URLSearchParams(window.location.search);
-      const urlUserId = urlParams.get('id');
-
-      // 2. Check for active login session
-      let sessionUser = null;
-      if (supabase) {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session) {
-          sessionUser = session.user;
-          this.currentLoggedInId = session.user.id;
-          this.userEmail = session.user.email || '';
-        }
-      }
-
-      if (urlUserId) {
-        // Someone clicked a shared link (e.g. profile.html?id=...)
-        this.targetProfileId = urlUserId;
-        this.isOwner = (this.currentLoggedInId === urlUserId);
-      } else if (this.currentLoggedInId) {
-        // Logged-in user viewing their own default profile
-        this.targetProfileId = this.currentLoggedInId;
-        this.isOwner = true;
-      } else {
-        // Not logged in and no user ID was provided in URL -> Redirect to home/login
-        window.location.href = 'index.html';
-      }
-    }
-
     /**
      * Hides edit controls if viewing someone else's public Trust Card
      */
@@ -294,7 +258,6 @@ document.documentElement.classList.add('js-enabled');
         if (walletCard) walletCard.style.display = 'none';
       }
 
-      // If visitor is NOT logged in at all, hide workspace-only nav & user footer
       if (!this.currentLoggedInId) {
         const sidebarNav = document.querySelector('.sidebar-nav');
         if (sidebarNav) {
@@ -317,7 +280,6 @@ document.documentElement.classList.add('js-enabled');
         if (mobileHud) mobileHud.style.display = 'none';
       }
     }
-    
 
     bindEditToggle() {
       if (!this.heroEditBtn || !this.editCard || !this.isOwner) return;
@@ -346,7 +308,7 @@ document.documentElement.classList.add('js-enabled');
           if (accounts && accounts.length > 0) {
             const addr = accounts[0];
             const shortAddr = `${addr.substring(0, 6)}...${addr.substring(addr.length - 4)}`;
-            
+
             const addrEl = document.getElementById('profile-address-code');
             if (addrEl) addrEl.textContent = `${shortAddr} • Base Network Connected`;
 
@@ -729,7 +691,7 @@ document.documentElement.classList.add('js-enabled');
           'disputed': '<span class="status-pill rust">Disputed</span>'
         };
 
-       const titleCell = this.isOwner
+        const titleCell = this.isOwner
           ? `<a href="escrow-details.html?id=${deal.id}" style="font-weight: 600;">${deal.title || 'Escrow Agreement'}</a>`
           : `<span style="font-weight: 600;">${deal.title || 'Escrow Agreement'}</span>`;
 
